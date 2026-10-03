@@ -1,0 +1,228 @@
+# ============================================================================
+# Workshop-2 - Reliable Batch Data Pipeline (Spotify + Grammy Awards)
+# Apache Airflow 3.1.8 - LocalExecutor - adapted from the official
+# https://airflow.apache.org/docs/apache-airflow/3.1.8/docker-compose.yaml
+#
+# Changes versus the official file:
+#   * Celery/Redis/Worker/Flower removed  -> LocalExecutor (single node, course use)
+#   * Custom image built from Dockerfile  -> pandas 2.3.3 + Great Expectations 1.23.1
+#   * Project folders mounted (dags/, src/, gx/, data/, docs/, sql/, scripts/)
+#   * New service "music-postgres"        -> Grammy SOURCE database (music_source)
+#                                            + analytical Data Warehouse (music_dw)
+#
+# Usage:
+#   cp .env.example .env          # once
+#   docker compose up -d --build
+#   docker compose exec music-postgres psql -U music -d music_source \
+#       -f /sql/source_setup.sql  (see README for the documented import flow)
+# ============================================================================
+---
+x-airflow-common: &airflow-common
+  build: .
+  image: ${AIRFLOW_IMAGE_NAME:-workshop2-airflow:3.1.8}
+  env_file:
+    - .env
+  environment: &airflow-common-env
+    # Rootless Podman maps container uid 0 -> the invoking host user, and
+    # non-root container uids -> subordinate uids. AIRFLOW_UID=0 therefore
+    # keeps every bind-mounted artefact owned by the developer, while
+    # HOME=/home/airflow keeps the Airflow CLI on its installed user site.
+    HOME: /home/airflow
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__CORE__AUTH_MANAGER: airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+    AIRFLOW__CORE__FERNET_KEY: ''
+    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
+    AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+    AIRFLOW__CORE__EXECUTION_API_SERVER_URL: 'http://airflow-apiserver:8080/execution/'
+    AIRFLOW__API_AUTH__JWT_SECRET: ${AIRFLOW__API_AUTH__JWT_SECRET:-airflow_jwt_secret}
+    AIRFLOW__API_AUTH__JWT_ISSUER: ${AIRFLOW__API_AUTH__JWT_ISSUER:-airflow}
+    AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
+    AIRFLOW_CONFIG: '/opt/airflow/config/airflow.cfg'
+    # --- project layout inside the containers -------------------------------
+    PYTHONPATH: /opt/airflow
+    MUSIC_DATA_DIR: /opt/airflow/data
+    MUSIC_GX_DIR: /opt/airflow/gx
+    MUSIC_EVIDENCE_DIR: /opt/airflow/docs/evidence
+    # --- database connectivity ---------------------------------------------
+    MUSIC_SOURCE_DB_URL: postgresql+psycopg2://music:music@music-postgres:5432/music_source
+    MUSIC_DW_DB_URL: postgresql+psycopg2://music:music@music-postgres:5432/music_dw
+    # --- source selection (switch to spotify_bad.csv for Test B) ------------
+    SPOTIFY_SOURCE_FILENAME: ${SPOTIFY_SOURCE_FILENAME:-spotify_dataset.csv}
+    GRAMMY_SOURCE_FILENAME: ${GRAMMY_SOURCE_FILENAME:-the_grammy_awards.csv}
+    DW_LOAD_STRATEGY: ${DW_LOAD_STRATEGY:-replace}
+  volumes:
+    - ${AIRFLOW_PROJ_DIR:-.}/dags:/opt/airflow/dags
+    - ${AIRFLOW_PROJ_DIR:-.}/logs:/opt/airflow/logs
+    - ${AIRFLOW_PROJ_DIR:-.}/config:/opt/airflow/config
+    - ${AIRFLOW_PROJ_DIR:-.}/plugins:/opt/airflow/plugins
+    - ${AIRFLOW_PROJ_DIR:-.}/src:/opt/airflow/src
+    - ${AIRFLOW_PROJ_DIR:-.}/gx:/opt/airflow/gx
+    - ${AIRFLOW_PROJ_DIR:-.}/data:/opt/airflow/data
+    - ${AIRFLOW_PROJ_DIR:-.}/docs:/opt/airflow/docs
+    - ${AIRFLOW_PROJ_DIR:-.}/sql:/opt/airflow/sql
+    - ${AIRFLOW_PROJ_DIR:-.}/scripts:/opt/airflow/scripts
+  user: "${AIRFLOW_UID:-50000}:0"
+  depends_on:
+    &airflow-common-depends-on
+    postgres:
+      condition: service_healthy
+    music-postgres:
+      condition: service_healthy
+
+services:
+  # --------------------------------------------------------------------------
+  # Airflow metadata database
+  # --------------------------------------------------------------------------
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    volumes:
+      - postgres-db-volume:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "airflow"]
+      interval: 10s
+      retries: 5
+      start_period: 5s
+    restart: always
+
+  # --------------------------------------------------------------------------
+  # Grammy SOURCE database (source preparation) + analytical Data Warehouse.
+  # music_source  <- the_grammy_awards.csv imported by scripts/prepare_source_db.py
+  # music_dw      <- dimensional star schema loaded by the pipeline (load_dw)
+  # --------------------------------------------------------------------------
+  music-postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-music}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-music}
+      POSTGRES_DB: ${POSTGRES_DB:-music_source}
+    ports:
+      # Bound to every host interface on purpose: the Power BI Desktop instance
+      # runs inside a Windows 11 VM and connects to music_dw through the host IP.
+      - "0.0.0.0:${MUSIC_POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - music-db-volume:/var/lib/postgresql/data
+      - ./sql:/sql:ro
+      - ./sql/db_init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER:-music}"]
+      interval: 10s
+      retries: 5
+      start_period: 5s
+    restart: always
+
+  # --------------------------------------------------------------------------
+  # Airflow services
+  # --------------------------------------------------------------------------
+  airflow-apiserver:
+    <<: *airflow-common
+    command: api-server
+    ports:
+      # Airflow UI/API reachable from the Windows 11 VM as well (0.0.0.0).
+      - "0.0.0.0:8080:8080"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/api/v2/monitor/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    restart: always
+    depends_on:
+      <<: *airflow-common-depends-on
+      airflow-init:
+        condition: service_completed_successfully
+
+  airflow-scheduler:
+    <<: *airflow-common
+    command: scheduler
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8974/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    restart: always
+    depends_on:
+      <<: *airflow-common-depends-on
+      airflow-init:
+        condition: service_completed_successfully
+
+  airflow-dag-processor:
+    <<: *airflow-common
+    command: dag-processor
+    healthcheck:
+      test: ["CMD-SHELL", 'airflow jobs check --job-type DagProcessorJob --hostname "$${HOSTNAME}"']
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    restart: always
+    depends_on:
+      <<: *airflow-common-depends-on
+      airflow-init:
+        condition: service_completed_successfully
+
+  airflow-triggerer:
+    <<: *airflow-common
+    command: triggerer
+    healthcheck:
+      test: ["CMD-SHELL", 'airflow jobs check --job-type TriggererJob --hostname "$${HOSTNAME}"']
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    restart: always
+    depends_on:
+      <<: *airflow-common-depends-on
+      airflow-init:
+        condition: service_completed_successfully
+
+  airflow-init:
+    <<: *airflow-common
+    entrypoint: /bin/bash
+    # yamllint disable rule:line-length
+    command:
+      - -c
+      - |
+        if [[ -z "${AIRFLOW_UID}" ]]; then
+          export AIRFLOW_UID=$$(id -u)
+        fi
+        echo "Creating missing opt dirs if missing:"
+        mkdir -v -p /opt/airflow/{logs,dags,plugins,config}
+        echo "Airflow version:"
+        /entrypoint airflow version
+        echo "Running airflow db migrate / user creation if requested."
+        echo "Change ownership of files in /opt/airflow to $${AIRFLOW_UID}:0"
+        chown -R "$${AIRFLOW_UID}:0" /opt/airflow/
+        chown -v -R "$${AIRFLOW_UID}:0" /opt/airflow/{logs,dags,plugins,config}
+    # yamllint enable rule:line-length
+    environment:
+      <<: *airflow-common-env
+      _AIRFLOW_DB_MIGRATE: 'true'
+      _AIRFLOW_WWW_USER_CREATE: 'true'
+      _AIRFLOW_WWW_USER_USERNAME: ${_AIRFLOW_WWW_USER_USERNAME:-airflow}
+      _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD:-airflow}
+      _PIP_ADDITIONAL_REQUIREMENTS: ''
+    user: "0:0"
+
+  airflow-cli:
+    <<: *airflow-common
+    profiles:
+      - debug
+    environment:
+      <<: *airflow-common-env
+      CONNECTION_CHECK_MAX_COUNT: "0"
+    command:
+      - bash
+      - -c
+      - airflow
+    depends_on:
+      <<: *airflow-common-depends-on
+
+volumes:
+  postgres-db-volume:
+  music-db-volume:

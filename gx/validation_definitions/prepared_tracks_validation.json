@@ -1,0 +1,22 @@
+{
+  "data": {
+    "asset": {
+      "id": "5e979e5b-a0e5-4a4c-b554-3066cfabd064",
+      "name": "prepared_tracks_asset"
+    },
+    "batch_definition": {
+      "id": "9e20e486-45c9-4fb5-99b2-227d31016f2e",
+      "name": "prepared_tracks_batch"
+    },
+    "datasource": {
+      "id": "e135f6c3-08f0-45ee-934b-f4276073a976",
+      "name": "music_pipeline"
+    }
+  },
+  "id": "1d07edd5-e88e-4afd-a0b0-edade98e91e8",
+  "name": "prepared_tracks_validation",
+  "suite": {
+    "id": "448a343f-9c8c-4f99-8e9d-b25c3afad369",
+    "name": "prepared_tracks_suite"
+  }
+}

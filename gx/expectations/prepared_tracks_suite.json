@@ -1,0 +1,120 @@
+{
+  "expectations": [
+    {
+      "id": "37cd80be-2c4f-4d8a-95d0-254bc1c48b0d",
+      "kwargs": {
+        "column": "track_id"
+      },
+      "meta": {
+        "quality_dimension": "Uniqueness",
+        "requirement": "AR1",
+        "rule_id": "DQ-P1",
+        "severity": "critical"
+      },
+      "severity": "critical",
+      "type": "expect_column_values_to_not_be_null"
+    },
+    {
+      "id": "d4ff4380-ed2c-4ceb-8e1e-c2c2a055b8df",
+      "kwargs": {
+        "column": "artist_key"
+      },
+      "meta": {
+        "quality_dimension": "Completeness",
+        "requirement": "AR1,AR2",
+        "rule_id": "DQ-P2",
+        "severity": "critical"
+      },
+      "severity": "critical",
+      "type": "expect_column_values_to_not_be_null"
+    },
+    {
+      "id": "5ff1a009-85e7-4083-9bfb-6b99cafa9b83",
+      "kwargs": {
+        "column": "popularity",
+        "max_value": 100.0,
+        "min_value": 0.0
+      },
+      "meta": {
+        "quality_dimension": "Validity",
+        "requirement": "AR1",
+        "rule_id": "DQ-P3",
+        "severity": "critical"
+      },
+      "severity": "critical",
+      "type": "expect_column_values_to_be_between"
+    },
+    {
+      "id": "cfbf056b-59bd-4c5c-804e-ac3202a4610f",
+      "kwargs": {
+        "column": "danceability",
+        "max_value": 1.0,
+        "min_value": 0.0
+      },
+      "meta": {
+        "quality_dimension": "Validity",
+        "requirement": "AR3",
+        "rule_id": "DQ-P4",
+        "severity": "critical"
+      },
+      "severity": "critical",
+      "type": "expect_column_values_to_be_between"
+    },
+    {
+      "id": "1c4ae894-64d1-4c4e-abfe-a2ae9a3d33f6",
+      "kwargs": {
+        "column": "energy",
+        "max_value": 1.0,
+        "min_value": 0.0
+      },
+      "meta": {
+        "quality_dimension": "Validity",
+        "requirement": "AR3",
+        "rule_id": "DQ-P4",
+        "severity": "critical"
+      },
+      "severity": "critical",
+      "type": "expect_column_values_to_be_between"
+    },
+    {
+      "id": "c98fcc5c-51e3-4b82-9a7c-d4397ce0453c",
+      "kwargs": {
+        "column": "valence",
+        "max_value": 1.0,
+        "min_value": 0.0
+      },
+      "meta": {
+        "quality_dimension": "Validity",
+        "requirement": "AR3",
+        "rule_id": "DQ-P4",
+        "severity": "critical"
+      },
+      "severity": "critical",
+      "type": "expect_column_values_to_be_between"
+    },
+    {
+      "id": "0af30624-c52d-43e5-a370-1022de5009b4",
+      "kwargs": {
+        "column": "is_grammy_artist",
+        "value_set": [
+          0,
+          1
+        ]
+      },
+      "meta": {
+        "quality_dimension": "Validity",
+        "requirement": "AR1,AR2",
+        "rule_id": "DQ-P5",
+        "severity": "critical"
+      },
+      "severity": "critical",
+      "type": "expect_column_values_to_be_in_set"
+    }
+  ],
+  "id": "448a343f-9c8c-4f99-8e9d-b25c3afad369",
+  "meta": {
+    "great_expectations_version": "1.23.1"
+  },
+  "name": "prepared_tracks_suite",
+  "notes": null
+}

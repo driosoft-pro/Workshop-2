@@ -1,0 +1,14 @@
+{
+  "actions": [],
+  "id": "d958ea3e-d299-4006-9be3-5597759e9834",
+  "name": "prepared_metrics_checkpoint",
+  "result_format": {
+    "result_format": "SUMMARY"
+  },
+  "validation_definitions": [
+    {
+      "id": "9d2ac837-4395-4466-9fec-ccd237eb8991",
+      "name": "prepared_metrics_validation"
+    }
+  ]
+}

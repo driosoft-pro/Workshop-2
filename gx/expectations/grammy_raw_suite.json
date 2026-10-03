@@ -1,0 +1,102 @@
+{
+  "expectations": [
+    {
+      "id": "9b121208-43da-4123-919a-4cb7c1067de6",
+      "kwargs": {
+        "column": "year"
+      },
+      "meta": {
+        "quality_dimension": "Validity",
+        "requirement": "AR3,AR4",
+        "rule_id": "DQ-G1",
+        "severity": "critical"
+      },
+      "severity": "critical",
+      "type": "expect_column_values_to_not_be_null"
+    },
+    {
+      "id": "9ef4f4d5-76a4-4ad9-8084-6167a42fb5e8",
+      "kwargs": {
+        "column": "year",
+        "max_value": 2026.0,
+        "min_value": 1958.0
+      },
+      "meta": {
+        "quality_dimension": "Validity",
+        "requirement": "AR3,AR4",
+        "rule_id": "DQ-G1",
+        "severity": "critical"
+      },
+      "severity": "critical",
+      "type": "expect_column_values_to_be_between"
+    },
+    {
+      "id": "b90ba9cf-fd60-4abe-866a-48c44a0326c4",
+      "kwargs": {
+        "column": "category"
+      },
+      "meta": {
+        "quality_dimension": "Completeness",
+        "requirement": "AR4",
+        "rule_id": "DQ-G2",
+        "severity": "critical"
+      },
+      "severity": "critical",
+      "type": "expect_column_values_to_not_be_null"
+    },
+    {
+      "id": "af084b48-2936-4189-a4c5-32599d6b2f1d",
+      "kwargs": {
+        "column": "winner",
+        "value_set": [
+          "True",
+          "False"
+        ]
+      },
+      "meta": {
+        "quality_dimension": "Validity",
+        "requirement": "AR3,AR4",
+        "rule_id": "DQ-G3",
+        "severity": "critical"
+      },
+      "severity": "critical",
+      "type": "expect_column_values_to_be_in_set"
+    },
+    {
+      "id": "7fdab144-1cb3-4462-8439-d1a840d6a2c5",
+      "kwargs": {
+        "column": "nominee",
+        "mostly": 0.995
+      },
+      "meta": {
+        "quality_dimension": "Completeness",
+        "requirement": "AR4",
+        "rule_id": "DQ-G4",
+        "severity": "warning"
+      },
+      "severity": "warning",
+      "type": "expect_column_values_to_not_be_null"
+    },
+    {
+      "id": "e176705d-7ed9-444a-9dbb-5ad2be575e63",
+      "kwargs": {
+        "column": "artist",
+        "mostly": 0.6
+      },
+      "meta": {
+        "quality_dimension": "Completeness",
+        "requirement": "AR1,AR2,AR3",
+        "rule_id": "DQ-G5",
+        "severity": "warning"
+      },
+      "severity": "warning",
+      "type": "expect_column_values_to_not_be_null"
+    }
+  ],
+  "id": "f0298733-ced4-47c8-99ca-0a50fb0cbd69",
+  "meta": {
+    "great_expectations_version": "1.23.1"
+  },
+  "name": "grammy_raw_suite",
+  "notes": null
+}

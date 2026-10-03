@@ -1,0 +1,22 @@
+{
+  "data": {
+    "asset": {
+      "id": "9fcb18ba-360a-471f-b213-9a496029163a",
+      "name": "spotify_raw_asset"
+    },
+    "batch_definition": {
+      "id": "35504a88-6c4d-4be3-897f-a556e9ff11a8",
+      "name": "spotify_raw_batch"
+    },
+    "datasource": {
+      "id": "e135f6c3-08f0-45ee-934b-f4276073a976",
+      "name": "music_pipeline"
+    }
+  },
+  "id": "41a6c5ba-5427-4a52-a615-0fcecfcb8cd9",
+  "name": "spotify_raw_validation",
+  "suite": {
+    "id": "b39b1c1d-8dd0-4915-abd5-af4be69c08c8",
+    "name": "spotify_raw_suite"
+  }
+}

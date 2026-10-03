@@ -1,0 +1,45 @@
+{
+  "captured_at": "2026-10-02T22:41:35",
+  "evidence": "Airflow reports version 3.1.8; DAG runnable and history preserved after stack restart",
+  "endpoints": [
+    "GET /api/v2/version",
+    "GET /api/v2/dags",
+    "GET /api/v2/dags/{dag_id}/dagRuns"
+  ],
+  "version": {
+    "version": "3.1.8",
+    "git_version": ".dev0+7c1b4e1cc6384096a4f391bbed129f0bc40e1d9d.dirty"
+  },
+  "dags": [
+    {
+      "dag_id": "reliable_music_pipeline",
+      "is_paused": false
+    }
+  ],
+  "dag_runs_total": 3,
+  "dag_runs": [
+    {
+      "dag_run_id": "test_a_success",
+      "state": "success",
+      "logical_date": "2026-10-03T00:00:00Z",
+      "duration": 61.293764,
+      "conf": {}
+    },
+    {
+      "dag_run_id": "test_b_critical_failure",
+      "state": "failed",
+      "logical_date": "2026-10-03T01:00:00Z",
+      "duration": 20.115134,
+      "conf": {
+        "spotify_source_file": "spotify_bad.csv"
+      }
+    },
+    {
+      "dag_run_id": "test_c_safe_rerun",
+      "state": "success",
+      "logical_date": "2026-10-03T02:00:00Z",
+      "duration": 58.143586,
+      "conf": {}
+    }
+  ]
+}

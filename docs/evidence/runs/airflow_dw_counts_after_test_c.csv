@@ -1,0 +1,6 @@
+dim_artist,30894
+dim_award_category,638
+dim_genre,114
+dim_year,62
+fact_grammy_award,4810
+fact_track_artist,157530

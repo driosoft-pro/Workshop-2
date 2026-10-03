@@ -1,0 +1,233 @@
+{
+  "generated_at": "2026-10-03T03:25:56.244571+00:00",
+  "source": "music_dw",
+  "kpi_csvs": {
+    "kpi_0_integration_coverage": "/opt/airflow/docs/evidence/kpis/kpi_0_integration_coverage.csv",
+    "kpi_1_popularity_by_grammy_recognition": "/opt/airflow/docs/evidence/kpis/kpi_1_popularity_by_grammy_recognition.csv",
+    "kpi_1_genre_split": "/opt/airflow/docs/evidence/kpis/kpi_1_genre_split.csv",
+    "kpi_2_awards_by_dominant_genre": "/opt/airflow/docs/evidence/kpis/kpi_2_awards_by_dominant_genre.csv",
+    "kpi_3_awards_and_profile_by_decade": "/opt/airflow/docs/evidence/kpis/kpi_3_awards_and_profile_by_decade.csv",
+    "kpi_3_awards_per_year": "/opt/airflow/docs/evidence/kpis/kpi_3_awards_per_year.csv",
+    "kpi_4_top_awarded_artists_on_spotify": "/opt/airflow/docs/evidence/kpis/kpi_4_top_awarded_artists_on_spotify.csv"
+  },
+  "charts": {
+    "kpi_1_genre_split": "/opt/airflow/docs/evidence/kpis/ar1_popularity_by_genre.png",
+    "kpi_2_awards_by_dominant_genre": "/opt/airflow/docs/evidence/kpis/ar2_awards_by_dominant_genre.png",
+    "kpi_3_awards_and_profile_by_decade": "/opt/airflow/docs/evidence/kpis/ar3_awards_and_profile_by_decade.png",
+    "kpi_4_top_awarded_artists_on_spotify": "/opt/airflow/docs/evidence/kpis/ar4_top_awarded_artists.png"
+  },
+  "row_counts": {
+    "kpi_0_integration_coverage": 1,
+    "kpi_1_popularity_by_grammy_recognition": 2,
+    "kpi_1_genre_split": 12,
+    "kpi_2_awards_by_dominant_genre": 15,
+    "kpi_3_awards_and_profile_by_decade": 7,
+    "kpi_3_awards_per_year": 62,
+    "kpi_4_top_awarded_artists_on_spotify": 10
+  },
+  "preview": {
+    "kpi_0_integration_coverage": [
+      {
+        "award_rows": 4810,
+        "matched_award_rows": 1395,
+        "matched_award_pct": 29.0,
+        "rows_without_artist_pct": 38.25
+      }
+    ],
+    "kpi_1_popularity_by_grammy_recognition": [
+      {
+        "artist_group": "Not Grammy-recognized",
+        "track_listings": 147100,
+        "distinct_tracks": 84619,
+        "avg_popularity": 33.58,
+        "avg_energy": 0.6404,
+        "avg_danceability": 0.5747,
+        "avg_valence": 0.4649
+      },
+      {
+        "artist_group": "Grammy-recognized",
+        "track_listings": 10430,
+        "distinct_tracks": 6621,
+        "avg_popularity": 31.55,
+        "avg_energy": 0.5935,
+        "avg_danceability": 0.5715,
+        "avg_valence": 0.5134
+      }
+    ],
+    "kpi_1_genre_split": [
+      {
+        "genre": "opera",
+        "track_listings": 2463,
+        "avg_popularity_grammy_artist": 26.03,
+        "avg_popularity_other_artist": 23.52
+      },
+      {
+        "genre": "show-tunes",
+        "track_listings": 2425,
+        "avg_popularity_grammy_artist": 32.05,
+        "avg_popularity_other_artist": 32.91
+      },
+      {
+        "genre": "classical",
+        "track_listings": 2297,
+        "avg_popularity_grammy_artist": 12.8,
+        "avg_popularity_other_artist": 10.46
+      },
+      {
+        "genre": "pop-film",
+        "track_listings": 2161,
+        "avg_popularity_grammy_artist": NaN,
+        "avg_popularity_other_artist": 59.85
+      },
+      {
+        "genre": "edm",
+        "track_listings": 2075,
+        "avg_popularity_grammy_artist": 49.93,
+        "avg_popularity_other_artist": 34.94
+      }
+    ],
+    "kpi_2_awards_by_dominant_genre": [
+      {
+        "dominant_spotify_genre": "blues",
+        "grammy_awards": 103,
+        "recognized_artists": 25,
+        "award_share_pct": 7.38
+      },
+      {
+        "dominant_spotify_genre": "country",
+        "grammy_awards": 99,
+        "recognized_artists": 36,
+        "award_share_pct": 7.1
+      },
+      {
+        "dominant_spotify_genre": "club",
+        "grammy_awards": 87,
+        "recognized_artists": 2,
+        "award_share_pct": 6.24
+      },
+      {
+        "dominant_spotify_genre": "disco",
+        "grammy_awards": 81,
+        "recognized_artists": 30,
+        "award_share_pct": 5.81
+      },
+      {
+        "dominant_spotify_genre": "soul",
+        "grammy_awards": 75,
+        "recognized_artists": 20,
+        "award_share_pct": 5.38
+      }
+    ],
+    "kpi_3_awards_and_profile_by_decade": [
+      {
+        "decade": 1950,
+        "grammy_awards": 63,
+        "recognized_artists": 27,
+        "avg_artist_popularity": 18.01,
+        "avg_artist_energy": 0.3472
+      },
+      {
+        "decade": 1960,
+        "grammy_awards": 433,
+        "recognized_artists": 132,
+        "avg_artist_popularity": 22.61,
+        "avg_artist_energy": 0.3682
+      },
+      {
+        "decade": 1970,
+        "grammy_awards": 487,
+        "recognized_artists": 167,
+        "avg_artist_popularity": 30.61,
+        "avg_artist_energy": 0.5087
+      },
+      {
+        "decade": 1980,
+        "grammy_awards": 684,
+        "recognized_artists": 280,
+        "avg_artist_popularity": 32.41,
+        "avg_artist_energy": 0.545
+      },
+      {
+        "decade": 1990,
+        "grammy_awards": 866,
+        "recognized_artists": 369,
+        "avg_artist_popularity": 34.49,
+        "avg_artist_energy": 0.5777
+      }
+    ],
+    "kpi_3_awards_per_year": [
+      {
+        "year": 1958,
+        "grammy_awards": 28,
+        "recognized_artists": 13,
+        "matched_award_rows": 7
+      },
+      {
+        "year": 1959,
+        "grammy_awards": 35,
+        "recognized_artists": 16,
+        "matched_award_rows": 8
+      },
+      {
+        "year": 1960,
+        "grammy_awards": 39,
+        "recognized_artists": 15,
+        "matched_award_rows": 8
+      },
+      {
+        "year": 1961,
+        "grammy_awards": 41,
+        "recognized_artists": 16,
+        "matched_award_rows": 8
+      },
+      {
+        "year": 1962,
+        "grammy_awards": 39,
+        "recognized_artists": 15,
+        "matched_award_rows": 8
+      }
+    ],
+    "kpi_4_top_awarded_artists_on_spotify": [
+      {
+        "artist_display_name": "Aretha Franklin",
+        "grammy_awards": 16,
+        "first_award_year": 1967,
+        "last_award_year": 2005,
+        "spotify_track_count": 15,
+        "avg_track_popularity": 16.33
+      },
+      {
+        "artist_display_name": "Bruce Springsteen",
+        "grammy_awards": 13,
+        "first_award_year": 1984,
+        "last_award_year": 2009,
+        "spotify_track_count": 6,
+        "avg_track_popularity": 75.33
+      },
+      {
+        "artist_display_name": "Beyonc\u00e9",
+        "grammy_awards": 13,
+        "first_award_year": 2003,
+        "last_award_year": 2019,
+        "spotify_track_count": 6,
+        "avg_track_popularity": 68.17
+      },
+      {
+        "artist_display_name": "Ella Fitzgerald",
+        "grammy_awards": 13,
+        "first_award_year": 1958,
+        "last_award_year": 1990,
+        "spotify_track_count": 262,
+        "avg_track_popularity": 3.38
+      },
+      {
+        "artist_display_name": "Stevie Wonder",
+        "grammy_awards": 13,
+        "first_award_year": 1973,
+        "last_award_year": 2005,
+        "spotify_track_count": 238,
+        "avg_track_popularity": 1.72
+      }
+    ]
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "data": {
+    "asset": {
+      "id": "0b1895f7-de9a-4af7-b504-11e31476fa3b",
+      "name": "prepared_metrics_asset"
+    },
+    "batch_definition": {
+      "id": "a6a8b214-6d3b-4306-8b8e-26478c86b201",
+      "name": "prepared_metrics_batch"
+    },
+    "datasource": {
+      "id": "e135f6c3-08f0-45ee-934b-f4276073a976",
+      "name": "music_pipeline"
+    }
+  },
+  "id": "9d2ac837-4395-4466-9fec-ccd237eb8991",
+  "name": "prepared_metrics_validation",
+  "suite": {
+    "id": "e6388fe5-e3b9-421a-b48d-1056d20b538c",
+    "name": "prepared_metrics_suite"
+  }
+}

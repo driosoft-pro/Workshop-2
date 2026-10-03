@@ -1,0 +1,58 @@
+{
+  "expectations": [
+    {
+      "id": "f032706a-165a-4849-b8e1-43d32a2ba610",
+      "kwargs": {
+        "column": "duplicate_grain_rows",
+        "max_value": 0.0,
+        "min_value": 0.0
+      },
+      "meta": {
+        "quality_dimension": "Uniqueness",
+        "requirement": "AR1",
+        "rule_id": "DQ-P10",
+        "severity": "critical"
+      },
+      "severity": "critical",
+      "type": "expect_column_values_to_be_between"
+    },
+    {
+      "id": "e608122f-c3fe-4151-a8f0-0a2108ac68ef",
+      "kwargs": {
+        "column": "grammy_match_rate_pct",
+        "max_value": 100.0,
+        "min_value": 25.0
+      },
+      "meta": {
+        "quality_dimension": "Consistency",
+        "requirement": "AR1,AR2,AR3",
+        "rule_id": "DQ-P11",
+        "severity": "warning"
+      },
+      "severity": "warning",
+      "type": "expect_column_values_to_be_between"
+    },
+    {
+      "id": "945c6bdd-e605-43b8-8b38-eb05abaca84a",
+      "kwargs": {
+        "column": "fact_track_rows",
+        "max_value": 10000000.0,
+        "min_value": 100000.0
+      },
+      "meta": {
+        "quality_dimension": "Completeness",
+        "requirement": "AR1",
+        "rule_id": "DQ-P12",
+        "severity": "critical"
+      },
+      "severity": "critical",
+      "type": "expect_column_values_to_be_between"
+    }
+  ],
+  "id": "e6388fe5-e3b9-421a-b48d-1056d20b538c",
+  "meta": {
+    "great_expectations_version": "1.23.1"
+  },
+  "name": "prepared_metrics_suite",
+  "notes": null
+}

@@ -1,0 +1,125 @@
+{
+  "stage": "prepared_grammys",
+  "generated_at": "2026-10-03T03:25:23.522635+00:00",
+  "run_context": {
+    "dag_id": "reliable_music_pipeline",
+    "task_id": "validate_prepared",
+    "run_id": "test_c_safe_rerun",
+    "try_number": 1,
+    "logical_date": "2026-10-03 02:00:00+00:00",
+    "stage": "prepared_grammys"
+  },
+  "checkpoint": "prepared_grammy_checkpoint",
+  "suite": "prepared_grammys_suite",
+  "success": true,
+  "max_failure_severity": null,
+  "statistics": {
+    "evaluated_expectations": 4,
+    "successful_expectations": 4,
+    "unsuccessful_expectations": 0,
+    "success_percent": 100.0
+  },
+  "failed_critical_rules": [],
+  "failed_warning_rules": [],
+  "expectations": [
+    {
+      "rule_id": "DQ-P6",
+      "quality_dimension": "Validity",
+      "requirement": "AR3,AR4",
+      "expectation": "expect_column_values_to_be_between",
+      "column": "year",
+      "thresholds": {
+        "min_value": 1958.0,
+        "max_value": 2026.0
+      },
+      "severity": "critical",
+      "success": true,
+      "result": {
+        "element_count": 4810,
+        "unexpected_count": 0,
+        "unexpected_percent": 0.0,
+        "partial_unexpected_list": [],
+        "missing_count": 0,
+        "missing_percent": 0.0
+      }
+    },
+    {
+      "rule_id": "DQ-P7",
+      "quality_dimension": "Completeness",
+      "requirement": "AR4",
+      "expectation": "expect_column_values_to_not_be_null",
+      "column": "category",
+      "thresholds": {},
+      "severity": "critical",
+      "success": true,
+      "result": {
+        "element_count": 4810,
+        "unexpected_count": 0,
+        "unexpected_percent": 0.0,
+        "partial_unexpected_list": []
+      }
+    },
+    {
+      "rule_id": "DQ-P8",
+      "quality_dimension": "Validity",
+      "requirement": "AR3",
+      "expectation": "expect_column_values_to_be_in_set",
+      "column": "winner_flag",
+      "thresholds": {
+        "value_set": [
+          0,
+          1
+        ]
+      },
+      "severity": "critical",
+      "success": true,
+      "result": {
+        "element_count": 4810,
+        "unexpected_count": 0,
+        "unexpected_percent": 0.0,
+        "partial_unexpected_list": [],
+        "missing_count": 0,
+        "missing_percent": 0.0
+      }
+    },
+    {
+      "rule_id": "DQ-P9",
+      "quality_dimension": "Completeness",
+      "requirement": "AR1,AR2",
+      "expectation": "expect_column_values_to_not_be_null",
+      "column": "artist_key",
+      "thresholds": {
+        "mostly": 0.6
+      },
+      "severity": "warning",
+      "success": true,
+      "result": {
+        "element_count": 4810,
+        "unexpected_count": 1840,
+        "unexpected_percent": 38.25363825363826,
+        "partial_unexpected_list": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      }
+    }
+  ]
+}

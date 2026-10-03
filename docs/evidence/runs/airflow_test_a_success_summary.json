@@ -1,0 +1,67 @@
+{
+  "run_id": "test_a_success",
+  "state": "success",
+  "run_type": "manual",
+  "start_date": "2026-10-03T03:22:42.001616Z",
+  "end_date": "2026-10-03T03:23:43.295380Z",
+  "duration_s": 61.293764,
+  "conf": {},
+  "tasks": {
+    "build_kpis": {
+      "state": "success",
+      "try_number": 1,
+      "duration_s": 5.533014,
+      "start_date": "2026-10-03T03:23:37.178254Z",
+      "end_date": "2026-10-03T03:23:42.711268Z"
+    },
+    "extract_grammys": {
+      "state": "success",
+      "try_number": 1,
+      "duration_s": 9.332341,
+      "start_date": "2026-10-03T03:22:42.122657Z",
+      "end_date": "2026-10-03T03:22:51.454998Z"
+    },
+    "extract_spotify": {
+      "state": "success",
+      "try_number": 1,
+      "duration_s": 10.311883,
+      "start_date": "2026-10-03T03:22:42.121972Z",
+      "end_date": "2026-10-03T03:22:52.433855Z"
+    },
+    "load_dw": {
+      "state": "success",
+      "try_number": 1,
+      "duration_s": 23.098554,
+      "start_date": "2026-10-03T03:23:13.283080Z",
+      "end_date": "2026-10-03T03:23:36.381634Z"
+    },
+    "transform_and_integrate": {
+      "state": "success",
+      "try_number": 1,
+      "duration_s": 7.783245,
+      "start_date": "2026-10-03T03:22:59.133170Z",
+      "end_date": "2026-10-03T03:23:06.916415Z"
+    },
+    "validate_grammys_raw": {
+      "state": "success",
+      "try_number": 1,
+      "duration_s": 5.164426,
+      "start_date": "2026-10-03T03:22:52.247041Z",
+      "end_date": "2026-10-03T03:22:57.411467Z"
+    },
+    "validate_prepared": {
+      "state": "success",
+      "try_number": 1,
+      "duration_s": 5.245726,
+      "start_date": "2026-10-03T03:23:07.090347Z",
+      "end_date": "2026-10-03T03:23:12.336073Z"
+    },
+    "validate_spotify_raw": {
+      "state": "success",
+      "try_number": 1,
+      "duration_s": 5.098237,
+      "start_date": "2026-10-03T03:22:53.296263Z",
+      "end_date": "2026-10-03T03:22:58.394500Z"
+    }
+  }
+}

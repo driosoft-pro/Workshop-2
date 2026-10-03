@@ -1,0 +1,73 @@
+{
+  "expectations": [
+    {
+      "id": "6271ddd7-45e2-4c5f-be67-8c9fff4af588",
+      "kwargs": {
+        "column": "year",
+        "max_value": 2026.0,
+        "min_value": 1958.0
+      },
+      "meta": {
+        "quality_dimension": "Validity",
+        "requirement": "AR3,AR4",
+        "rule_id": "DQ-P6",
+        "severity": "critical"
+      },
+      "severity": "critical",
+      "type": "expect_column_values_to_be_between"
+    },
+    {
+      "id": "f5b3e581-b166-47ab-b6b6-1530e1c2aa77",
+      "kwargs": {
+        "column": "category"
+      },
+      "meta": {
+        "quality_dimension": "Completeness",
+        "requirement": "AR4",
+        "rule_id": "DQ-P7",
+        "severity": "critical"
+      },
+      "severity": "critical",
+      "type": "expect_column_values_to_not_be_null"
+    },
+    {
+      "id": "d0ec51b9-26c4-4f47-b4f3-3ede21633838",
+      "kwargs": {
+        "column": "winner_flag",
+        "value_set": [
+          0,
+          1
+        ]
+      },
+      "meta": {
+        "quality_dimension": "Validity",
+        "requirement": "AR3",
+        "rule_id": "DQ-P8",
+        "severity": "critical"
+      },
+      "severity": "critical",
+      "type": "expect_column_values_to_be_in_set"
+    },
+    {
+      "id": "82bf2fc5-ef24-4658-b4ca-fea0b20e7126",
+      "kwargs": {
+        "column": "artist_key",
+        "mostly": 0.6
+      },
+      "meta": {
+        "quality_dimension": "Completeness",
+        "requirement": "AR1,AR2",
+        "rule_id": "DQ-P9",
+        "severity": "warning"
+      },
+      "severity": "warning",
+      "type": "expect_column_values_to_not_be_null"
+    }
+  ],
+  "id": "597428ea-df82-4313-aeba-93ba4fae60e0",
+  "meta": {
+    "great_expectations_version": "1.23.1"
+  },
+  "name": "prepared_grammys_suite",
+  "notes": null
+}

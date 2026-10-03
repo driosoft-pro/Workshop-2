@@ -1,0 +1,64 @@
+{
+  "sources": {
+    "spotify_rows": 114000,
+    "spotify_raw_columns": 21,
+    "spotify_contract_columns": 16,
+    "spotify_dropped_columns": [
+      "Unnamed: 0",
+      "key",
+      "mode",
+      "instrumentalness",
+      "time_signature"
+    ],
+    "grammy_rows": 4810,
+    "grammy_raw_columns": 10,
+    "grammy_contract_columns": 9
+  },
+  "grain": {
+    "spotify_duplicate_track_id": 24259,
+    "spotify_duplicate_track_genre_grain": 450,
+    "spotify_fully_duplicated_rows": 0,
+    "grammy_duplicate_award_bk": 0,
+    "grammy_duplicate_award_bk_naive_na_artifact": 1839
+  },
+  "completeness": {
+    "spotify_artists_null_rows": 1,
+    "grammy_artist_null_rows": 1840,
+    "grammy_artist_null_pct": 38.2536
+  },
+  "validity_flags": {
+    "popularity < 0": 0,
+    "popularity > 100": 0,
+    "duration_ms <= 0": 1,
+    "duration_ms > 600000 (>10 min)": 603,
+    "duration_ms > 3600000 (>1 h)": 16,
+    "energy outside [0,1]": 0,
+    "loudness > 0 dB": 90,
+    "loudness < -60 dB": 0,
+    "tempo <= 0": 157,
+    "time_signature == 0": 163
+  },
+  "categoricals": {
+    "distinct_genres": 114,
+    "distinct_grammy_categories": 638,
+    "grammy_winner_values": {
+      "True": 4810
+    }
+  },
+  "temporal": {
+    "grammy_year_min": 1958,
+    "grammy_year_max": 2019,
+    "grammy_distinct_years": 62
+  },
+  "integration": {
+    "normalization_source": "src.transform.normalize_artist_name (production code)",
+    "spotify_artist_keys": 29789,
+    "grammy_artist_keys": 1636,
+    "matched_artist_keys": 531,
+    "award_rows_with_artist": 2970,
+    "award_rows_matched": 1395,
+    "grammy_match_rate_pct_of_artist_rows": 46.9697,
+    "grammy_match_rate_pct_of_all_rows": 29.0021,
+    "normalized_display_name_conflicts": 90
+  }
+}

@@ -1,0 +1,135 @@
+{
+  "expectations": [
+    {
+      "id": "3c9ac0e1-ebcc-4a34-8084-8f8f7777e593",
+      "kwargs": {
+        "column": "track_id"
+      },
+      "meta": {
+        "quality_dimension": "Completeness",
+        "requirement": "AR1,AR2,AR3",
+        "rule_id": "DQ-S1",
+        "severity": "critical"
+      },
+      "severity": "critical",
+      "type": "expect_column_values_to_not_be_null"
+    },
+    {
+      "id": "33528272-bc1b-434d-8a0e-14299493747c",
+      "kwargs": {
+        "column": "artists",
+        "mostly": 0.999
+      },
+      "meta": {
+        "quality_dimension": "Completeness",
+        "requirement": "AR1,AR2,AR3",
+        "rule_id": "DQ-S2",
+        "severity": "critical"
+      },
+      "severity": "critical",
+      "type": "expect_column_values_to_not_be_null"
+    },
+    {
+      "id": "21eed221-5572-4e5d-9533-0afc4883a2cf",
+      "kwargs": {
+        "column": "popularity",
+        "max_value": 100.0,
+        "min_value": 0.0
+      },
+      "meta": {
+        "quality_dimension": "Validity",
+        "requirement": "AR1",
+        "rule_id": "DQ-S3",
+        "severity": "critical"
+      },
+      "severity": "critical",
+      "type": "expect_column_values_to_be_between"
+    },
+    {
+      "id": "846c022b-8d48-491a-807a-847fcff6b16c",
+      "kwargs": {
+        "column": "duration_ms",
+        "max_value": 600000.0,
+        "min_value": 1.0,
+        "mostly": 0.99
+      },
+      "meta": {
+        "quality_dimension": "Validity",
+        "requirement": "AR1",
+        "rule_id": "DQ-S4",
+        "severity": "warning"
+      },
+      "severity": "warning",
+      "type": "expect_column_values_to_be_between"
+    },
+    {
+      "id": "22ba228f-2384-4699-a3c6-4c3b9e498d0b",
+      "kwargs": {
+        "column": "danceability",
+        "max_value": 1.0,
+        "min_value": 0.0
+      },
+      "meta": {
+        "quality_dimension": "Validity",
+        "requirement": "AR3",
+        "rule_id": "DQ-S5",
+        "severity": "critical"
+      },
+      "severity": "critical",
+      "type": "expect_column_values_to_be_between"
+    },
+    {
+      "id": "d2109875-4277-4e3b-b3c6-2d78d4061344",
+      "kwargs": {
+        "column": "energy",
+        "max_value": 1.0,
+        "min_value": 0.0
+      },
+      "meta": {
+        "quality_dimension": "Validity",
+        "requirement": "AR3",
+        "rule_id": "DQ-S5",
+        "severity": "critical"
+      },
+      "severity": "critical",
+      "type": "expect_column_values_to_be_between"
+    },
+    {
+      "id": "762fb4f5-6b3a-4ce6-8ce5-382a400309b4",
+      "kwargs": {
+        "column": "valence",
+        "max_value": 1.0,
+        "min_value": 0.0
+      },
+      "meta": {
+        "quality_dimension": "Validity",
+        "requirement": "AR3",
+        "rule_id": "DQ-S5",
+        "severity": "critical"
+      },
+      "severity": "critical",
+      "type": "expect_column_values_to_be_between"
+    },
+    {
+      "id": "54fe7d7f-3548-4ff4-b9d5-1d18fd4f0528",
+      "kwargs": {
+        "column": "track_genre",
+        "mostly": 0.999
+      },
+      "meta": {
+        "quality_dimension": "Completeness",
+        "requirement": "AR2",
+        "rule_id": "DQ-S6",
+        "severity": "critical"
+      },
+      "severity": "critical",
+      "type": "expect_column_values_to_not_be_null"
+    }
+  ],
+  "id": "b39b1c1d-8dd0-4915-abd5-af4be69c08c8",
+  "meta": {
+    "great_expectations_version": "1.23.1"
+  },
+  "name": "spotify_raw_suite",
+  "notes": null
+}

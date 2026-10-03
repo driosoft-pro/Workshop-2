@@ -1,0 +1,69 @@
+{
+  "run_id": "test_b_critical_failure",
+  "state": "failed",
+  "run_type": "manual",
+  "start_date": "2026-10-03T03:24:19.196069Z",
+  "end_date": "2026-10-03T03:24:39.311203Z",
+  "duration_s": 20.115134,
+  "conf": {
+    "spotify_source_file": "spotify_bad.csv"
+  },
+  "tasks": {
+    "build_kpis": {
+      "state": "upstream_failed",
+      "try_number": 0,
+      "duration_s": 0.0,
+      "start_date": "2026-10-03T03:24:38.285097Z",
+      "end_date": "2026-10-03T03:24:38.285097Z"
+    },
+    "extract_grammys": {
+      "state": "success",
+      "try_number": 1,
+      "duration_s": 4.633396,
+      "start_date": "2026-10-03T03:24:19.261299Z",
+      "end_date": "2026-10-03T03:24:23.894695Z"
+    },
+    "extract_spotify": {
+      "state": "success",
+      "try_number": 1,
+      "duration_s": 5.659207,
+      "start_date": "2026-10-03T03:24:19.259152Z",
+      "end_date": "2026-10-03T03:24:24.918359Z"
+    },
+    "load_dw": {
+      "state": "upstream_failed",
+      "try_number": 0,
+      "duration_s": 0.0,
+      "start_date": "2026-10-03T03:24:37.264072Z",
+      "end_date": "2026-10-03T03:24:37.264072Z"
+    },
+    "transform_and_integrate": {
+      "state": "upstream_failed",
+      "try_number": 0,
+      "duration_s": 0.0,
+      "start_date": "2026-10-03T03:24:36.231781Z",
+      "end_date": "2026-10-03T03:24:36.231781Z"
+    },
+    "validate_grammys_raw": {
+      "state": "success",
+      "try_number": 1,
+      "duration_s": 5.532185,
+      "start_date": "2026-10-03T03:24:24.471279Z",
+      "end_date": "2026-10-03T03:24:30.003464Z"
+    },
+    "validate_prepared": {
+      "state": "upstream_failed",
+      "try_number": 0,
+      "duration_s": 0.0,
+      "start_date": "2026-10-03T03:24:37.262959Z",
+      "end_date": "2026-10-03T03:24:37.262959Z"
+    },
+    "validate_spotify_raw": {
+      "state": "failed",
+      "try_number": 1,
+      "duration_s": 10.318127,
+      "start_date": "2026-10-03T03:24:25.257978Z",
+      "end_date": "2026-10-03T03:24:35.576105Z"
+    }
+  }
+}

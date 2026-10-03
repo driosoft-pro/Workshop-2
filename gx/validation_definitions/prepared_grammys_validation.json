@@ -1,0 +1,22 @@
+{
+  "data": {
+    "asset": {
+      "id": "14174b57-05dd-4e27-8bd4-7645f33f8767",
+      "name": "prepared_grammys_asset"
+    },
+    "batch_definition": {
+      "id": "3376c2f1-1833-4a19-90d9-a89a1bbffaea",
+      "name": "prepared_grammys_batch"
+    },
+    "datasource": {
+      "id": "e135f6c3-08f0-45ee-934b-f4276073a976",
+      "name": "music_pipeline"
+    }
+  },
+  "id": "1e888eeb-505f-4840-a752-0a05b34e588f",
+  "name": "prepared_grammys_validation",
+  "suite": {
+    "id": "597428ea-df82-4313-aeba-93ba4fae60e0",
+    "name": "prepared_grammys_suite"
+  }
+}
