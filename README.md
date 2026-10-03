@@ -292,10 +292,11 @@ them through the host address:
 | `5432` | `music-postgres` — `music_source` + `music_dw` | Power BI Desktop |
 | `8080` | `airflow-apiserver` — UI / REST API | browser |
 
-The host firewall must allow them. `services.network.firewall.allowedTCPPorts =
-[ 5432 8080 ]` in `env.nix` is rendered by
+The host firewall must allow them: the list
+`services.network.firewall.allowedTCPPorts = [ 5432 8080 ]` sits in the machine
+configuration `/etc/nixos/env.nix` and is rendered by
 `/etc/nixos/modules/system/networking.nix` into the nftables ruleset
-(`tcp dport { 5432, 8080 } accept`). Rebuild after editing:
+(`tcp dport { 5432, 8080 } accept`). After editing that file, rebuild:
 
 ```bash
 doas nixos-rebuild switch
