@@ -9,7 +9,7 @@
       },
       "meta": {
         "quality_dimension": "Uniqueness",
-        "requirement": "AR1",
+        "requirement": "R1",
         "rule_id": "DQ-P10",
         "severity": "critical"
       },
@@ -25,7 +25,7 @@
       },
       "meta": {
         "quality_dimension": "Consistency",
-        "requirement": "AR1,AR2,AR3",
+        "requirement": "R1,R2,R3",
         "rule_id": "DQ-P11",
         "severity": "warning"
       },
@@ -41,7 +41,7 @@
       },
       "meta": {
         "quality_dimension": "Completeness",
-        "requirement": "AR1",
+        "requirement": "R1",
         "rule_id": "DQ-P12",
         "severity": "critical"
       },

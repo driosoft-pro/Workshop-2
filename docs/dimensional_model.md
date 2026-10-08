@@ -18,7 +18,7 @@ conformed `dim_artist` (and `dim_year` for the temporal context).
 | `fact_grammy_award` | one **Grammy award record** (`year` × `category` × `nominee` × `artist`) | **4,810** | `winner`, `winner_flag`, `is_matched_spotify`, `spotify_track_count`, `award_count` |
 
 Grain justification: a Spotify track may be attributed to several genres *and*
-several artists; the finest level at which all AR measures are consistent is
+several artists; the finest level at which all R1-R4 measures are consistent is
 *(listing, artist)*. Awards are atomic per source row (the award business key
 has 0 duplicates).
 
@@ -26,10 +26,10 @@ has 0 duplicates).
 
 | Dimension | Grain / business key | Surrogate key | Columns | Attributes used by |
 | --- | --- | --- | --- | --- |
-| `dim_artist` | **`artist_bk`** = normalized `artist_key` (TEXT, UNIQUE) | `artist_sk` BIGSERIAL (1-based, rebuilt each load) | `artist_display_name`, `from_spotify`, `from_grammy`, `grammy_award_count`, `spotify_track_count` | AR1 (recognition flag), AR4 (award rank + catalogue coverage) |
-| `dim_genre` | `genre` = Spotify `track_genre` (114 values, UNIQUE) | `genre_sk` BIGSERIAL | – | AR2 (genre split), AR1 per-genre view |
-| `dim_year` | `year` (natural key = `year_sk`, INTEGER) | *none needed* — year is already a stable integer key | `decade` (derived `year/10*10`) | AR3 (decade + per-year series) |
-| `dim_award_category` | `category` (638 values, UNIQUE) | `category_sk` BIGSERIAL | – | AR4 award analysis, drill-down |
+| `dim_artist` | **`artist_bk`** = normalized `artist_key` (TEXT, UNIQUE) | `artist_sk` BIGSERIAL (1-based, rebuilt each load) | `artist_display_name`, `from_spotify`, `from_grammy`, `grammy_award_count`, `spotify_track_count` | R1 (recognition flag), R4 (award rank + catalogue coverage) |
+| `dim_genre` | `genre` = Spotify `track_genre` (114 values, UNIQUE) | `genre_sk` BIGSERIAL | – | R2 (genre split), R1 per-genre view |
+| `dim_year` | `year` (natural key = `year_sk`, INTEGER) | *none needed* — year is already a stable integer key | `decade` (derived `year/10*10`) | R3 (decade + per-year series) |
+| `dim_award_category` | `category` (638 values, UNIQUE) | `category_sk` BIGSERIAL | – | R4 award analysis, drill-down |
 
 **Surrogate/business-key strategy**
 
@@ -78,7 +78,7 @@ dim_artist ---|<== fact_track_artist  |  fact_grammy_award  |==> dim_year (year_
 * CHECK: `is_grammy_artist IN (0,1)`, `winner_flag IN (0,1)`,
   `is_matched_spotify IN (0,1)` (mirrors GX rules DQ-P5/P8).
 * FKs as in §4 (all `REFERENCES` clauses in `sql/dw_schema.sql`).
-* Indexes on every FK plus `batch_id` and the AR1 segmentation flag.
+* Indexes on every FK plus `batch_id` and the R1 segmentation flag.
 
 ## 6. Measures and aggregation guidance
 
@@ -106,7 +106,7 @@ dim_artist ---|<== fact_track_artist  |  fact_grammy_award  |==> dim_year (year_
 
 | Requirement | Facts/dimensions used | Query |
 | --- | --- | --- |
-| AR1 | `fact_track_artist` + `dim_artist.is_grammy_artist` + `dim_genre` | `kpi_1_popularity_by_grammy_recognition`, `kpi_1_genre_split` |
-| AR2 | `fact_grammy_award` × `dim_artist` × `dim_genre` (dominant genre per artist) | `kpi_2_awards_by_dominant_genre` |
-| AR3 | `fact_grammy_award` + `dim_year` (+ profile from `fact_track_artist`) | `kpi_3_awards_and_profile_by_decade`, `kpi_3_awards_per_year` |
-| AR4 | `fact_grammy_award` + `dim_artist` | `kpi_4_top_awarded_artists_on_spotify` |
+| R1 | `fact_track_artist` + `dim_artist.is_grammy_artist` + `dim_genre` | `kpi_1_popularity_by_grammy_recognition`, `kpi_1_genre_split` |
+| R2 | `fact_grammy_award` × `dim_artist` × `dim_genre` (dominant genre per artist) | `kpi_2_awards_by_dominant_genre` |
+| R3 | `fact_grammy_award` + `dim_year` (+ profile from `fact_track_artist`) | `kpi_3_awards_and_profile_by_decade`, `kpi_3_awards_per_year` |
+| R4 | `fact_grammy_award` + `dim_artist` | `kpi_4_top_awarded_artists_on_spotify` |

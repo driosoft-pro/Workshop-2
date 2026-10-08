@@ -290,7 +290,7 @@ def reliable_music_pipeline():
         retry_exponential_backoff=True,
     )
     def build_kpis_task(load_summary: dict) -> dict:
-        """Produce AR1-AR4 KPIs and visualisations from the Data Warehouse."""
+        """Produce R1-R4 KPIs and visualisations from the Data Warehouse."""
         summary = analytics.build_kpis()
         log.info("build_kpis row_counts=%s", summary["row_counts"])
         return {

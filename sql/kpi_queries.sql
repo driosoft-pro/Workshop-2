@@ -1,12 +1,12 @@
 -- ============================================================================
 -- KPI queries over the dimensional Data Warehouse (PostgreSQL, music_dw)
 -- Parsed by src/analytics.py (marker: -- @name: <query_name>).
--- Each KPI is linked to an analytical requirement (AR) in docs/traceability_matrix.md
+-- Each KPI is linked to an analytical requirement (R1-R4) in docs/traceability_matrix.md
 -- and is also usable directly in Power BI (docs/powerbi_dashboard.md).
 -- ============================================================================
 
 -- @name: kpi_0_integration_coverage
--- AR1/AR2/AR3 - integration coverage of the cross-source join.
+-- R1/R2/R3 - integration coverage of the cross-source join.
 SELECT
     COUNT(*)                                                        AS award_rows,
     SUM(is_matched_spotify)                                         AS matched_award_rows,
@@ -15,7 +15,7 @@ SELECT
 FROM fact_grammy_award;
 
 -- @name: kpi_1_popularity_by_grammy_recognition
--- AR1 - do Grammy-recognized artists perform differently on Spotify?
+-- R1 - do Grammy-recognized artists perform differently on Spotify?
 SELECT
     CASE WHEN a.from_grammy THEN 'Grammy-recognized'
          ELSE 'Not Grammy-recognized' END                          AS artist_group,
@@ -31,7 +31,7 @@ GROUP BY 1
 ORDER BY avg_popularity DESC;
 
 -- @name: kpi_1_genre_split
--- AR1/AR2 - popularity comparison inside the highest-volume Spotify genres.
+-- R1/R2 - popularity comparison inside the highest-volume Spotify genres.
 WITH genre_totals AS (
     SELECT g.genre, COUNT(*) AS listing_count
     FROM fact_track_artist f
@@ -53,7 +53,7 @@ GROUP BY g.genre
 ORDER BY track_listings DESC;
 
 -- @name: kpi_2_awards_by_dominant_genre
--- AR2 - which Spotify genres dominate among Grammy-recognized artists?
+-- R2 - which Spotify genres dominate among Grammy-recognized artists?
 WITH artist_genre AS (
     SELECT
         f.artist_sk,
@@ -81,7 +81,7 @@ ORDER BY grammy_awards DESC
 LIMIT 15;
 
 -- @name: kpi_3_awards_and_profile_by_decade
--- AR3 - how did the profile of recognized artists evolve over the decades?
+-- R3 - how did the profile of recognized artists evolve over the decades?
 WITH artist_profile AS (
     SELECT
         artist_sk,
@@ -103,7 +103,7 @@ GROUP BY y.decade
 ORDER BY y.decade;
 
 -- @name: kpi_3_awards_per_year
--- AR3 - award volume over time (trend line of the dashboard).
+-- R3 - award volume over time (trend line of the dashboard).
 SELECT
     y.year,
     COUNT(*)                             AS grammy_awards,
@@ -115,7 +115,7 @@ GROUP BY y.year
 ORDER BY y.year;
 
 -- @name: kpi_4_top_awarded_artists_on_spotify
--- AR1/AR4 - most awarded artists measured inside the Spotify catalog.
+-- R1/R4 - most awarded artists measured inside the Spotify catalog.
 -- Only award rows whose artist is present in the Spotify catalog are counted,
 -- and the "(Various Artists)" credit is excluded because it is an aggregate
 -- credit rather than a single performing artist.

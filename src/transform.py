@@ -6,7 +6,7 @@ and is justified independently of the current validation result:
     T1  Drop Spotify rows whose `artists` value is null/blank.
         Evidence: 1 of 114,000 rows (profiling notebook, completeness table).
         Rationale: the integration contract cannot be satisfied without an
-        integration key; the row cannot contribute to AR1-AR3.
+        integration key; the row cannot contribute to R1-R3.
     T2  Remove duplicate rows at the source grain (track_id, track_genre),
         keeping the first occurrence (sorted deterministically).
         Evidence: 450 repeated (track_id, track_genre) pairs (0.39%).

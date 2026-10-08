@@ -1,6 +1,6 @@
 """KPI computation and visualisation against the dimensional Data Warehouse.
 
-Every output answers a declared analytical requirement (AR1-AR4) and is
+Every output answers a declared analytical requirement (R1-R4) and is
 produced exclusively from the Data Warehouse - never from a CSV.
 
     sql/kpi_queries.sql   -> KPI definitions (single source of truth, also used
@@ -93,7 +93,7 @@ def _chart_genre_split(frame: pd.DataFrame, path: Path) -> None:
         figsize=(13, 6),
         color=["#1f77b4", "#ff7f0e"],
     )
-    plot.set_title("AR1 - Average Spotify popularity by genre\n"
+    plot.set_title("R1 - Average Spotify popularity by genre\n"
                    "Grammy-recognized vs other artists")
     plot.set_xlabel("Spotify genre")
     plot.set_ylabel("Average popularity (0-100)")
@@ -114,7 +114,7 @@ def _chart_awards_by_genre(frame: pd.DataFrame, path: Path) -> None:
         color="#2ca02c",
         legend=False,
     )
-    ax.set_title("AR2 - Grammy awards by the awardee's dominant Spotify genre")
+    ax.set_title("R2 - Grammy awards by the awardee's dominant Spotify genre")
     ax.set_xlabel("Grammy awards")
     ax.set_ylabel("Dominant Spotify genre")
     plt.tight_layout()
@@ -125,7 +125,7 @@ def _chart_awards_by_genre(frame: pd.DataFrame, path: Path) -> None:
 def _chart_decade_evolution(frame: pd.DataFrame, path: Path) -> None:
     figure, axes = plt.subplots(1, 2, figsize=(14, 5))
     axes[0].bar(frame["decade"].astype(str), frame["grammy_awards"], color="#9467bd")
-    axes[0].set_title("AR3 - Grammy awards per decade")
+    axes[0].set_title("R3 - Grammy awards per decade")
     axes[0].set_xlabel("Decade")
     axes[0].set_ylabel("Awards")
     axes[0].tick_params(axis="x", rotation=45)
@@ -144,12 +144,12 @@ def _chart_decade_evolution(frame: pd.DataFrame, path: Path) -> None:
         color="#d62728",
         label="Avg energy (x100)",
     )
-    axes[1].set_title("AR3 - Audio profile of recognized artists")
+    axes[1].set_title("R3 - Audio profile of recognized artists")
     axes[1].set_xlabel("Decade")
     axes[1].set_ylabel("Score")
     axes[1].tick_params(axis="x", rotation=45)
     axes[1].legend()
-    figure.suptitle("AR3 - Evolution of Grammy-recognized artists over time")
+    figure.suptitle("R3 - Evolution of Grammy-recognized artists over time")
     plt.tight_layout()
     plt.savefig(path, dpi=150)
     plt.close()
@@ -165,7 +165,7 @@ def _chart_top_artists(frame: pd.DataFrame, path: Path) -> None:
         color="#e377c2",
         legend=False,
     )
-    ax.set_title("AR4 - Most awarded artists present in the Spotify catalog")
+    ax.set_title("R4 - Most awarded artists present in the Spotify catalog")
     ax.set_xlabel("Grammy awards")
     ax.set_ylabel("Artist")
     plt.tight_layout()

@@ -7,7 +7,7 @@
       },
       "meta": {
         "quality_dimension": "Uniqueness",
-        "requirement": "AR1",
+        "requirement": "R1",
         "rule_id": "DQ-P1",
         "severity": "critical"
       },
@@ -21,7 +21,7 @@
       },
       "meta": {
         "quality_dimension": "Completeness",
-        "requirement": "AR1,AR2",
+        "requirement": "R1,R2",
         "rule_id": "DQ-P2",
         "severity": "critical"
       },
@@ -37,7 +37,7 @@
       },
       "meta": {
         "quality_dimension": "Validity",
-        "requirement": "AR1",
+        "requirement": "R1",
         "rule_id": "DQ-P3",
         "severity": "critical"
       },
@@ -53,7 +53,7 @@
       },
       "meta": {
         "quality_dimension": "Validity",
-        "requirement": "AR3",
+        "requirement": "R3",
         "rule_id": "DQ-P4",
         "severity": "critical"
       },
@@ -69,7 +69,7 @@
       },
       "meta": {
         "quality_dimension": "Validity",
-        "requirement": "AR3",
+        "requirement": "R3",
         "rule_id": "DQ-P4",
         "severity": "critical"
       },
@@ -85,7 +85,7 @@
       },
       "meta": {
         "quality_dimension": "Validity",
-        "requirement": "AR3",
+        "requirement": "R3",
         "rule_id": "DQ-P4",
         "severity": "critical"
       },
@@ -103,7 +103,7 @@
       },
       "meta": {
         "quality_dimension": "Validity",
-        "requirement": "AR1,AR2",
+        "requirement": "R1,R2",
         "rule_id": "DQ-P5",
         "severity": "critical"
       },

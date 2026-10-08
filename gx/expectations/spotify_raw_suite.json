@@ -7,7 +7,7 @@
       },
       "meta": {
         "quality_dimension": "Completeness",
-        "requirement": "AR1,AR2,AR3",
+        "requirement": "R1,R2,R3",
         "rule_id": "DQ-S1",
         "severity": "critical"
       },
@@ -22,7 +22,7 @@
       },
       "meta": {
         "quality_dimension": "Completeness",
-        "requirement": "AR1,AR2,AR3",
+        "requirement": "R1,R2,R3",
         "rule_id": "DQ-S2",
         "severity": "critical"
       },
@@ -38,7 +38,7 @@
       },
       "meta": {
         "quality_dimension": "Validity",
-        "requirement": "AR1",
+        "requirement": "R1",
         "rule_id": "DQ-S3",
         "severity": "critical"
       },
@@ -55,7 +55,7 @@
       },
       "meta": {
         "quality_dimension": "Validity",
-        "requirement": "AR1",
+        "requirement": "R1",
         "rule_id": "DQ-S4",
         "severity": "warning"
       },
@@ -71,7 +71,7 @@
       },
       "meta": {
         "quality_dimension": "Validity",
-        "requirement": "AR3",
+        "requirement": "R3",
         "rule_id": "DQ-S5",
         "severity": "critical"
       },
@@ -87,7 +87,7 @@
       },
       "meta": {
         "quality_dimension": "Validity",
-        "requirement": "AR3",
+        "requirement": "R3",
         "rule_id": "DQ-S5",
         "severity": "critical"
       },
@@ -103,7 +103,7 @@
       },
       "meta": {
         "quality_dimension": "Validity",
-        "requirement": "AR3",
+        "requirement": "R3",
         "rule_id": "DQ-S5",
         "severity": "critical"
       },
@@ -118,7 +118,7 @@
       },
       "meta": {
         "quality_dimension": "Completeness",
-        "requirement": "AR2",
+        "requirement": "R2",
         "rule_id": "DQ-S6",
         "severity": "critical"
       },
