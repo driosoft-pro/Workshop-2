@@ -42,12 +42,13 @@
           fi
 
           stamp_file=.venv/.deps.stamp
-          deps_id="$(sha256sum requirements.txt | cut -d' ' -f 1)-${airflowVersion}"
+          deps_id="$(cat requirements.txt requirements-dev.txt | sha256sum | cut -d' ' -f 1)-${airflowVersion}"
           if [ ! -f "$stamp_file" ] || [ "$(cat "$stamp_file")" != "$deps_id" ]; then
-            echo "[flake] Instalando requirements.txt + apache-airflow==${airflowVersion} ..."
+            echo "[flake] Instalando requirements.txt + requirements-dev.txt + apache-airflow==${airflowVersion} ..."
             uv pip install --python .venv/bin/python \
               --no-progress \
               -r requirements.txt \
+              -r requirements-dev.txt \
               "apache-airflow==${airflowVersion}"
             printf '%s' "$deps_id" > "$stamp_file"
           fi
@@ -75,10 +76,13 @@
           echo ""
           echo "Stack: apache-airflow ${airflowVersion}, pandas, great_expectations"
           echo ""
-          echo "Puertos expuestos en 0.0.0.0 (VM Windows 11 + Power BI):"
+          echo "Puertos expuestos en 0.0.0.0 (VM Windows 11):"
           echo "  5432  PostgreSQL music_dw  (Power BI: servidor 192.168.1.14, base music_dw)"
           echo "  8080  Airflow UI / API     (http://192.168.1.14:8080)"
+          echo "  8088  Apache Superset      (http://192.168.1.14:8088, admin/admin)"
           echo "  firewall: services.network.firewall.allowedTCPPorts en env.nix"
+          echo ""
+          echo "Tests:  ./run.sh test        (pytest: unit + integration)"
           echo ""
         '';
       };

@@ -1,20 +1,26 @@
 # Analytical Product: KPIs, Visualizations and Power BI Dashboard
 
+> **Alternative BI layer.** The primary BI tool of the project is
+> **Apache Superset** (automated inside the repository, see
+> [`superset_dashboard.md`](superset_dashboard.md)). This document keeps the
+> Power BI Desktop design over the same `music_dw` connection for workstations
+> where Power BI is the standard client.
+
 Workshop-2, sections 8.1 and 9.1 (deliverable 5).
 **All queries read the dimensional Data Warehouse (`music_dw`) in PostgreSQL —
 no direct CSV connection is used.**
 
 ## 1. KPI inventory (7 SQL queries, `sql/kpi_queries.sql`)
 
-| ID | AR | Query name | Grain / rows | Headline numbers (this batch) |
+| ID | Req. | Query name | Grain / rows | Headline numbers (this batch) |
 | --- | --- | --- | --- | --- |
-| **KPI-0** | AR1, AR2, AR3 (coverage qualifier) | `kpi_0_integration_coverage` | 1 row | 4,810 award rows → 1,395 matched (29.0%); 38.25% rows have no artist credit |
-| **KPI-1a** | AR1 | `kpi_1_popularity_by_grammy_recognition` | 2 groups | Grammy-recognized: 10,430 listings, avg popularity **31.55**, energy 0.5935 · Other: 147,100 listings, avg popularity **33.58**, energy 0.6404 |
-| **KPI-1b** | AR1 | `kpi_1_genre_split` | top-12 genres by volume | e.g. `edm` 49.93 vs 34.94, `house` 53.90 vs 34.23, `opera` 26.03 vs 23.52 (recognition premium per genre) |
-| **KPI-2** | AR2 | `kpi_2_awards_by_dominant_genre` | top-15 genres | blues 103 awards (7.38%), country 99 (7.10%), club 87 (6.24%), disco 81 (5.81%), soul 75 (5.38%) |
-| **KPI-3a** | AR3 | `kpi_3_awards_and_profile_by_decade` | 7 decades | 1950s: 63 awards, 27 artists, avg popularity 18.01 → 2010s: 1,210 awards, 535 artists, avg popularity 35.67 |
-| **KPI-3b** | AR3 | `kpi_3_awards_per_year` | 62 years | 1958–2019 trend line (no gaps) |
-| **KPI-4** | AR4 | `kpi_4_top_awarded_artists_on_spotify` | top-10 artists | Aretha Franklin 16 awards/15 tracks, Bruce Springsteen 13/6 (avg 75.33), Beyoncé 13/6 (68.17), Ella Fitzgerald 13/262, Stevie Wonder 13/238, … (aggregate credit `(Various Artists)` excluded, artists absent from Spotify excluded) |
+| **KPI-0** | R1, R2, R3 (coverage qualifier) | `kpi_0_integration_coverage` | 1 row | 4,810 award rows → 1,395 matched (29.0%); 38.25% rows have no artist credit |
+| **KPI-1a** | R1 | `kpi_1_popularity_by_grammy_recognition` | 2 groups | Grammy-recognized: 10,430 listings, avg popularity **31.55**, energy 0.5935 · Other: 147,100 listings, avg popularity **33.58**, energy 0.6404 |
+| **KPI-1b** | R1 | `kpi_1_genre_split` | top-12 genres by volume | e.g. `edm` 49.93 vs 34.94, `house` 53.90 vs 34.23, `opera` 26.03 vs 23.52 (recognition premium per genre) |
+| **KPI-2** | R2 | `kpi_2_awards_by_dominant_genre` | top-15 genres | blues 103 awards (7.38%), country 99 (7.10%), club 87 (6.24%), disco 81 (5.81%), soul 75 (5.38%) |
+| **KPI-3a** | R3 | `kpi_3_awards_and_profile_by_decade` | 7 decades | 1950s: 63 awards, 27 artists, avg popularity 18.01 → 2010s: 1,210 awards, 535 artists, avg popularity 35.67 |
+| **KPI-3b** | R3 | `kpi_3_awards_per_year` | 62 years | 1958–2019 trend line (no gaps) |
+| **KPI-4** | R4 | `kpi_4_top_awarded_artists_on_spotify` | top-10 artists | Aretha Franklin 16 awards/15 tracks, Bruce Springsteen 13/6 (avg 75.33), Beyoncé 13/6 (68.17), Ella Fitzgerald 13/262, Stevie Wonder 13/238, … (aggregate credit `(Various Artists)` excluded, artists absent from Spotify excluded) |
 
 Query results are exported as machine-readable evidence by `build_kpis`:
 
@@ -26,12 +32,12 @@ docs/evidence/kpis/ar1..ar4_*.png     (4 charts rendered from the DW results)
 
 ## 2. Visualizations (minimum 3 → 4 provided)
 
-| Chart file | AR | Visual | Reading |
+| Chart file | Req. | Visual | Reading |
 | --- | --- | --- | --- |
-| `ar1_popularity_by_genre.png` | AR1 | grouped bars: avg popularity of Grammy-recognized vs other artists, top-12 genres | recognition premium is positive in EDM/house/reggaeton, negative in funk/classical |
-| `ar2_awards_by_dominant_genre.png` | AR2 | bars: awards by the awardee's dominant Spotify genre | where recognition concentrates |
-| `ar3_awards_and_profile_by_decade.png` | AR3 | combo: awards per decade (bars) + avg popularity/energy of recognized artists (lines) | award volume and artist profile both rise over time |
-| `ar4_top_awarded_artists.png` | AR4 | horizontal bars: top-10 awarded artists with Spotify track counts | award rank vs catalogue coverage |
+| `ar1_popularity_by_genre.png` | R1 | grouped bars: avg popularity of Grammy-recognized vs other artists, top-12 genres | recognition premium is positive in EDM/house/reggaeton, negative in funk/classical |
+| `ar2_awards_by_dominant_genre.png` | R2 | bars: awards by the awardee's dominant Spotify genre | where recognition concentrates |
+| `ar3_awards_and_profile_by_decade.png` | R3 | combo: awards per decade (bars) + avg popularity/energy of recognized artists (lines) | award volume and artist profile both rise over time |
+| `ar4_top_awarded_artists.png` | R4 | horizontal bars: top-10 awarded artists with Spotify track counts | award rank vs catalogue coverage |
 
 ## 3. Power BI dashboard design
 
@@ -40,7 +46,7 @@ database `music_dw`, credentials from `.env` (`music` / `music` — never commit
 real credentials). Mode: **Import** (refresh after each DAG run) with DirectQuery
 as an alternative for ad-hoc exploration.
 
-### Page 1 — "Recognition & Catalogue" (AR1)
+### Page 1 — "Recognition & Catalogue" (R1)
 
 | Visual | Source |
 | --- | --- |
@@ -48,21 +54,21 @@ as an alternative for ad-hoc exploration.
 | Clustered bar: recognition vs other by genre | `kpi_1_genre_split` |
 | Card: matched award rows / % (context for the page) | `kpi_0_integration_coverage` |
 
-### Page 2 — "Genres & Awards" (AR2)
+### Page 2 — "Genres & Awards" (R2)
 
 | Visual | Source |
 | --- | --- |
 | Bar: awards by dominant genre (top 15) | `kpi_2_awards_by_dominant_genre` |
 | Table: genre, awards, recognized artists, share % | same |
 
-### Page 3 — "Evolution" (AR3)
+### Page 3 — "Evolution" (R3)
 
 | Visual | Source |
 | --- | --- |
 | Line: awards per year | `kpi_3_awards_per_year` |
 | Combo: awards per decade + avg popularity/energy | `kpi_3_awards_and_profile_by_decade` |
 
-### Page 4 — "Artists" (AR4)
+### Page 4 — "Artists" (R4)
 
 | Visual | Source |
 | --- | --- |

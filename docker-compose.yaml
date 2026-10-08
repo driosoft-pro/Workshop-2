@@ -9,6 +9,8 @@
 #   * Project folders mounted (dags/, src/, gx/, data/, docs/, sql/, scripts/)
 #   * New service "music-postgres"        -> Grammy SOURCE database (music_source)
 #                                            + analytical Data Warehouse (music_dw)
+#   * New service "superset" / "superset-init" -> Apache Superset (primary BI
+#                     layer on top of music_dw, metadata DB "superset")
 #
 # Usage:
 #   cp .env.example .env          # once
@@ -67,6 +69,35 @@ x-airflow-common: &airflow-common
     &airflow-common-depends-on
     postgres:
       condition: service_healthy
+    music-postgres:
+      condition: service_healthy
+
+# ----------------------------------------------------------------------------
+# Apache Superset (primary BI layer over music_dw).
+# Metadata database "superset" lives in music-postgres (same server as
+# music_source/music_dw). config/superset_config.py is mounted on PYTHONPATH.
+# ----------------------------------------------------------------------------
+x-superset-common: &superset-common
+  build:
+    context: .
+    dockerfile: Dockerfile.superset
+  image: ${SUPERSET_IMAGE_NAME:-workshop2-superset:4.1.4}
+  env_file:
+    - .env
+  environment: &superset-common-env
+    SUPERSET_CONFIG_PATH: /app/pythonpath/superset_config.py
+    SUPERSET_SECRET_KEY: ${SUPERSET_SECRET_KEY:-workshop2-dev-secret-change-me}
+    SUPERSET_SQLALCHEMY_DATABASE_URI: postgresql+psycopg2://${POSTGRES_USER:-music}:${POSTGRES_PASSWORD:-music}@music-postgres:5432/superset
+    SUPERSET_METADATA_ADMIN_URI: postgresql+psycopg2://${POSTGRES_USER:-music}:${POSTGRES_PASSWORD:-music}@music-postgres:5432/${POSTGRES_DB:-music_source}
+    SUPERSET_ADMIN_USER: ${SUPERSET_ADMIN_USER:-admin}
+    SUPERSET_ADMIN_PASSWORD: ${SUPERSET_ADMIN_PASSWORD:-admin}
+    SUPERSET_URL: http://superset:8088
+  volumes:
+    - ./config/superset_config.py:/app/pythonpath/superset_config.py:ro
+    - ./scripts:/app/scripts:ro
+    - ./sql:/app/sql:ro
+    - superset-home:/app/superset_home
+  depends_on:
     music-postgres:
       condition: service_healthy
 
@@ -223,6 +254,75 @@ services:
     depends_on:
       <<: *airflow-common-depends-on
 
+  # --------------------------------------------------------------------------
+  # Superset one-shot initialisation: metadata DB -> db upgrade -> admin user
+  # --------------------------------------------------------------------------
+  superset-init:
+    <<: *superset-common
+    entrypoint: /bin/bash
+    # yamllint disable rule:line-length
+    command:
+      - -c
+      - |
+        set -euo pipefail
+        echo "[superset-init] ensuring metadata database exists ..."
+        python /app/scripts/superset_create_metadata_db.py
+        echo "[superset-init] running database migrations ..."
+        superset db upgrade
+        echo "[superset-init] creating admin user ..."
+        superset fab create-admin \
+          --username "$$SUPERSET_ADMIN_USER" \
+          --firstname Workshop \
+          --lastname Admin \
+          --email "$${SUPERSET_ADMIN_EMAIL:-admin@workshop2.local}" \
+          --password "$$SUPERSET_ADMIN_PASSWORD" || true
+        echo "[superset-init] running superset init ..."
+        superset init
+        echo "[superset-init] done"
+    # yamllint enable rule:line-length
+    restart: "no"
+
+  # --------------------------------------------------------------------------
+  # Apache Superset UI (primary BI layer) - http://localhost:8088
+  # --------------------------------------------------------------------------
+  superset:
+    <<: *superset-common
+    ports:
+      # Bound to every host interface so the Windows 11 VM can reach it too.
+      - "0.0.0.0:${SUPERSET_PORT:-8088}:8088"
+    depends_on:
+      music-postgres:
+        condition: service_healthy
+      superset-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8088/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+    restart: always
+
+  # --------------------------------------------------------------------------
+  # Superset bootstrap: datasets/charts/dashboard from the KPI queries
+  # (run after the stack is up:  podman compose --profile debug run --rm superset-bootstrap)
+  # --------------------------------------------------------------------------
+  superset-bootstrap:
+    <<: *superset-common
+    profiles:
+      - debug
+    environment:
+      <<: *superset-common-env
+      SUPERSET_URL: http://superset:8088
+    entrypoint: /bin/bash
+    command:
+      - -c
+      - python /app/scripts/superset_bootstrap.py
+    depends_on:
+      superset:
+        condition: service_healthy
+
 volumes:
   postgres-db-volume:
   music-db-volume:
+  superset-home:
