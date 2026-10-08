@@ -1,10 +1,10 @@
-# Workshop-2 — Reliable Batch Data Pipeline (Spotify × Grammy Awards)
+# Workshop-2 — Pipeline (Spotify × Grammy Awards)
 
 A production-style, **reliability-first** batch pipeline: Spotify CSV + Grammy
 Awards (PostgreSQL source) → two Great Expectations validation gates →
 harmonization/integration → trusted dimensional Data Warehouse (PostgreSQL) →
-KPIs and a Power BI dashboard, orchestrated by **Apache Airflow 3.1.8** with the
-TaskFlow API.
+KPIs and an **Apache Superset dashboard** (Power BI as an alternative),
+orchestrated by **Apache Airflow 3.1.8** with the TaskFlow API.
 
 > Reliable does not mean that nothing fails. Reliable means that failures are
 > anticipated, controlled and observable — and that a rerun never corrupts the
@@ -12,56 +12,109 @@ TaskFlow API.
 
 ---
 
-## 1. Problem and analytical objective
+## 1. General and specific objectives
+
+**General objective:** build a trusted Data Warehouse that integrates the Spotify
+catalogue with the Grammy Awards record and delivers verifiable KPIs and a
+dashboard, with measured quality, validation gates and evidence on every batch.
+
+**Specific objectives:**
+
+1. Extract and harmonize two incompatible sources (CSV + PostgreSQL table)
+   under an explicit column contract (16 and 9 columns).
+2. Validate every stage with declarative quality rules (23 rules → 28 Great
+   Expectations) and **gates that block** the batch on critical severity.
+3. Transform and integrate **without repairing values**: deduplicate, normalize
+   keys, explode multi-valued fields and measure integration coverage instead
+   of hiding it.
+4. Load a **controlled transactional replace** into a dimensional model
+   (4 dimensions + 2 facts + batch log), repeatable across reruns.
+5. Orchestrate the flow with Airflow (dependencies, failure-class retries, logs
+   and evidence) and deliver KPIs + dashboard per analytical requirement.
+6. Prove it with a reproducible test suite (`tests/`, pytest).
+
+## 2. Granularity of the analytical deliverables
+
+The level at which each requirement is read (every KPI only aggregates
+**upwards**, never downwards):
+
+| Requirement | Reading granularity | Aggregation |
+| --- | --- | --- |
+| **R1** | track × genre, grouped by `is_grammy_artist` | mean (`popularity`, `energy`, `valence`), count |
+| **R2** | artist's dominant Spotify genre × Grammy category | award counts, % of total |
+| **R3** | decade (primary) and year (secondary) | mean popularity/energy, award and artist counts |
+| **R4** | artist | sum of awards, Spotify track count, top-N=10 |
+| Coverage (KPI-0) | 1 row (whole batch) | % of award rows matched and without credit |
+
+## 3. Expected results
+
+* `music_dw`: 4 dimensions, 2 facts and `etl_batch_log` with per-batch audit
+  (before/after counts).
+* **7 KPIs** (`sql/kpi_queries.sql`) exported as CSV + **4 PNG charts** in
+  `docs/evidence/kpis/`, one per requirement.
+* **Superset** dashboard with 7 charts (one per KPI plus a coverage panel) and,
+  as an alternative, the Power BI pages/DAX design.
+* Per-run evidence: Great Expectations JSON per stage, Airflow run summary and
+  task logs, load counts, task-state matrix and retry policy.
+* Current warehouse state (committed batches): `fact_track_artist` 157,530 ·
+  `fact_grammy_award` 4,810 · `dim_artist` 30,894 · `dim_genre` 114 ·
+  `dim_year` 62 · `dim_award_category` 638.
+
+## 4. Problem
 
 Award recognition (Grammy) and streaming catalogue performance (Spotify) live in
 two incompatible sources: a file and a relational table, with no shared
-identifier. The objective is a **trusted Data Warehouse** that lets analysts ask
-questions that neither source can answer alone — e.g. *do Grammy-recognized
-artists behave differently on Spotify, and which genres dominate among award
-winners* — while making data quality a measured, gated, evidenced property of
-every batch.
+identifier. Neither can answer alone questions like *do Grammy-recognized
+artists behave differently on Spotify?* or *which genres dominate among award
+winners?*. On top of that, the integration joins on **names**, with 38.25% of
+award rows carrying no artist credit: quality is not a detail, it is the
+condition for interpreting any number. This pipeline turns that problem into a
+Data Warehouse whose quality is **measured, gated and documented**.
 
-## 2. Analytical requirements
+## 5. Analytical objective and requirements (R1–R4)
 
-Full table: [`docs/analytical_requirements.md`](docs/analytical_requirements.md).
+Full table with questions, expected answers and outputs:
+[`docs/analytical_requirements.md`](docs/analytical_requirements.md).
 
 | ID | Question | Both sources needed because |
 | --- | --- | --- |
-| **AR1** | Do Grammy-recognized artists perform differently on Spotify than the rest of the catalogue? | recognition flag comes from Grammys, popularity/audio profile from Spotify |
-| **AR2** | Which Spotify genres dominate among Grammy-recognized artists? | genre from Spotify, award signal from Grammys |
-| **AR3** | How has the profile of recognized artists evolved by decade? | timeline from Grammys, artist profile from Spotify |
-| **AR4** | Which artists accumulate the most awards, and how are they represented in the Spotify catalogue? | award rank from Grammys, catalogue coverage from Spotify |
+| **R1** | Do Grammy-recognized artists perform differently on Spotify than the rest of the catalogue? | recognition flag comes from Grammys, popularity/audio profile from Spotify |
+| **R2** | Which Spotify genres dominate among Grammy-recognized artists? | genre from Spotify, award signal from Grammys |
+| **R3** | How has the profile of recognized artists evolved by decade? | timeline from Grammys, artist profile from Spotify |
+| **R4** | Which artists accumulate the most awards, and how are they represented in the Spotify catalogue? | award rank from Grammys, catalogue coverage from Spotify |
 
-## 3. Data sources
+Requirements are the **traceability tag** across all layers:
+`RULES[*].requirement` (`src/validation.py`), `meta.requirement` on every GX
+expectation, the `-- Rn` comment on each KPI SQL and the `[Rn]` label on each
+dashboard chart.
+
+## 6. Alignment
+
+| Course dimension | How it is met here |
+| --- | --- |
+| Batch pipeline | 8 TaskFlow tasks, manual/UI-triggered run, `dagrun_timeout=2h` |
+| Quality as a measured property | 23 rules with metric/threshold/severity → 28 GX expectations → 2 blocking gates |
+| Delivery confidence | failure-class retries, per-task logs, transactional `etl_batch_log`, safe rerun |
+| Dimensional modelling | star schema with declared grains and unique business keys |
+| Analytics and BI | 7 KPIs tied to R1–R4 + Superset dashboard (primary) and Power BI (alternative) |
+| Reproducibility | Nix environment + compose (Podman/Docker), `run.sh`/`run.bat`, pytest suite, versioned evidence |
+
+## 7. Data sources
 
 | Source | Form used by the pipeline | Rows | Notes |
 | --- | --- | --- | --- |
 | Spotify tracks | `data/raw/spotify_dataset.csv` (CSV) | 114,000 | 21 raw columns → **16 contract columns** extracted (`key`, `mode`, `instrumentalness`, `time_signature`, unnamed index are profiled but not loaded) |
-| Grammy Awards | PostgreSQL `music_source.grammy_awards` | 4,810 | **Source preparation**: `scripts/prepare_source_db.py` imports the provided CSV (evidence `docs/evidence/runs/source_preparation.json`). This is *not* the ETL Load — the Load writes `music_dw` |
+| Grammy Awards | PostgreSQL `music_source.grammy_awards` | 4,810 | **Source preparation**: `scripts/prepare_source_db.py` imports the provided CSV (evidence `docs/evidence/runs/source_preparation.json`, 4,810 = 4,810). This is *not* the ETL Load — the Load writes `music_dw` |
 
-NA policy: `keep_default_na=False, na_values=[""]` — the Spotify file contains
-the literal artist name `"N/A"`, which default pandas parsing would corrupt.
+NA policy: `keep_default_na=False, na_values=[""]` — the file contains literal
+artist components `N/A` (2 rows) that default pandas parsing would turn into
+NaN. The column contract is asserted by tests (`tests/test_extract_contract.py`).
 
-## 4. Pipeline architecture
+## 8. Profiling and quality matrices (Python + GX + Airflow)
 
-[`docs/architecture.md`](docs/architecture.md)
-
-```
-spotify CSV ─ extract_spotify ─ validate_spotify_raw ─┐
-                                                      ├─ transform_and_integrate ─ validate_prepared ─ load_dw ─ build_kpis
-postgres   ─ extract_grammys ─ validate_grammys_raw ──┘                                     (music_dw)    (KPIs/PNG)
-```
-
-![Implemented DAG structure](docs/dag_structure.png)
-
-8 TaskFlow tasks, both source branches observable, both gates enforced through
-dependencies, interfaces exchange paths/compact metadata only.
-
-## 5. Data profiling findings
-
-[`notebooks/data_profiling.ipynb`](notebooks/data_profiling.ipynb)
-(executed; machine summary `docs/evidence/profiling_summary.json`).
+**Profiling** (executed):
+[`notebooks/data_profiling.ipynb`](notebooks/data_profiling.ipynb) — machine
+summary in `docs/evidence/profiling_summary.json`.
 
 | Dimension | Key findings |
 | --- | --- |
@@ -73,71 +126,190 @@ dependencies, interfaces exchange paths/compact metadata only.
 | Temporal | awards 1958–2019, 62 distinct years, **no gaps**; `published_at` parseable 4,810/4,810 |
 | Cross-source | 29,789 Spotify vs 1,636 Grammy artist keys → **531 matched keys**; 1,395 award rows matched (**29.0021%**); 90 normalized keys merge >1 display name |
 
-## 6. Quality risks and quality rules
+**Risk → rule → expectation → gate matrix** (four layers):
 
-[`docs/quality_rules.md`](docs/quality_rules.md) — 24 rules (DQ-S1…S6,
-DQ-G1…G5, DQ-P1…P12) with metric, threshold, severity, justification and AR tags.
+1. **Risks** with observed metric and justification:
+   [`docs/quality_rules.md`](docs/quality_rules.md) (profiling → risk → severity
+   → requirement).
+2. **Executable rules** in Python (`RULES` in `src/validation.py`, 23: DQ-S1…S6
+   schema, DQ-G1…G5 business integrity, DQ-P1…P12 profiling/thresholds),
+   consumed by the `enforce_policy`.
+3. **Great Expectations**: 5 suites ↔ 5 validation definitions ↔ 5 checkpoints,
+   28 expectations carrying
+   `meta.rule_id/severity/dimension/requirement`
+   ([`docs/gx_design.md`](docs/gx_design.md)).
+4. **Airflow gates**: `validate_spotify_raw` and `validate_grammys_raw` (*can
+   these data enter transformation?*) and `validate_prepared` (*can it be
+   loaded?*). Critical severity → `ValidationGateError` → downstream
+   `upstream_failed`; warning → recorded, batch continues.
 
-Severity policy: **critical** → gate raises `ValidationGateError` → downstream
-blocked (`upstream_failed`); **warning** → recorded, logged, batch continues.
-Thresholds are engineering decisions documented per rule (e.g. DQ-S4 99% because
-0.53% of real durations exceed 10 min; DQ-P11 ≥25% because the measured match
-rate is 29.0021%).
+## 9. Traceability
 
-## 7. Great Expectations validation design
+End-to-end chain (requirement → risk → rule → expectation → transformation →
+DW → KPI → dashboard) materialized in
+[`docs/traceability_matrix.md`](docs/traceability_matrix.md):
 
-[`docs/gx_design.md`](docs/gx_design.md) — GX 1.23.1 file-mode project in `gx/`:
-5 suites ↔ 5 validation definitions ↔ 5 checkpoints, 28 expectations carrying
-`meta.rule_id/severity/dimension/requirement`. Results are written as
-machine-readable JSON to `docs/evidence/gx/<stage>/<stamp>_<run_id>.json`
-(per-rule counts, sample unexpected values, failed rule ids).
+* `RULES[*].requirement` in `src/validation.py` → `R1`–`R4` tags
+* `meta.rule_id` / `meta.severity` per GX expectation → `docs/evidence/gx/…`
+* `T1..T11` with a rationale column → `docs/transformation_integration.md`
+* `-- Rn` comments in `sql/kpi_queries.sql` → CSVs in `docs/evidence/kpis/`
+* `[Rn]` label per chart → `docs/superset_dashboard.md` (Power BI:
+  `docs/powerbi_dashboard.md`)
 
-* Raw gate: *can these data enter transformation?*
-* Prepared gate: *did transformation produce load-ready data?* (runs all three
-  prepared checkpoints, then applies policy)
-
-## 8. Transformation and integration strategy
+## 10. Preparation strategy and structural corrections
 
 [`docs/transformation_integration.md`](docs/transformation_integration.md) —
-rules **T1…T11** (drop keyless rows −1, dedupe grain −450, explode on `;`,
-normalize artist key, **no value repair (T5)**, derive recognition flags,
-`winner_flag`, match flags, emit integration metrics).
+rules **T1…T11**: drop keyless rows (−1), dedupe grain (−450), explode `artists`
+on `;`, normalize the artist key (case, spacing, punctuation), **no value repair
+(T5)**, derive recognition flags, `winner_flag` and match flags, emit
+integration metrics.
+
+Structural corrections applied (metrics are never “fixed”, data shape is):
+
+| Correction | Effect |
+| --- | --- |
+| Deduplication `(track_id, track_genre)` | 450 redundant rows out of the fact |
+| Explode of `artists` | track↔artists cardinality 1..n (157,530 listings) |
+| Artist name normalization | stable integration key `artist_key` (90 display names merged) |
+| Explicit `winner_flag` | a winners-only dataset is never read as “candidates” |
+| Surrogate keys generated inside the transaction | no cross-run leaks; sequences realigned with `setval` |
 
 Integration contract: key `artist_key` (name-based — no shared ID exists),
-cardinality track↔artists 1..n and award↔artist 0..1 (many-to-many across
-sources), unmatched rows **measured and retained** (`is_matched_spotify=0`),
-ambiguous display names merged and counted (90), documented limitations
-(38.25% of award rows have no artist credit; winners-only dataset).
+award↔artist cardinality 0..1, unmatched rows **measured and retained**
+(`is_matched_spotify=0`), documented limitations (38.25% with no credit;
+winners-only dataset).
 
-## 9. Dimensional model
+## 11. Declared grain
 
-[`docs/dimensional_model.md`](docs/dimensional_model.md), DDL
-[`sql/dw_schema.sql`](sql/dw_schema.sql):
-
-| Object | Rows | Grain |
+| Object | Declared grain | Business key |
 | --- | --- | --- |
-| `dim_artist` | 30,894 | `artist_bk` (normalized artist key) |
-| `dim_genre` | 114 | `genre` |
-| `dim_year` | 62 | `year` (natural PK) + `decade` |
-| `dim_award_category` | 638 | `category` |
-| `fact_track_artist` | 157,530 | track listing × performing artist |
-| `fact_grammy_award` | 4,810 | year × category × nominee × artist |
-| `etl_batch_log` | 1 per batch | load audit (before/after counts) |
+| `fact_track_artist` | track listing × genre × performing artist | `(track_id, track_genre, artist_sk)` (UNIQUE) |
+| `fact_grammy_award` | year × category × nominee × artist | `award_bk` (UNIQUE, normalized) |
+| `dim_artist` | artist | `artist_bk` |
+| `dim_genre` | Spotify genre | `genre` |
+| `dim_year` | year (natural PK) + derived `decade` | `year` |
+| `dim_award_category` | award category | `category` |
+| `etl_batch_log` | one row per committed batch | `batch_id = <dag_id>__<run_id>` |
 
-Surrogate keys are generated inside the load transaction; business keys are
-UNIQUE-constrained; unmatched awards keep `artist_sk NULL` by design.
+The finest level at which R1–R4 measures are consistent is track × genre ×
+artist; every KPI aggregates upward from there.
 
-## 10. Airflow DAG design
+## 12. Dimensional model
 
-[`dags/reliable_music_pipeline.py`](dags/reliable_music_pipeline.py) —
-`from airflow.sdk import dag, task, get_current_context`, `schedule=None`,
-`max_active_runs=1`, `catchup=False`, `dagrun_timeout=2h`. Dependencies encode
-the policy: transformation requires **both** raw gates; load requires the
-prepared gate. Task interfaces pass paths/metadata only (no DataFrames in XCom).
+[`docs/dimensional_model.md`](docs/dimensional_model.md) ·
+DDL [`sql/dw_schema.sql`](sql/dw_schema.sql) · auto-created by
+`sql/db_init/01_create_dw.sql` when `music-postgres` starts.
 
-## 11. Failure and retry policy
+```mermaid
+erDiagram
+    dim_artist ||--o{ fact_track_artist : "artist_sk"
+    dim_genre ||--o{ fact_track_artist : "genre_sk"
+    dim_artist ||--o{ fact_grammy_award : "artist_sk"
+    dim_year ||--o{ fact_grammy_award : "year_sk"
+    dim_award_category ||--o{ fact_grammy_award : "category_sk"
 
-[`docs/failure_retry_policy.md`](docs/failure_retry_policy.md)
+    dim_artist {
+        bigint artist_sk PK
+        text artist_bk UK "normalized name key"
+        text artist_display_name
+        bool from_spotify
+        bool from_grammy
+        int grammy_award_count
+        int spotify_track_count
+    }
+    dim_genre {
+        bigint genre_sk PK
+        text genre UK
+    }
+    dim_year {
+        int year_sk PK
+        int year UK
+        int decade
+    }
+    dim_award_category {
+        bigint category_sk PK
+        text category UK
+    }
+    fact_track_artist {
+        bigint track_artist_sk PK
+        text track_id
+        text track_genre
+        bigint artist_sk FK
+        bigint genre_sk FK
+        text track_name
+        text album_name
+        int popularity
+        bigint duration_ms
+        float energy
+        float valence
+        int artist_position
+        int artist_total
+        int is_grammy_artist "0/1"
+        int artist_grammy_awards
+        text batch_id
+        timestamptz loaded_at
+    }
+    fact_grammy_award {
+        bigint grammy_award_sk PK
+        text award_bk UK "year x category x nominee x artist"
+        bigint artist_sk FK "NULL when unmatched"
+        int year_sk FK
+        bigint category_sk FK
+        text title
+        text nominee
+        text artist_credit
+        text workers
+        bool winner
+        int winner_flag "0/1"
+        int is_matched_spotify "0/1"
+        int spotify_track_count
+        int award_count
+        text batch_id
+        timestamptz loaded_at
+    }
+    etl_batch_log {
+        text batch_id PK
+        text dag_id
+        text run_id
+        text strategy
+        jsonb target_rows_before
+        jsonb target_rows_after
+        text status
+        timestamptz started_at
+        timestamptz finished_at
+        text notes
+    }
+```
+
+Row counts: `fact_track_artist` 157,530 · `fact_grammy_award` 4,810 ·
+`dim_artist` 30,894 · `dim_genre` 114 · `dim_year` 62 ·
+`dim_award_category` 638. Surrogate keys are generated inside the load
+transaction; business keys are UNIQUE-constrained; unmatched awards keep
+`artist_sk NULL` by design.
+
+## 13. ETL pipeline, gates and orchestration
+
+[`docs/architecture.md`](docs/architecture.md) ·
+[`dags/reliable_music_pipeline.py`](dags/reliable_music_pipeline.py)
+
+```
+spotify CSV ─ extract_spotify ─ validate_spotify_raw ─┐
+                                                      ├─ transform_and_integrate ─ validate_prepared ─ load_dw ─ build_kpis
+postgres   ─ extract_grammys ─ validate_grammys_raw ──┘                                     (music_dw)    (KPIs/PNG)
+```
+
+![Implemented DAG structure](docs/dag_structure.png)
+
+* 8 TaskFlow tasks (`from airflow.sdk import dag, task, get_current_context`),
+  `schedule=None`, `max_active_runs=1`, `catchup=False`, `dagrun_timeout=2h`.
+* Dependencies **encode the policy**: transformation requires **both** raw
+  gates; load requires the prepared gate. Interfaces exchange paths/compact
+  metadata only (no DataFrames in XCom).
+* Reusable logic lives in `src/` (extract, transform, validation, load,
+  analytics): the DAG only orchestrates.
+
+**Failures and retries**
+([`docs/failure_retry_policy.md`](docs/failure_retry_policy.md)):
 
 | Class | Tasks | Retry |
 | --- | --- | --- |
@@ -147,197 +319,281 @@ prepared gate. Task interfaces pass paths/metadata only (no DataFrames in XCom).
 
 No blanket `retries=3`; every retry is justified by its failure class.
 
-## 12. Successful execution evidence
+**Repeatability** — controlled replace: one transaction per batch (`DELETE` +
+`INSERT` over the six tables, business-key UNIQUE constraints as backstop,
+`etl_batch_log` upsert keyed by `batch_id = <dag_id>__<run_id>`, sequences
+realigned with `setval`). A crash rolls back completely; the target keeps its
+previous state.
 
-Run **`test_a_success`** (Airflow 3.1.8): 8/8 tasks `success`, try=1, 61.3 s.
-Artefacts: `docs/evidence/runs/airflow_test_a_success_summary.json` +
-`airflow_test_a_success_log_*.txt`, GX results (E6/E7), load counts
-`row_counts_after = 157,530 / 4,810 / 30,894 / 114 / 62 / 638`.
+## 14. Requirements → model → KPIs
+
+| Req. | Model tables | KPI SQL (`sql/kpi_queries.sql`) | Superset chart |
+| --- | --- | --- | --- |
+| coverage | both facts + `etl_batch_log` | `kpi_0_integration_coverage` | Quality – Integration coverage |
+| **R1** | `fact_track_artist` (+ `dim_genre`, `dim_year`) | `kpi_1_popularity_by_grammy_recognition`, `kpi_1_genre_split` | R1 – Popularity (2 charts) |
+| **R2** | `fact_grammy_award` + `fact_track_artist` | `kpi_2_awards_by_dominant_genre` | R2 – Awards by genre |
+| **R3** | `fact_grammy_award` + `dim_year` + `fact_track_artist` | `kpi_3_awards_and_profile_by_decade`, `kpi_3_awards_per_year` | R3 – Decades and yearly series |
+| **R4** | `fact_grammy_award` + `dim_artist` | `kpi_4_top_awarded_artists_on_spotify` | R4 – Top awarded artists |
+
+The queries also run outside Airflow (`python -m scripts.smoke_test`);
+`tests/test_sql_and_schema.py` asserts each query name, its `-- Rn` tag and the
+existence of every DDL object.
+
+## 15. Quality rules, Great Expectations and validation summary
+
+**23 rules** (DQ-S1…S6 schema · DQ-G1…G5 business integrity · DQ-P1…P12
+profiling) with metric, threshold, severity, justification and requirement tag:
+[`docs/quality_rules.md`](docs/quality_rules.md).
+
+GX design ([`docs/gx_design.md`](docs/gx_design.md)): a 1.23.1 file-mode project
+in `gx/` — 5 suites ↔ 5 validation definitions ↔ 5 checkpoints, **28
+expectations** with `meta.rule_id/severity/dimension/requirement`. Results are
+written as machine-readable JSON to
+`docs/evidence/gx/<stage>/<stamp>_<run_id>.json` (per-rule counts, sample
+unexpected values, failed rule ids).
+
+**Validation summary per run:**
+
+| Run | Result |
+| --- | --- |
+| Test A (`test_a_success`) | 8/8 tasks `success`, try=1, 61.3 s; counts `157,530 / 4,810 / 30,894 / 114 / 62 / 638` (`docs/evidence/runs/`) |
+| Test B (`test_b_critical_failure`) | `extract_spotify` success → `validate_spotify_raw` **failed** (`ValidationGateError … DQ-S3 … unexpected_count=1`); 4 tasks `upstream_failed`; warehouse untouched (no `etl_batch_log` row) |
+| Test C (`test_c_safe_rerun`) | same input as Test A: identical counts before/after, two committed batches with equal `target_rows_after` |
 
 ![Task states across the three reliability tests](docs/evidence/runs/airflow_task_states.png)
 
-## 13. Controlled failure evidence (Test B)
+**Automated tests** (`tests/`, `pytest.ini`, `integration` marker):
+**62 tests** — 58 offline (rule catalogue, GX consistency, transform over
+synthetic CSVs, extraction contract, KPI/DDL, validation gate, DAG DagBag,
+Superset bootstrap contract) + 4 integration tests that skip automatically when
+no database is reachable.
 
-Run **`test_b_critical_failure`** with
-`conf={"spotify_source_file": "spotify_bad.csv"}` (file produced by
-`scripts/make_bad_data.py`: `popularity=150` on one row):
+```bash
+./run.sh test     # or: nix develop -c python -m pytest
+```
 
-* `extract_spotify` **success** → `validate_spotify_raw` **failed**
-  (`ValidationGateError: … DQ-S3(expect_column_values_to_be_between column=popularity unexpected_count=1)`)
-* `transform_and_integrate`, `validate_prepared`, `load_dw`, `build_kpis` →
-  `upstream_failed` (never executed)
-* Data Warehouse untouched (no `etl_batch_log` row for that run)
-* GX evidence: `docs/evidence/gx/raw_spotify/20261003T032430534472_test_b_critical_failure.json`
-* Failed task log: `docs/evidence/runs/airflow_test_b_critical_failure_log_validate_spotify_raw.txt`
-* State matrix (with interpretation): `docs/evidence/runs/airflow_task_states.png`
+## 16. Business intelligence: Superset (primary) and Power BI (alternative)
 
-## 14. Repeatability strategy
+**Apache Superset is the primary BI layer** and it is automated in the repo:
 
-**Controlled replace** — one transaction per batch: `DELETE` + `INSERT` over the
-six tables, business-key UNIQUE constraints as backstop, `etl_batch_log` upsert
-keyed by `batch_id = <dag_id>__<run_id>`, sequences realigned with `setval`.
-A crash rolls back completely (target keeps the previous consistent state).
+| Element | Value |
+| --- | --- |
+| URL / login | `http://localhost:8088` — `admin` / `admin` |
+| Connection | virtual datasets, SQL over `music_dw` (PostgreSQL on `music-postgres:5432`) |
+| Objects | 1 database, **7 datasets** (built from `sql/kpi_queries.sql`), **7 charts**, **1 dashboard** (`Workshop-2 - KPIs (R1-R4)`, published) |
+| Bootstrap | `./run.sh superset` → `scripts/superset_bootstrap.py` (idempotent; validates every query through the Superset API) |
+| Documentation | [`docs/superset_dashboard.md`](docs/superset_dashboard.md) |
 
-Evidence (run `test_c_safe_rerun`, same input as Test A): identical row counts
-before/after, `etl_batch_log` shows two committed batches with equal
-`target_rows_after` (`docs/evidence/runs/airflow_dw_counts_after_test_c.csv`,
-`docs/evidence/runs/airflow_etl_batch_log.csv`, and
-`docs/evidence/runs/safe_rerun_run1_counts.csv` +
-`docs/evidence/runs/safe_rerun_run2_counts.csv`).
+Because the datasets are *virtual*, each chart reflects the warehouse state
+after the latest DAG run: refreshing means rerunning the pipeline — there is no
+extract to refresh. Chart-by-chart detail (type, requirement, validated rows)
+and the analytical reading live in the document above.
 
-## 15. Dashboard and analytical outputs
+**Power BI as an alternative**
+([`docs/powerbi_dashboard.md`](docs/powerbi_dashboard.md)): the same 4 pages
+(one per requirement), DAX measures and relationships over the same `music_dw`;
+connected from the Windows 11 VM (§18.3). Both layers are interchangeable since
+they consume the same KPIs.
 
-[`docs/powerbi_dashboard.md`](docs/powerbi_dashboard.md) — Power BI (PostgreSQL
-`music_dw`), 4 pages for AR1–AR4, DAX measures and star-schema relationships.
-Pipeline-generated artifacts (7 KPI CSVs + 4 PNG charts) live in
-`docs/evidence/kpis/`; every KPI has a `-- ARn` tag in `sql/kpi_queries.sql`.
+Pipeline-generated artifacts (7 CSVs + 4 PNGs) live in `docs/evidence/kpis/`.
 
-## 16. Setup and execution
+## 17. Architecture, outputs and evidence
 
-### 16.1 Requirements
+| Layer | Implementation | Location |
+| --- | --- | --- |
+| Orchestration | Airflow 3.1.8, TaskFlow, LocalExecutor | `dags/reliable_music_pipeline.py`, `docker-compose.yaml` |
+| Logic | extract / transform / validation / load / analytics | `src/*.py` |
+| Validation | Great Expectations 1.23.1, 5 suites / 28 expectations, 2 gates | `gx/`, `src/validation.py` |
+| Grammy source | PostgreSQL 16 `music_source` | `sql/source_setup.sql`, `scripts/prepare_source_db.py` |
+| Warehouse | PostgreSQL 16 `music_dw` (star schema) | `sql/dw_schema.sql`, `src/load.py` |
+| Analytics | 7 KPI queries + pandas/matplotlib | `sql/kpi_queries.sql`, `src/analytics.py` |
+| BI | **Apache Superset 4.1.4** (primary) · Power BI (alternative) | `scripts/superset_bootstrap.py`, `docs/superset_dashboard.md`, `docs/powerbi_dashboard.md` |
+| Evidence | GX JSON, run summaries, KPI CSV/PNG, task logs | `docs/evidence/` |
+| Verification | pytest (62) + `scripts/smoke_test.py` | `tests/`, `pytest.ini` |
+
+Registered evidence: [`docs/evidence_register.md`](docs/evidence_register.md)
+(IDs E1–E19 → artefact → claim → report section).
+
+## 18. How to use the repository
+
+### 18.1 Requirements
 
 * Nix with flakes: `nix develop` provides Python 3.12, `uv`, PostgreSQL client
-  and Podman (`flake.nix`)
-* **Podman ≥ 4** (rootless) + `podman compose` / `podman-compose` — the compose
-  file is adapted from the official Airflow 3.1.8 file: LocalExecutor, no
-  Redis/Celery (Docker + Compose also work if you set `AIRFLOW_UID=$(id -u)`)
-* optional Python ≥ 3.11 venv for local runs (`requirements.txt`)
+  and Podman (`flake.nix`); `requirements.txt` (+ `requirements-dev.txt` for
+  pytest)
+* **Podman ≥ 4** (rootless) with `podman compose`/`podman-compose`, or Docker +
+  Compose; the compose file is adapted from the official Airflow 3.1.8 file
+  (LocalExecutor, no Redis/Celery)
 
-### 16.2 Start the environment
-
-```bash
-cp .env.example .env            # review AIRFLOW_UID, ports, credentials
-podman compose -f docker-compose.yaml up -d --build   # or: docker compose up -d --build
-curl -s http://localhost:8080/api/v2/monitor/health    # API healthy
-```
-
-Services: `airflow-apiserver` (UI/API on **http://localhost:8080**, user
-`airflow`/`airflow`), `airflow-scheduler`, `airflow-dag-processor`,
-`airflow-triggerer`, `postgres` (Airflow metadata), `music-postgres`
-(`music_source` + `music_dw`, host port 5432).
-
-> Rootless Podman note: `.env` sets `AIRFLOW_UID=0` (container root maps to the
-> invoking host user) and the compose file sets `HOME=/home/airflow`, so
-> bind-mounted evidence stays owned by you. On Docker Desktop use
-> `AIRFLOW_UID=$(id -u)` instead.
-
-### 16.3 Source preparation (Grammy CSV → PostgreSQL)
+### 18.2 Clone and start the project
 
 ```bash
-podman compose --profile debug run --rm airflow-cli bash -c \
-  'cd /opt/airflow && python -m scripts.prepare_source_db'
+git clone git@github.com:driosoft-pro/Workshop-2.git   # or HTTPS
+cd Workshop-2
+cp .env.example .env                # review AIRFLOW_UID, ports, credentials
+./run.sh up                         # frees ports + stack + source prep + Superset
+./run.sh test                       # 62 tests (unit + integration)
+./run.sh trigger                    # DAG Test A → 8/8 success
 ```
 
-(or on the host: `MUSIC_SOURCE_DB_URL=postgresql+psycopg2://music:music@localhost:5432/music_source PYTHONPATH=. python -m scripts.prepare_source_db`)
-
-Evidence: `docs/evidence/runs/source_preparation.json` (row-count
-reconciliation 4,810 = 4,810).
-
-### 16.4 Run the DAG
+`./run.sh up` first runs `./run.sh ports`: it frees the ports this project
+needs (5432, 8080, 8088) if another project holds them, and only then starts
+the stack. Quick verification:
 
 ```bash
-# UI: DAGs -> reliable_music_pipeline -> unpause -> Trigger DAG (Test A)
-# API equivalent:
-curl -s -X POST http://localhost:8080/auth/token \
-  -H 'Content-Type: application/json' \
-  -d '{"username":"airflow","password":"airflow"}'   # -> access_token
-# create a run with conf {} (Test A) or {"spotify_source_file":"spotify_bad.csv"} (Test B)
-podman compose --profile debug run --rm airflow-cli bash -c \
-  'cd /opt/airflow && airflow dags trigger reliable_music_pipeline'
+./run.sh status    # containers + URLs
+./run.sh urls      # URLs only
+# Airflow     http://localhost:8080  (airflow / airflow)
+# Superset    http://localhost:8088  (admin / admin)
+# PostgreSQL  localhost:5432         (music / music)
 ```
 
-Expected: Test A `success` (all 8 tasks); Test B `failed` at
-`validate_spotify_raw` with 4 tasks `upstream_failed`.
+Optional (only if you do not use Nix): `python -m venv .venv && pip install -r
+requirements.txt`.
 
-### 16.5 Local (host) run without Airflow
+### 18.3 `run.sh` / `run.bat` (single entry point)
 
 ```bash
-python -m venv .venv && . .venv/bin/activate
-pip install -r requirements.txt
-export PYTHONPATH=. MUSIC_DATA_DIR="$PWD/data" MUSIC_GX_DIR="$PWD/gx" \
-       MUSIC_EVIDENCE_DIR="$PWD/docs/evidence" \
-       MUSIC_SOURCE_DB_URL=postgresql+psycopg2://music:music@localhost:5432/music_source \
-       MUSIC_DW_DB_URL=postgresql+psycopg2://music:music@localhost:5432/music_dw
-python -m scripts.smoke_test                 # Test A: extract→gates→transform→load→KPIs
-python -m scripts.make_bad_data              # create data/bad/spotify_bad.csv
-python -m scripts.smoke_test --source spotify_bad.csv   # Test B: expected BLOCKED exit code 2
-python -m src.validation init                # (re)build gx/ assets
-python -m src.validation rules               # print the rule catalogue
+./run.sh up            # frees ports + compose up -d --build + source prep + Superset bootstrap
+./run.sh ports         # checks active containers/ports and stops foreign ones
+./run.sh down          # stops ALL project services (volumes intact)
+./run.sh stop          # alias of down
+./run.sh trigger       # DAG Test A (8/8 success)
+./run.sh trigger-bad   # creates data/bad/spotify_bad.csv and runs Test B
+./run.sh test          # pytest (unit + integration)
+./run.sh status        # containers and URLs
+./run.sh superset      # rerun the Superset bootstrap (idempotent)
+./run.sh logs          # scheduler logs
+./run.sh reset         # down + drops volumes (full reset)
+./run.sh smoke         # local pipeline without Airflow
 ```
 
-### 16.6 Useful commands
+`ports` walks the running containers of **podman or docker**, finds who
+publishes 5432/8080/8088, **automatically stops** the ones that do not belong
+to this project and warns when the port is held by a non-container process
+(that one must be freed manually). Add extra ports with `EXTRA_PORTS="9000"`.
 
-```bash
-podman compose logs -f airflow-scheduler           # scheduler logs
-podman exec -it 2_music-postgres_1 psql -U music -d music_dw   # explore the DW
-podman compose --profile debug run --rm airflow-cli airflow version  # 3.1.8
-podman compose -f docker-compose.yaml down                     # stop (add -v to reset volumes)
-```
+On Windows: `run.bat up`, `run.bat ports`, `run.bat test`, `run.bat trigger`, …
+(`run.bat help`). Commands use `podman compose` when available and fall back to
+`docker compose`.
 
-### 16.7 Nix shell, Podman and exposed ports (Windows 11 VM → Power BI)
-
-```bash
-nix develop        # Python 3.12 + uv + postgresql + podman/podman-compose
-```
-
-The runtime is **rootless Podman** (no Docker daemon): `docker-compose.yaml` is
-the official Airflow 3.1.8 file adapted for this project and is driven with
-`podman compose …` (built into Podman ≥ 4) or `podman-compose`.
-
-Both service ports are published on **`0.0.0.0`**, so a guest machine can reach
-them through the host address:
+### 18.4 Services, ports and clients (Windows 11 VM)
 
 | Port | Service | Typical consumer |
 | --- | --- | --- |
-| `5432` | `music-postgres` — `music_source` + `music_dw` | Power BI Desktop |
-| `8080` | `airflow-apiserver` — UI / REST API | browser |
+| `8080` | `airflow-apiserver` — UI/API (`airflow`/`airflow`) | browser |
+| `8088` | `superset` — UI (`admin`/`admin`) | browser (primary BI) |
+| `5432` | `music-postgres` — `music_source` + `music_dw` | Superset / Power BI Desktop |
 
-The host firewall must allow them: the list
-`services.network.firewall.allowedTCPPorts = [ 5432 8080 ]` sits in the machine
-configuration `/etc/nixos/env.nix` and is rendered by
-`/etc/nixos/modules/system/networking.nix` into the nftables ruleset
-(`tcp dport { 5432, 8080 } accept`). After editing that file, rebuild:
-
-```bash
-doas nixos-rebuild switch
-```
+Ports are published on **`0.0.0.0`**, so a guest machine reaches them through
+the host address. Firewall list in the NixOS machine configuration
+(`/etc/nixos/env.nix`, `allowedTCPPorts = [ 5432 8080 8088 ]`; rebuild with
+`doas nixos-rebuild switch`).
 
 Power BI Desktop inside the **Windows 11 VM** (libvirt `default` NAT, host
-gateway `192.168.122.1`; on the LAN the host is `192.168.1.14`):
+gateway `192.168.122.1`; on the LAN `192.168.1.14`):
 
 | Setting | Value |
 | --- | --- |
 | Server | `192.168.122.1,5432` (LAN: `192.168.1.14,5432`) |
-| Database | `music_dw` |
-| Authentication | Database — user `music`, password `music` |
-| Airflow UI | `http://192.168.122.1:8080` (`airflow` / `airflow`) |
+| Database | `music_dw` · user `music` / password `music` |
+| Superset | `http://192.168.122.1:8088` (`admin`/`admin`) |
+| Airflow | `http://192.168.122.1:8080` (`airflow`/`airflow`) |
 
 Connectivity check from the VM: `Test-NetConnection 192.168.122.1 -Port 5432`.
 
-## 17. Repository structure
+### 18.5 Connecting with DBeaver (browsing `music_dw`)
+
+[DBeaver Community](https://dbeaver.io/download/) (free) with the PostgreSQL
+driver it ships. **New connection → PostgreSQL**:
+
+| Setting | Value (NixOS host) | Value (from the Windows 11 VM) |
+| --- | --- | --- |
+| Server | `localhost` | `192.168.122.1` (LAN: `192.168.1.14`) |
+| Port | `5432` | `5432` |
+| Database | `music_dw` | same |
+| User | `music` | same |
+| Password | `music` | same |
+| SSL off (optional) | *Main* tab → uncheck *Use SSL* | same |
+
+Additional databases on the same server (same user/port):
+
+| Database | Contents |
+| --- | --- |
+| `music_dw` | star schema: `dim_*`, `fact_*`, `etl_batch_log` |
+| `music_source` | source table `grammy_awards` (4,810 rows) |
+| `superset` | Superset metadata (do not modify) |
+
+Verification in the DBeaver SQL console (must return `157530`):
+
+```sql
+select count(*) from fact_track_artist;              -- 157530
+select count(*) from fact_grammy_award;              -- 4810
+select * from etl_batch_log order by started_at desc limit 5;
+select track_id, track_name, popularity              -- top R1 (Grammy artists)
+  from fact_track_artist
+ where is_grammy_artist = 1
+ order by popularity desc limit 10;
+```
+
+If the connection fails with *Connection refused*: port 5432 is held by another
+project — run `./run.sh ports` (or `./run.sh status` to see the mapping) and
+retry. From the VM: `Test-NetConnection 192.168.122.1 -Port 5432`.
+
+### 18.6 Manual run (without `run.sh`)
+
+```bash
+cp .env.example .env                          # review AIRFLOW_UID, ports, credentials
+podman compose -f docker-compose.yaml up -d --build
+podman compose exec -T airflow-apiserver python -m scripts.prepare_source_db
+podman compose exec -T airflow-apiserver airflow dags trigger reliable_music_pipeline
+podman compose exec -T superset python /app/scripts/superset_bootstrap.py
+curl -s http://localhost:8080/api/v2/monitor/health
+```
+
+### 18.7 Local (host) run without Airflow
+
+```bash
+export PYTHONPATH=. MUSIC_DATA_DIR="$PWD/data" MUSIC_GX_DIR="$PWD/gx" \
+       MUSIC_EVIDENCE_DIR="$PWD/docs/evidence" \
+       MUSIC_SOURCE_DB_URL=postgresql+psycopg2://music:music@localhost:5432/music_source \
+       MUSIC_DW_DB_URL=postgresql+psycopg2://music:music@localhost:5432/music_dw
+python -m scripts.smoke_test                          # full Test A
+python -m scripts.make_bad_data                       # creates data/bad/spotify_bad.csv
+python -m scripts.smoke_test --source spotify_bad.csv # Test B: expected BLOCKED exit code 2
+python -m src.validation init                         # (re)build gx/ assets
+python -m src.validation rules                        # print the 23-rule catalogue
+```
+
+### 18.8 Repository structure
 
 ```
 workshop-2/
+|-- run.sh  run.bat                     # single entry point (up/ports/down/test/trigger/superset/…)
 |-- dags/reliable_music_pipeline.py     # TaskFlow DAG (workflow + policy only)
 |-- src/                                # reusable logic
 |   |-- config.py  extract.py  transform.py  validation.py  load.py  analytics.py
+|-- tests/                              # pytest: offline unit + integration (marker)
 |-- gx/                                 # Great Expectations project (suites/validations/checkpoints)
 |-- notebooks/data_profiling.ipynb      # executed profiling notebook
-|-- sql/source_setup.sql                # Grammy source table DDL
-|-- sql/dw_schema.sql                   # star schema DDL
-|-- sql/db_init/01_create_dw.sql        # auto-created on container start
-|-- sql/kpi_queries.sql                 # 7 KPI queries (-- ARn tags)
-|-- scripts/                            # prepare_source_db, make_bad_data, smoke_test
+|-- sql/source_setup.sql  dw_schema.sql # source and star schema DDL
+|-- sql/db_init/01_create_dw.sql        # auto-created on music-postgres start
+|-- sql/db_init/02_create_superset.sql  # Superset metadata database
+|-- sql/kpi_queries.sql                 # 7 KPI queries (-- Rn tags)
+|-- scripts/                            # prepare_source_db, make_bad_data, smoke_test,
+|   |                                   # superset_bootstrap, superset_create_metadata_db
+|-- config/superset_config.py  Dockerfile.superset
 |-- docs/                               # analytical_requirements, architecture, quality_rules,
 |   |                                   # gx_design, transformation_integration, dimensional_model,
 |   |                                   # failure_retry_policy, traceability_matrix,
-|   |                                   # powerbi_dashboard, evidence_register
+|   |                                   # superset_dashboard, powerbi_dashboard, evidence_register
 |   `-- evidence/                       # gx/, kpis/, runs/, profiling_summary.json
 |-- data/{raw,work,output,bad}/         # inputs (raw committed) / generated
-|-- requirements.txt  Dockerfile  docker-compose.yaml  flake.nix  .env.example  .gitignore
+|-- requirements.txt  requirements-dev.txt  pytest.ini
+|-- docker-compose.yaml  flake.nix  .env.example  .gitignore
 ```
 
-## 18. Assumptions and limitations
+### 18.9 Assumptions and limitations
 
 1. **Name-based integration**: there is no shared artist identifier; matching
    relies on normalization of display names. 1,575 award rows with a credit
@@ -349,10 +605,9 @@ workshop-2/
 4. **No value repair** (T5): out-of-range source values (603 long durations,
    1 zero duration, …) are reported, never corrected.
 5. **Contract columns**: `key`, `mode`, `instrumentalness`, `time_signature`
-   are profiled but not extracted — audio metadata beyond the AR1/AR3 features
+   are profiled but not extracted — audio metadata beyond the R1/R3 features
    is out of scope.
 6. **Batch strategy**: full replace per run (no incremental/SCD loading); safe
    for 157k-row volumes, would need partitioning at larger scale.
-7. **Dashboard**: Power BI Desktop on Windows/macOS connects to PostgreSQL
-   `music_dw`; the repository ships the query layer, DAX design and rendered
-   charts as reproducible evidence.
+7. **BI**: Superset is the primary layer (automated); Power BI Desktop remains
+   an alternative for the workstation standard.

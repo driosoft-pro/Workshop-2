@@ -12,7 +12,7 @@ Web UI shows (`logs/dag_id=…/run_id=…/task_id=…/attempt=1.log`).
 | **E1** | Source preparation | `docs/evidence/runs/source_preparation.json`, `sql/source_setup.sql`, `scripts/prepare_source_db.py` | Grammy CSV loaded into PostgreSQL `music_source.grammy_awards`, 4,810 = 4,810 row reconciliation, DDL + import decisions documented | §6.2 source preparation (not the ETL Load) |
 | **E2** | Environment | `docker-compose.yaml`, `Dockerfile`, `.env.example`; `docs/evidence/runs/airflow_api_version_and_runs.json` (persisted `GET /api/v2/version` → `{"version":"3.1.8"}` plus the 3 dagRuns) | reproducible compose environment; **Airflow reports 3.1.8**; DAG + run history survive a stack restart | §6.2 environment |
 | **E3** | Profiling | `notebooks/data_profiling.ipynb` (executed, 27 cells) + `docs/evidence/profiling_summary.json` | structure/completeness/uniqueness/categorical/numerical/temporal/cross-source evidence for every risk in `docs/quality_rules.md` §2 | §6.3 profiling |
-| **E4** | Quality design | `docs/quality_rules.md`, `RULES` in `src/validation.py` | 24 rules with metric, threshold, severity, justification and AR tags | §6.5 rules & thresholds |
+| **E4** | Quality design | `docs/quality_rules.md`, `RULES` in `src/validation.py` | 23 rules with metric, threshold, severity, justification and R tags | §6.5 rules & thresholds |
 | **E5** | GX design | `docs/gx_design.md`, `gx/expectations/*.json`, `gx/validation_definitions/*.json`, `gx/checkpoints/*.json` | Rule ID ↔ Expectation mapping; suites/validations/checkpoints for both layers | §6.6 GX design |
 | **E6** | Test A — raw gates | `docs/evidence/gx/raw_spotify/20261003T032258323783_test_a_success.json`, `…/raw_grammys/…_test_a_success.json` | both raw gates pass (8/8, 6/6 expectations; `success_percent=100`) with full per-rule evidence | §6.7 raw validation |
 | **E7** | Test A — prepared gates | `docs/evidence/gx/prepared_tracks|prepared_grammys|prepared_metrics/*_test_a_success.json` | 14 prepared expectations pass; prepared suites are distinct from raw suites | §6.9 prepared validation |
@@ -27,7 +27,7 @@ Web UI shows (`logs/dag_id=…/run_id=…/task_id=…/attempt=1.log`).
 | **E16** | Test C — replace mechanics | `airflow_test_c_safe_rerun_log_load_dw.txt` (`row_counts_before` = previous batch counts) + `airflow_etl_batch_log.csv` | strategy `replace` in one transaction; `etl_batch_log` holds one row per batch with equal `target_rows_after` | §7.3 strategy |
 | **E17** | Module-level rerun | `docs/evidence/runs/safe_rerun_run1_counts.csv`, `safe_rerun_run2_counts.csv` (diff empty) | same idempotence guarantee outside Airflow | §7.3 |
 | **E18** | Analytics from the DW | `docs/evidence/kpis/kpi_*.csv` (7 result sets), `kpi_summary.json`, `ar1..ar4_*.png` (4 charts) | ≥3 KPIs and ≥3 visualizations, all querying `music_dw` | §8.1 analytics |
-| **E19** | Traceability | `docs/traceability_matrix.md`, AR tags in `src/validation.py`, `-- ARn` tags in `sql/kpi_queries.sql` | requirement → rule → expectation → transformation → DW → KPI chain | §8.2 traceability |
+| **E19** | Traceability | `docs/traceability_matrix.md`, R tags in `src/validation.py`, `-- Rn` tags in `sql/kpi_queries.sql` | requirement → rule → expectation → transformation → DW → KPI chain | §8.2 traceability |
 | **E20** | Security hygiene | `.env.example` (no secrets), `.gitignore` (ignores `.env`, `data/work`, `data/output`, `data/bad`, `gx/uncommitted`), masked credentials in logs (`config.describe()` prints `***`) | no credentials committed; only documented variables | §6.2 secrets |
 | **E21** | Task-state overview (Grid-view equivalent) | `docs/evidence/runs/airflow_task_states.png`, `docs/dag_structure.png` | all 8 task states side by side: Test A/C green, Test B red at `validate_spotify_raw` + orange `upstream_failed` downstream; the implemented dependency graph with per-task retry class | §7.1/§7.2 evidence with interpretation |
 
@@ -46,7 +46,7 @@ Web UI shows (`logs/dag_id=…/run_id=…/task_id=…/attempt=1.log`).
 | Controlled failed DAG Run + failed task log | E11, E12, E13 |
 | Selective-retry evidence / justification | E14, `docs/failure_retry_policy.md` §2 |
 | Safe-rerun evidence | E15, E16, E17 |
-| Dashboard connection to the DW + requirement-to-KPI traceability | `docs/powerbi_dashboard.md`, E18, E19 |
+| Dashboard connection to the DW + requirement-to-KPI traceability | `docs/superset_dashboard.md`, `docs/powerbi_dashboard.md`, E18, E19 |
 
 ## How to re-inspect a run
 

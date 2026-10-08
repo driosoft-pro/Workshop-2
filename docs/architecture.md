@@ -22,9 +22,9 @@ Workshop-2, sections 4.2, 5 and 6.11.
                                    |
                               DATA WAREHOUSE  (music_dw: 4 dims + 2 facts + etl_batch_log)
                                    |
-                               build_kpis      7 SQL KPIs + 4 PNG charts (AR1-AR4)
+                               build_kpis      7 SQL KPIs + 4 PNG charts (R1-R4)
                                    |
-                          KPIs / DASHBOARD (Power BI on music_dw)
+                          KPIs / DASHBOARD (Superset primary, Power BI alt.)
 ```
 
 Quality design around the flow: *profiling → quality risks → quality rules →
@@ -42,7 +42,7 @@ monitoring → controlled failure → safe rerun*.
 | Source DB (Grammy) | PostgreSQL 16, `music_source.grammy_awards` | `sql/source_setup.sql`, `scripts/prepare_source_db.py` |
 | Data Warehouse | PostgreSQL 16, `music_dw` star schema | `sql/dw_schema.sql`, `src/load.py` |
 | Analytics | 7 SQL queries + pandas/matplotlib charts | `sql/kpi_queries.sql`, `src/analytics.py` |
-| Dashboard | Power BI Desktop on `music_dw` (PostgreSQL) | `docs/powerbi_dashboard.md` |
+| Dashboard | **Apache Superset 4.1.4** (primary, compose service + REST bootstrap) on `music_dw`; Power BI Desktop as alternative | `docs/superset_dashboard.md`, `docs/powerbi_dashboard.md`, `scripts/superset_bootstrap.py` |
 | Evidence | GX JSON results, run summaries, KPI CSV/PNG, task logs | `docs/evidence/` |
 
 ## 3. Implemented DAG structure
