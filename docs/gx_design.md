@@ -23,13 +23,14 @@ run — a run never rewrites the rule catalogue.
 
 | Layer | Suite (expectations) | Validation definition | Checkpoint | Gate task | Data validated |
 | --- | --- | --- | --- | --- | --- |
-| raw Spotify | `spotify_raw_suite` (8) | `spotify_raw_validation` | `raw_spotify_checkpoint` | `validate_spotify_raw` | `data/work/spotify_raw.csv` (16 contract columns) |
+| raw Spotify | `spotify_raw_suite` (9) | `spotify_raw_validation` | `raw_spotify_checkpoint` | `validate_spotify_raw` | `data/work/spotify_raw.csv` (22 contract columns) |
 | raw Grammys | `grammy_raw_suite` (6) | `grammy_raw_validation` | `raw_grammy_checkpoint` | `validate_grammys_raw` | `data/work/grammys_raw.csv` |
-| prepared tracks | `prepared_tracks_suite` (7) | `prepared_tracks_validation` | `prepared_tracks_checkpoint` | `validate_prepared` | `data/work/prepared_tracks.csv` (157,530 rows) |
-| prepared Grammys | `prepared_grammys_suite` (4) | `prepared_grammys_validation` | `prepared_grammy_checkpoint` | `validate_prepared` | `data/work/prepared_grammys.csv` (4,810 rows) |
-| prepared metrics | `prepared_metrics_suite` (3) | `prepared_metrics_validation` | `prepared_metrics_checkpoint` | `validate_prepared` | `data/work/prepared_metrics.csv` (integration summary) |
+| prepared tracks | `prepared_tracks_suite` (10) | `prepared_tracks_validation` | `prepared_tracks_checkpoint` | `validate_prepared` | `data/work/prepared_tracks.csv` (157,530 rows) |
+| prepared Grammys | `prepared_grammys_suite` (8) | `prepared_grammys_validation` | `prepared_grammy_checkpoint` | `validate_prepared` | `data/work/prepared_grammys.csv` (4,810 rows) |
+| prepared metrics | `prepared_metrics_suite` (6) | `prepared_metrics_validation` | `prepared_metrics_checkpoint` | `validate_prepared` | `data/work/prepared_metrics.csv` (integration summary) |
+| prepared bridge | `prepared_bridge_suite` (1) | `prepared_bridge_validation` | `prepared_bridge_checkpoint` | `validate_prepared` | `data/work/bridge_award_artist.csv` (bridge) |
 
-Total: **24 rule IDs → 28 expectations** across 5 checkpoints.
+Total: **34 rule IDs → 40 expectations** across 6 checkpoints.
 
 ## 3. Rule ID ↔ Expectation mapping
 
@@ -43,6 +44,7 @@ Total: **24 rule IDs → 28 expectations** across 5 checkpoints.
 | DQ-S4 | `expect_column_values_to_be_between` | `column=duration_ms`, `min_value=1`, `max_value=600000`, `mostly=0.99` | warning |
 | DQ-S5 (×3) | `expect_column_values_to_be_between` | `column ∈ {danceability, energy, valence}`, `min_value=0`, `max_value=1` | critical |
 | DQ-S6 | `expect_column_values_to_not_be_null` | `column=track_genre`, `mostly=0.999` | critical |
+| DQ-S7 | `expect_table_columns_to_match_set` | `column_set=22 columns`, `exact_match=True` | critical |
 
 ### Raw Grammys — `grammy_raw_suite`
 
@@ -63,13 +65,23 @@ Total: **24 rule IDs → 28 expectations** across 5 checkpoints.
 | DQ-P3 | `expect_column_values_to_be_between` | `column=popularity`, 0..100 | critical |
 | DQ-P4 (×3) | `expect_column_values_to_be_between` | `column ∈ {danceability, energy, valence}`, 0..1 | critical |
 | DQ-P5 | `expect_column_values_to_be_in_set` | `column=is_grammy_artist`, `value_set=[0,1]` | critical |
+| DQ-G8 | `expect_column_values_to_be_in_set` | `column=genre_family`, `value_set=12 families`, `mostly=1.0` | critical |
+| DQ-P13 | `expect_column_mean_to_be_between` | `column=is_zero_popularity`, 0.0..0.20 | warning |
+| DQ-G10 | `expect_compound_columns_to_be_unique` | `column_list=[song_key, artist_key]`, `is_primary_song==1` | critical |
 | DQ-P6 | `expect_column_values_to_be_between` | `column=year`, 1958..current year | critical |
 | DQ-P7 | `expect_column_values_to_not_be_null` | `column=category`, `mostly=1.0` | critical |
 | DQ-P8 | `expect_column_values_to_be_in_set` | `column=winner_flag`, `value_set=[0,1]` | critical |
 | DQ-P9 | `expect_column_values_to_not_be_null` | `column=artist_key`, `mostly=0.60` | warning |
+| DQ-G6 | `expect_column_values_to_be_in_set` | `column=match_method`, `value_set={exact, split, workers, nominee, fuzzy, none}` | critical |
+| DQ-G7 | `expect_column_values_to_be_in_set` | `column=artist_source`, `value_set={credit, workers, nominee, none}` | critical |
+| DQ-G9 (×2) | `expect_column_values_to_not_be_null` / `expect_column_values_to_be_in_set` | `column=category_family`, `mostly=1.0` / `mostly=0.90` | critical |
 | DQ-P10 | `expect_column_values_to_be_between` | `column=duplicate_grain_rows`, `min_value=0`, `max_value=0` | critical |
 | DQ-P11 | `expect_column_values_to_be_between` | `column=grammy_match_rate_pct`, `min_value=25.0`, `max_value=100.0` | warning |
 | DQ-P12 | `expect_column_values_to_be_between` | `column=fact_track_rows`, `min_value=100000`, `max_value=10000000` | critical |
+| DQ-P14 | `expect_column_values_to_be_between` | `column=grammy_match_rate_pct`, `min_value=47.2`, `max_value=100.0` | warning |
+| DQ-P15 | `expect_column_values_to_be_between` | `column=song_confirmation_rate_pct`, `min_value=21.4`, `max_value=100.0` | warning |
+| DQ-P16 | `expect_column_values_to_be_between` | `column=genre_tie_share_pct`, `min_value=0.0`, `max_value=15.0` | warning |
+| DQ-G11 | `expect_compound_columns_to_be_unique` | `column_list=[award_bk, artist_key]` | critical |
 
 ## 4. Execution flow inside a gate task
 

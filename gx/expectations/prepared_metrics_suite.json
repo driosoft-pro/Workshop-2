@@ -1,7 +1,7 @@
 {
   "expectations": [
     {
-      "id": "f032706a-165a-4849-b8e1-43d32a2ba610",
+      "id": "cb559bff-abe4-4350-8ae3-16bb80804a69",
       "kwargs": {
         "column": "duplicate_grain_rows",
         "max_value": 0.0,
@@ -17,7 +17,7 @@
       "type": "expect_column_values_to_be_between"
     },
     {
-      "id": "e608122f-c3fe-4151-a8f0-0a2108ac68ef",
+      "id": "d0bf0fc8-409a-4ff4-8b37-15d7a1dd465f",
       "kwargs": {
         "column": "grammy_match_rate_pct",
         "max_value": 100.0,
@@ -33,7 +33,7 @@
       "type": "expect_column_values_to_be_between"
     },
     {
-      "id": "945c6bdd-e605-43b8-8b38-eb05abaca84a",
+      "id": "be9dce28-a6e3-4e58-b0d4-6b62d270a4ef",
       "kwargs": {
         "column": "fact_track_rows",
         "max_value": 10000000.0,
@@ -47,9 +47,57 @@
       },
       "severity": "critical",
       "type": "expect_column_values_to_be_between"
+    },
+    {
+      "id": "e29530c1-2e97-4f9d-80b8-94d23278d5d7",
+      "kwargs": {
+        "column": "grammy_match_rate_pct",
+        "max_value": 100.0,
+        "min_value": 47.2
+      },
+      "meta": {
+        "quality_dimension": "Consistency",
+        "requirement": "R1,R2",
+        "rule_id": "DQ-P14",
+        "severity": "warning"
+      },
+      "severity": "warning",
+      "type": "expect_column_values_to_be_between"
+    },
+    {
+      "id": "1062fa4f-d77a-418c-8b5f-9981b6748d4d",
+      "kwargs": {
+        "column": "song_confirmation_rate_pct",
+        "max_value": 100.0,
+        "min_value": 21.4
+      },
+      "meta": {
+        "quality_dimension": "Consistency",
+        "requirement": "R1,R2",
+        "rule_id": "DQ-P15",
+        "severity": "warning"
+      },
+      "severity": "warning",
+      "type": "expect_column_values_to_be_between"
+    },
+    {
+      "id": "c5a73c81-9a01-44ce-944e-410c82feb277",
+      "kwargs": {
+        "column": "genre_tie_share_pct",
+        "max_value": 15.0,
+        "min_value": 0.0
+      },
+      "meta": {
+        "quality_dimension": "Consistency",
+        "requirement": "R2",
+        "rule_id": "DQ-P16",
+        "severity": "warning"
+      },
+      "severity": "warning",
+      "type": "expect_column_values_to_be_between"
     }
   ],
-  "id": "e6388fe5-e3b9-421a-b48d-1056d20b538c",
+  "id": "cac55fd5-61ae-46b0-8e9b-5c13cbed0019",
   "meta": {
     "great_expectations_version": "1.23.1"
   },

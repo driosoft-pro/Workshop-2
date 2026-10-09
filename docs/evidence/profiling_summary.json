@@ -2,13 +2,9 @@
   "sources": {
     "spotify_rows": 114000,
     "spotify_raw_columns": 21,
-    "spotify_contract_columns": 16,
+    "spotify_contract_columns": 22,
     "spotify_dropped_columns": [
-      "Unnamed: 0",
-      "key",
-      "mode",
-      "instrumentalness",
-      "time_signature"
+      "Unnamed: 0"
     ],
     "grammy_rows": 4810,
     "grammy_raw_columns": 10,
@@ -60,5 +56,32 @@
     "grammy_match_rate_pct_of_artist_rows": 46.9697,
     "grammy_match_rate_pct_of_all_rows": 29.0021,
     "normalized_display_name_conflicts": 90
+  },
+  "upgrade_evidence": {
+    "zero_popularity_share_pct": 14.0526,
+    "unique_songs": {
+      "track_id_count": 89741,
+      "unique_song_count": 78361
+    },
+    "credit_split_gain": {
+      "split_matched_rows": 333,
+      "split_share_pct": 6.9231
+    },
+    "workers_recovery": {
+      "recoverable_rows": 1333,
+      "matched_rows": 585
+    },
+    "category_variants": {
+      "raw_distinct": 638,
+      "clean_sans_parentheses": 579
+    },
+    "category_family_other_rows_pct": 0.0,
+    "category_family_mapped_distinct_pct": 100.0,
+    "genre_family_mapped_genres_pct": 100.0,
+    "genre_family_dictionary_entries": 114,
+    "post_transform_match_rate_pct": 52.2245,
+    "post_transform_song_confirmation_rate_pct": 26.4085,
+    "post_transform_genre_tie_share_pct": 4.6628,
+    "post_transform_bridge_rows": 2757
   }
 }

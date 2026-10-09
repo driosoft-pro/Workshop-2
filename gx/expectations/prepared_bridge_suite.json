@@ -1,0 +1,27 @@
+{
+  "expectations": [
+    {
+      "id": "e23899e8-e1d6-4635-b409-dde691f73d0c",
+      "kwargs": {
+        "column_list": [
+          "award_bk",
+          "artist_key"
+        ]
+      },
+      "meta": {
+        "quality_dimension": "Uniqueness",
+        "requirement": "R1,R2",
+        "rule_id": "DQ-G11",
+        "severity": "critical"
+      },
+      "severity": "critical",
+      "type": "expect_compound_columns_to_be_unique"
+    }
+  ],
+  "id": "b025ae79-71e5-490f-8e5e-266ceefa86bb",
+  "meta": {
+    "great_expectations_version": "1.23.1"
+  },
+  "name": "prepared_bridge_suite",
+  "notes": null
+}

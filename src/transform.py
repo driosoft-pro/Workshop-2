@@ -173,6 +173,10 @@ def transform_and_integrate(
 
     exploded["duration_min"] = (exploded["duration_ms"] / 60000).round(2)
 
+    # --- T14: genre family on every prepared row (dim_genre uses the same
+    # dictionary; DQ-G8 proves that no source genre is left without a family)
+    exploded["genre_family"] = exploded["track_genre"].map(genre_family)
+
     # --- T15: quality flags, song_key and the primary-song selection ------
     exploded["is_zero_popularity"] = (exploded["popularity"] == 0).astype("int64")
     exploded["is_outlier_duration"] = (

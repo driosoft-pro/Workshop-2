@@ -9,7 +9,11 @@ only derives a new column from it (Workshop-2 principle: no value repair).
                       normalised, the 8 "Producer Of The Year" variants merged
                       into the 2 canonical ones.
     category_family   T13 `category_family`: ordered regex cascade, first hit
-                      wins, default "Other".
+                      wins, default "Other". The documented primary cascade is
+                      tried first; CATEGORY_FAMILY_EXTENSION_RULES then covers
+                      the legacy (pre-1990s) categories the primary cascade
+                      cannot express, still first-hit-wins and only reached
+                      when the primary cascade returned "Other".
     genre_family      T14 `genre_family`: fixed 114-genre dictionary.
 """
 
@@ -143,12 +147,40 @@ _CATEGORY_FAMILY_COMPILED = [
     (name, re.compile(pattern, re.IGNORECASE)) for name, pattern in CATEGORY_FAMILY_RULES
 ]
 
+# Extension pass (T13): the primary cascade above covers the modern Grammy
+# vocabulary; these patterns cover the legacy categories that would otherwise
+# fall through to "Other" (instrumental/arrangement craft awards, blues,
+# rhythm & blues, roots, music video, historical reissues, ...). Reached only
+# when the primary cascade returned "Other", so a row classified by a primary
+# rule is never reclassified (first hit wins, no regressions).
+CATEGORY_FAMILY_EXTENSION_RULES: list[tuple[str, str]] = [
+    ("Classical", r"arrangement|instrumental|ensemble|soloist|new age|a cappella|accompaniment"),
+    ("R&B & Rap", r"rhythm\s*&\s*blues"),
+    ("Jazz", r"blues"),
+    ("Country & Folk", r"american roots|regional roots|roots|ethnic|traditional"),
+    ("Latin", r"salsa|merengue|norte"),
+    ("Pop", r"vocal|contemporary|top 40|voices|chorus|dancing"),
+    ("Gospel & Christian", r"sacred|inspirational"),
+    ("Dance & Electronic", r"disco"),
+    ("Production & Technical", r"historical|reissue|album cover|immersive"),
+    ("Visual Media & Theater", r"music video|video|cast|broadway|show album|score|sound track"),
+]
+_CATEGORY_FAMILY_EXTENSION_COMPILED = [
+    (name, re.compile(pattern, re.IGNORECASE))
+    for name, pattern in CATEGORY_FAMILY_EXTENSION_RULES
+]
+
+CATEGORY_FAMILIES: list[str] = [name for name, _ in CATEGORY_FAMILY_RULES]
+
 
 def category_family(value) -> str:
     if value is None:
         return "Other"
     text = str(value)
     for name, pattern in _CATEGORY_FAMILY_COMPILED:
+        if pattern.search(text):
+            return name
+    for name, pattern in _CATEGORY_FAMILY_EXTENSION_COMPILED:
         if pattern.search(text):
             return name
     return "Other"

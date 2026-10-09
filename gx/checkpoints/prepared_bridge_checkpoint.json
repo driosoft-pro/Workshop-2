@@ -1,0 +1,14 @@
+{
+  "actions": [],
+  "id": "c7d132fa-9b50-4d52-9766-8e9f1cc200d3",
+  "name": "prepared_bridge_checkpoint",
+  "result_format": {
+    "result_format": "SUMMARY"
+  },
+  "validation_definitions": [
+    {
+      "id": "33852814-cc3d-4288-b04a-db7cc1f0769f",
+      "name": "prepared_bridge_validation"
+    }
+  ]
+}

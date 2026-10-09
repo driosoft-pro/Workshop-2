@@ -1,7 +1,7 @@
 {
   "expectations": [
     {
-      "id": "37cd80be-2c4f-4d8a-95d0-254bc1c48b0d",
+      "id": "1dd5002a-c911-40f9-b6b5-9eb6ca1f9cf0",
       "kwargs": {
         "column": "track_id"
       },
@@ -15,7 +15,7 @@
       "type": "expect_column_values_to_not_be_null"
     },
     {
-      "id": "d4ff4380-ed2c-4ceb-8e1e-c2c2a055b8df",
+      "id": "d97c8bc1-f6a0-4535-9193-d01480595d65",
       "kwargs": {
         "column": "artist_key"
       },
@@ -29,7 +29,7 @@
       "type": "expect_column_values_to_not_be_null"
     },
     {
-      "id": "5ff1a009-85e7-4083-9bfb-6b99cafa9b83",
+      "id": "762237e5-eba4-45e4-8aeb-fabe6a8e612a",
       "kwargs": {
         "column": "popularity",
         "max_value": 100.0,
@@ -45,7 +45,7 @@
       "type": "expect_column_values_to_be_between"
     },
     {
-      "id": "cfbf056b-59bd-4c5c-804e-ac3202a4610f",
+      "id": "b93cb8d7-f8e3-4c7b-8fd7-88c23f204507",
       "kwargs": {
         "column": "danceability",
         "max_value": 1.0,
@@ -61,7 +61,7 @@
       "type": "expect_column_values_to_be_between"
     },
     {
-      "id": "1c4ae894-64d1-4c4e-abfe-a2ae9a3d33f6",
+      "id": "d1eeb432-0d21-4c52-be66-a6a55544fed9",
       "kwargs": {
         "column": "energy",
         "max_value": 1.0,
@@ -77,7 +77,7 @@
       "type": "expect_column_values_to_be_between"
     },
     {
-      "id": "c98fcc5c-51e3-4b82-9a7c-d4397ce0453c",
+      "id": "02853514-3e09-4b98-b9e9-87382611cdc5",
       "kwargs": {
         "column": "valence",
         "max_value": 1.0,
@@ -93,7 +93,7 @@
       "type": "expect_column_values_to_be_between"
     },
     {
-      "id": "0af30624-c52d-43e5-a370-1022de5009b4",
+      "id": "efc62944-a4a2-4b06-825c-f0b804fe2df4",
       "kwargs": {
         "column": "is_grammy_artist",
         "value_set": [
@@ -109,9 +109,75 @@
       },
       "severity": "critical",
       "type": "expect_column_values_to_be_in_set"
+    },
+    {
+      "id": "1a86ad28-2c8c-444f-8a8c-bc43032e101e",
+      "kwargs": {
+        "column": "genre_family",
+        "value_set": [
+          "Classical & Instrumental",
+          "Country & Folk",
+          "Electronic",
+          "Hip-Hop & R&B",
+          "Jazz Blues Soul",
+          "Latin",
+          "Metal",
+          "Mood & Media",
+          "Pop",
+          "Reggae & Caribbean",
+          "Rock",
+          "World"
+        ]
+      },
+      "meta": {
+        "quality_dimension": "Completeness",
+        "requirement": "R2",
+        "rule_id": "DQ-G8",
+        "severity": "critical"
+      },
+      "severity": "critical",
+      "type": "expect_column_values_to_be_in_set"
+    },
+    {
+      "id": "40fb53f3-2038-4d06-90f1-f9062f74e639",
+      "kwargs": {
+        "column": "is_zero_popularity",
+        "max_value": 0.2,
+        "min_value": 0.0
+      },
+      "meta": {
+        "quality_dimension": "Validity",
+        "requirement": "R1",
+        "rule_id": "DQ-P13",
+        "severity": "warning"
+      },
+      "severity": "warning",
+      "type": "expect_column_mean_to_be_between"
+    },
+    {
+      "id": "bbb23777-1ec5-42cd-947f-7c6e9ffa225f",
+      "kwargs": {
+        "column_list": [
+          "song_key",
+          "artist_key"
+        ],
+        "condition_parser": "pandas",
+        "row_condition": {
+          "pass_through_filter": "is_primary_song == 1",
+          "type": "pass_through"
+        }
+      },
+      "meta": {
+        "quality_dimension": "Uniqueness",
+        "requirement": "R1",
+        "rule_id": "DQ-G10",
+        "severity": "critical"
+      },
+      "severity": "critical",
+      "type": "expect_compound_columns_to_be_unique"
     }
   ],
-  "id": "448a343f-9c8c-4f99-8e9d-b25c3afad369",
+  "id": "5d4be8fa-70d0-4ef2-90f9-9eec3f363f93",
   "meta": {
     "great_expectations_version": "1.23.1"
   },

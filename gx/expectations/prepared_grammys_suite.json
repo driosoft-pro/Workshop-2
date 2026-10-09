@@ -1,7 +1,7 @@
 {
   "expectations": [
     {
-      "id": "6271ddd7-45e2-4c5f-be67-8c9fff4af588",
+      "id": "770fb663-7494-44dc-9c4c-d2dbd0a08a3b",
       "kwargs": {
         "column": "year",
         "max_value": 2026.0,
@@ -17,7 +17,7 @@
       "type": "expect_column_values_to_be_between"
     },
     {
-      "id": "f5b3e581-b166-47ab-b6b6-1530e1c2aa77",
+      "id": "23785e24-dfa4-4870-9043-6c230019adc9",
       "kwargs": {
         "column": "category"
       },
@@ -31,7 +31,7 @@
       "type": "expect_column_values_to_not_be_null"
     },
     {
-      "id": "d0ec51b9-26c4-4f47-b4f3-3ede21633838",
+      "id": "fd6c885c-11ab-46ce-bfbc-2052d7c76dc0",
       "kwargs": {
         "column": "winner_flag",
         "value_set": [
@@ -49,7 +49,7 @@
       "type": "expect_column_values_to_be_in_set"
     },
     {
-      "id": "82bf2fc5-ef24-4658-b4ca-fea0b20e7126",
+      "id": "3eaaccc3-27fd-497d-8141-cae3fb483c7a",
       "kwargs": {
         "column": "artist_key",
         "mostly": 0.6
@@ -62,9 +62,96 @@
       },
       "severity": "warning",
       "type": "expect_column_values_to_not_be_null"
+    },
+    {
+      "id": "b3a1fc40-6ab5-4c29-b999-e7adaa48aa57",
+      "kwargs": {
+        "column": "match_method",
+        "value_set": [
+          "exact",
+          "split",
+          "workers",
+          "nominee",
+          "fuzzy",
+          "none"
+        ]
+      },
+      "meta": {
+        "quality_dimension": "Validity",
+        "requirement": "R2,R3,R4",
+        "rule_id": "DQ-G6",
+        "severity": "critical"
+      },
+      "severity": "critical",
+      "type": "expect_column_values_to_be_in_set"
+    },
+    {
+      "id": "b271278c-c06a-4d9c-842f-8e607e0e2b3d",
+      "kwargs": {
+        "column": "artist_source",
+        "value_set": [
+          "credit",
+          "workers",
+          "nominee",
+          "none"
+        ]
+      },
+      "meta": {
+        "quality_dimension": "Validity",
+        "requirement": "R4",
+        "rule_id": "DQ-G7",
+        "severity": "critical"
+      },
+      "severity": "critical",
+      "type": "expect_column_values_to_be_in_set"
+    },
+    {
+      "id": "cc2174c3-e023-4a8d-95a3-494a151b07c2",
+      "kwargs": {
+        "column": "category_family"
+      },
+      "meta": {
+        "quality_dimension": "Completeness",
+        "requirement": "R4",
+        "rule_id": "DQ-G9",
+        "severity": "critical"
+      },
+      "severity": "critical",
+      "type": "expect_column_values_to_not_be_null"
+    },
+    {
+      "id": "0db8e845-eaac-418b-a13f-06259f155bd7",
+      "kwargs": {
+        "column": "category_family",
+        "mostly": 0.9,
+        "value_set": [
+          "Classical",
+          "Jazz",
+          "Country & Folk",
+          "Latin",
+          "R&B & Rap",
+          "Rock & Metal",
+          "General Field",
+          "Pop",
+          "Gospel & Christian",
+          "Dance & Electronic",
+          "Reggae & World",
+          "Production & Technical",
+          "Visual Media & Theater",
+          "Spoken & Comedy"
+        ]
+      },
+      "meta": {
+        "quality_dimension": "Completeness",
+        "requirement": "R4",
+        "rule_id": "DQ-G9",
+        "severity": "critical"
+      },
+      "severity": "critical",
+      "type": "expect_column_values_to_be_in_set"
     }
   ],
-  "id": "597428ea-df82-4313-aeba-93ba4fae60e0",
+  "id": "a719e890-341e-46d8-b350-c7d300ef874a",
   "meta": {
     "great_expectations_version": "1.23.1"
   },

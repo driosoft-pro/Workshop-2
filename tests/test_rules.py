@@ -15,8 +15,8 @@ DIMENSIONS = {"Completeness", "Validity", "Uniqueness", "Consistency"}
 SEVERITIES = {"critical", "warning"}
 
 
-def test_rule_catalog_has_23_rules():
-    assert len(RULES) == 23
+def test_rule_catalog_has_34_rules():
+    assert len(RULES) == 34
 
 
 def test_rule_ids_match_documented_pattern():

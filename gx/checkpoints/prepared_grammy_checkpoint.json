@@ -1,13 +1,13 @@
 {
   "actions": [],
-  "id": "8096dcbb-4f2a-438f-97ea-0b0430558e8c",
+  "id": "ed1f2192-b8ec-4b4d-a112-dbbb90567d83",
   "name": "prepared_grammy_checkpoint",
   "result_format": {
     "result_format": "SUMMARY"
   },
   "validation_definitions": [
     {
-      "id": "1e888eeb-505f-4840-a752-0a05b34e588f",
+      "id": "61240b5d-194b-4976-9533-a0dcbd9f3205",
       "name": "prepared_grammys_validation"
     }
   ]

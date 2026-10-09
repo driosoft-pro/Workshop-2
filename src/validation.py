@@ -15,6 +15,7 @@ Stages:
     prepared_tracks  - prepared gate: transformed Spotify track facts
     prepared_grammys - prepared gate: transformed Grammy award facts
     prepared_metrics - prepared gate: integration integrity metrics
+    prepared_bridge  - prepared gate: award-artist bridge grain
 
 Severity policy (identical for every stage):
     CRITICAL -> the calling Airflow task fails and the downstream path is blocked.
@@ -34,6 +35,7 @@ from great_expectations.checkpoint.checkpoint import CheckpointResult
 from great_expectations.expectations.metadata_types import FailureSeverity
 
 from src import config
+from src.mappings import CATEGORY_FAMILIES, GENRE_FAMILIES
 
 CRITICAL = FailureSeverity.CRITICAL
 WARNING = FailureSeverity.WARNING
@@ -119,9 +121,68 @@ RULES: dict[str, dict] = {
                "dimension": "Completeness",
                "rule": "the prepared track fact must contain at least 100000 rows",
                "threshold": "100000 rows", "severity": "critical", "requirement": "R1"},
+    # --- upgrade: raw contract, derived families, integration gates --------
+    "DQ-S7": {"layer": "raw_spotify", "attribute": "extract column set",
+              "dimension": "Completeness",
+              "rule": "the raw extract must expose the full 22-column contract "
+                      "(20 source columns + source_row_index + duration_min)",
+              "threshold": "22 columns", "severity": "critical", "requirement": "R1,R2,R3"},
+    "DQ-G6": {"layer": "prepared_grammys", "attribute": "match_method",
+              "dimension": "Validity",
+              "rule": "match_method must be one of exact, split, workers, nominee, fuzzy, none",
+              "threshold": "100% in set", "severity": "critical", "requirement": "R2,R3,R4"},
+    "DQ-G7": {"layer": "prepared_grammys", "attribute": "artist_source",
+              "dimension": "Validity",
+              "rule": "artist_source must be one of credit, workers, nominee, none",
+              "threshold": "100% in set", "severity": "critical", "requirement": "R4"},
+    "DQ-G8": {"layer": "prepared_tracks", "attribute": "genre_family",
+              "dimension": "Completeness",
+              "rule": "every prepared row must carry a mapped T14 genre family "
+                      "(all 114 source genres are in the dictionary)",
+              "threshold": "100% in set", "severity": "critical", "requirement": "R2"},
+    "DQ-G9": {"layer": "prepared_grammys", "attribute": "category_family",
+              "dimension": "Completeness",
+              "rule": "category_family must never be null and at least 90% of rows "
+                      "must resolve to a real family (not the Other fallback)",
+              "threshold": "100% non-null, >= 90% non-Other",
+              "severity": "critical", "requirement": "R4"},
+    "DQ-G10": {"layer": "prepared_tracks", "attribute": "song_key,artist_key",
+               "dimension": "Uniqueness",
+               "rule": "exactly one primary song row per (song_key, artist_key) grain",
+               "threshold": "0 duplicates", "severity": "critical", "requirement": "R1"},
+    "DQ-G11": {"layer": "prepared_bridge", "attribute": "award_bk,artist_key",
+               "dimension": "Uniqueness",
+               "rule": "the award-artist bridge grain (award_bk, artist_key) must be unique",
+               "threshold": "0 duplicates", "severity": "critical", "requirement": "R1,R2"},
+    "DQ-P13": {"layer": "prepared_tracks", "attribute": "is_zero_popularity",
+               "dimension": "Validity",
+               "rule": "at most 20% of prepared rows may carry popularity == 0",
+               "threshold": "<= 20%", "severity": "warning", "requirement": "R1"},
+    "DQ-P14": {"layer": "prepared_metrics", "attribute": "grammy_match_rate_pct",
+               "dimension": "Consistency",
+               "rule": "award-to-Spotify match rate must stay within 5pp of the measured "
+                       "52.2245% baseline (observed - 5pp)",
+               "threshold": ">= 47.2%", "severity": "warning", "requirement": "R1,R2"},
+    "DQ-P15": {"layer": "prepared_metrics", "attribute": "song_confirmation_rate_pct",
+               "dimension": "Consistency",
+               "rule": "song confirmation rate must stay within 5pp of the measured "
+                       "26.4085% baseline (observed - 5pp)",
+               "threshold": ">= 21.4%", "severity": "warning", "requirement": "R1,R2"},
+    "DQ-P16": {"layer": "prepared_metrics", "attribute": "genre_tie_share_pct",
+               "dimension": "Consistency",
+               "rule": "artists with an ambiguous (tied) dominant genre must stay at or "
+                       "below 15% of artists",
+               "threshold": "<= 15%", "severity": "warning", "requirement": "R2"},
 }
 
-STAGES = ("raw_spotify", "raw_grammys", "prepared_tracks", "prepared_grammys", "prepared_metrics")
+STAGES = (
+    "raw_spotify",
+    "raw_grammys",
+    "prepared_tracks",
+    "prepared_grammys",
+    "prepared_metrics",
+    "prepared_bridge",
+)
 
 DATASOURCE_NAME = "music_pipeline"
 
@@ -150,6 +211,11 @@ STAGE_SPEC: dict[str, dict[str, str]] = {
         "asset": "prepared_metrics_asset", "batch": "prepared_metrics_batch",
         "suite": "prepared_metrics_suite", "vd": "prepared_metrics_validation",
         "checkpoint": "prepared_metrics_checkpoint",
+    },
+    "prepared_bridge": {
+        "asset": "prepared_bridge_asset", "batch": "prepared_bridge_batch",
+        "suite": "prepared_bridge_suite", "vd": "prepared_bridge_validation",
+        "checkpoint": "prepared_bridge_checkpoint",
     },
 }
 
@@ -197,6 +263,31 @@ def _get_or_add(add_callable, get_callable, name: str):
         return add_callable()
 
 
+def _expected_rule_signatures(stage: str) -> list[tuple]:
+    """Rule signatures (rule_id, severity, requirement) ``_add_expectations`` would register for ``stage``."""
+    probe = gx.ExpectationSuite(name="__coverage_probe__")
+    _add_expectations(probe, stage)
+    return [
+        (item.meta.get("rule_id"), item.meta.get("severity"), item.meta.get("requirement"))
+        for item in probe.expectations
+    ]
+
+
+def _rebuild_stage(context, spec: dict, stage: str) -> None:
+    """Delete and recreate one stage's suite, validation definition and checkpoint."""
+    for store, name in (
+        (context.checkpoints, spec["checkpoint"]),
+        (context.validation_definitions, spec["vd"]),
+        (context.suites, spec["suite"]),
+    ):
+        try:
+            store.delete(name)
+        except Exception:  # noqa: BLE001 - absent asset, nothing to rebuild
+            pass
+    suite = context.suites.add(gx.ExpectationSuite(name=spec["suite"]))
+    _add_expectations(suite, stage)
+
+
 def ensure_assets(context=None):
     context = context or get_context()
 
@@ -223,8 +314,16 @@ def ensure_assets(context=None):
             lambda n: context.suites.get(n),
             spec["suite"],
         )
-        if len(suite.expectations) == 0:
-            _add_expectations(suite, stage)
+        current_signatures = [
+            (item.meta.get("rule_id"), item.meta.get("severity"), item.meta.get("requirement"))
+            for item in suite.expectations
+        ]
+        if current_signatures != _expected_rule_signatures(stage):
+            # The stored suite predates the current RULES catalogue (a rule or
+            # metadata was added or modified): rebuild this stage's assets so
+            # the store and the code can never drift apart. Configuration only -
+            # evidence files are never touched.
+            _rebuild_stage(context, spec, stage)
             suite = context.suites.get(spec["suite"])
 
         validation_definition = _get_or_add(
@@ -283,6 +382,9 @@ def _add_expectations(suite, stage: str) -> None:
                     "DQ-S5", "critical", column=column, min_value=0, max_value=1)
         _expect(suite, gx.expectations.ExpectColumnValuesToNotBeNull,
                 "DQ-S6", "critical", column="track_genre", mostly=0.999)
+        _expect(suite, gx.expectations.ExpectTableColumnsToMatchSet,
+                "DQ-S7", "critical",
+                column_set=list(config.SPOTIFY_REQUIRED_COLUMNS), exact_match=True)
 
     elif stage == "raw_grammys":
         _expect(suite, gx.expectations.ExpectColumnValuesToNotBeNull,
@@ -311,6 +413,15 @@ def _add_expectations(suite, stage: str) -> None:
                     "DQ-P4", "critical", column=column, min_value=0, max_value=1)
         _expect(suite, gx.expectations.ExpectColumnValuesToBeInSet,
                 "DQ-P5", "critical", column="is_grammy_artist", value_set=[0, 1])
+        _expect(suite, gx.expectations.ExpectColumnValuesToBeInSet,
+                "DQ-G8", "critical", column="genre_family", value_set=GENRE_FAMILIES,
+                mostly=1.0)
+        _expect(suite, gx.expectations.ExpectColumnMeanToBeBetween,
+                "DQ-P13", "warning", column="is_zero_popularity",
+                min_value=0.0, max_value=0.20)
+        _expect(suite, gx.expectations.ExpectCompoundColumnsToBeUnique,
+                "DQ-G10", "critical", column_list=["song_key", "artist_key"],
+                row_condition="is_primary_song == 1", condition_parser="pandas")
 
     elif stage == "prepared_grammys":
         _expect(suite, gx.expectations.ExpectColumnValuesToBeBetween,
@@ -322,6 +433,17 @@ def _add_expectations(suite, stage: str) -> None:
                 "DQ-P8", "critical", column="winner_flag", value_set=[0, 1])
         _expect(suite, gx.expectations.ExpectColumnValuesToNotBeNull,
                 "DQ-P9", "warning", column="artist_key", mostly=0.60)
+        _expect(suite, gx.expectations.ExpectColumnValuesToBeInSet,
+                "DQ-G6", "critical", column="match_method",
+                value_set=["exact", "split", "workers", "nominee", "fuzzy", "none"])
+        _expect(suite, gx.expectations.ExpectColumnValuesToBeInSet,
+                "DQ-G7", "critical", column="artist_source",
+                value_set=["credit", "workers", "nominee", "none"])
+        _expect(suite, gx.expectations.ExpectColumnValuesToNotBeNull,
+                "DQ-G9", "critical", column="category_family", mostly=1.0)
+        _expect(suite, gx.expectations.ExpectColumnValuesToBeInSet,
+                "DQ-G9", "critical", column="category_family",
+                value_set=CATEGORY_FAMILIES, mostly=0.90)
 
     elif stage == "prepared_metrics":
         _expect(suite, gx.expectations.ExpectColumnValuesToBeBetween,
@@ -333,6 +455,19 @@ def _add_expectations(suite, stage: str) -> None:
         _expect(suite, gx.expectations.ExpectColumnValuesToBeBetween,
                 "DQ-P12", "critical", column="fact_track_rows",
                 min_value=100000, max_value=10_000_000)
+        _expect(suite, gx.expectations.ExpectColumnValuesToBeBetween,
+                "DQ-P14", "warning", column="grammy_match_rate_pct",
+                min_value=47.2, max_value=100.0)
+        _expect(suite, gx.expectations.ExpectColumnValuesToBeBetween,
+                "DQ-P15", "warning", column="song_confirmation_rate_pct",
+                min_value=21.4, max_value=100.0)
+        _expect(suite, gx.expectations.ExpectColumnValuesToBeBetween,
+                "DQ-P16", "warning", column="genre_tie_share_pct",
+                min_value=0.0, max_value=15.0)
+
+    elif stage == "prepared_bridge":
+        _expect(suite, gx.expectations.ExpectCompoundColumnsToBeUnique,
+                "DQ-G11", "critical", column_list=["award_bk", "artist_key"])
 
     else:
         raise ValueError(f"Unknown validation stage: {stage}")

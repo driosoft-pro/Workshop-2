@@ -13,10 +13,10 @@
       "name": "music_pipeline"
     }
   },
-  "id": "41a6c5ba-5427-4a52-a615-0fcecfcb8cd9",
+  "id": "ca78f556-e985-4266-8be7-d45619df2501",
   "name": "spotify_raw_validation",
   "suite": {
-    "id": "b39b1c1d-8dd0-4915-abd5-af4be69c08c8",
+    "id": "69ce4a1e-2baf-4dd7-b73e-5241265543a0",
     "name": "spotify_raw_suite"
   }
 }

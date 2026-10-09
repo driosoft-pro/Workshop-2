@@ -1,13 +1,13 @@
 {
   "actions": [],
-  "id": "e913db57-4084-42e9-aa95-66f7c513a678",
+  "id": "b3bdb52a-14ad-4c07-bb82-0f8f828e5dcb",
   "name": "prepared_tracks_checkpoint",
   "result_format": {
     "result_format": "SUMMARY"
   },
   "validation_definitions": [
     {
-      "id": "1d07edd5-e88e-4afd-a0b0-edade98e91e8",
+      "id": "512e6513-d377-495f-a0cc-8a301599954e",
       "name": "prepared_tracks_validation"
     }
   ]

@@ -125,5 +125,13 @@ fluent_datasources:
           prepared_metrics_batch:
             id: a6a8b214-6d3b-4306-8b8e-26478c86b201
             partitioner:
+      prepared_bridge_asset:
+        type: dataframe
+        id: 344bc9ab-ccaa-4458-97ae-d7cf11f7c32e
+        batch_metadata: {}
+        batch_definitions:
+          prepared_bridge_batch:
+            id: 4eea1649-b814-4f07-a828-9532b1117dc1
+            partitioner:
 analytics_enabled:
 data_context_id: da015a8c-63ea-4b2d-b205-ebe332492737

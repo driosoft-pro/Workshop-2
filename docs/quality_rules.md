@@ -2,7 +2,7 @@
 
 Workshop-2, sections 6.3, 6.5 and 6.6.
 Single source of truth for the catalogue: `RULES` in `src/validation.py`
-(23 rule IDs, 28 GX expectations over 5 stages). The profiling evidence behind
+(34 rule IDs, 40 GX expectations over 6 stages). The profiling evidence behind
 each risk is reproducible in [`notebooks/data_profiling.ipynb`](../notebooks/data_profiling.ipynb)
 (machine summary: `docs/evidence/profiling_summary.json`).
 
@@ -39,7 +39,7 @@ are justified in section 4.
 
 ## 3. Quality rule catalogue
 
-### 3.1 Raw Spotify gate — suite `spotify_raw_suite` (8 expectations)
+### 3.1 Raw Spotify gate — suite `spotify_raw_suite` (9 expectations)
 
 | Rule | Attribute | Dimension | Rule statement | Metric / threshold | Severity | Justification (evidence / requirement) | Req. |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -49,6 +49,7 @@ are justified in section 4.
 | DQ-S4 | `duration_ms` | Validity | 1 ms ≤ x ≤ 600,000 ms (10 min) | 99% in range | warning | observed 603 rows (0.529%) >10 min and 1 row = 0 ms: real but rare, affects averages not validity → visible, non-blocking (T5: never silently repaired) | R1 |
 | DQ-S5 | `danceability`, `energy`, `valence` (3 expectations) | Validity | each in [0,1] | 100% in range | critical | 0 violations observed; R3 profile comparison depends on them | R3 |
 | DQ-S6 | `track_genre` | Completeness | genre present in ≥ 99.9% of rows | 99.9% | critical | 0 nulls; 114 genres × 1,000 rows; genre is the R2 dimension | R2 |
+| DQ-S7 | extract column set | Completeness | 22-column contract present (20 source cols + source_row_index + duration_min) | 22 columns match set | critical | downstream transforms depend on extended audio features and explicit flag | R1,R2,R3 |
 
 ### 3.2 Raw Grammy gate — suite `grammy_raw_suite` (6 expectations)
 
@@ -60,7 +61,7 @@ are justified in section 4.
 | DQ-G4 | `nominee` | Completeness | present in ≥ 99.5% of rows | 99.5% | warning | observed 6 nulls (0.1247%): the award business key tolerates them (`fillna('')`) → monitor, do not block | R4 |
 | DQ-G5 | `artist` | Completeness | present in ≥ 60% of rows | 60% | warning | observed 61.75% present (1,840 nulls = 38.25%): a **critical** rule here would always fail; the defect is real, documented and measured through DQ-P11 instead | R1,R2,R3 |
 
-### 3.3 Prepared-data gates (14 expectations)
+### 3.3 Prepared-data gates (25 expectations across 4 suites)
 
 | Rule | Stage / attribute | Dimension | Rule statement | Metric / threshold | Severity | Justification | Req. |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -69,13 +70,23 @@ are justified in section 4.
 | DQ-P3 | tracks / `popularity` | Validity | still within [0,100] after transformation | 100% | critical | transformation must not create invalid values | R1 |
 | DQ-P4 | tracks / audio features (3) | Validity | still within [0,1] | 100% | critical | as DQ-P3 | R3 |
 | DQ-P5 | tracks / `is_grammy_artist` | Validity | ∈ {0,1} | 100% | critical | derived flag must be boolean-coded for the DW bit/int column | R1,R2 |
+| DQ-G8 | tracks / `genre_family` | Completeness | genre_family mapped to one of 12 families | 100% in set | critical | all 114 source genres must be categorized under T14 | R2 |
+| DQ-P13 | tracks / `is_zero_popularity` | Validity | share of popularity == 0 rows | ≤ 20% (obs 14.1%) | warning | zero-popularity tracks flagged without value repair (T15) | R1 |
+| DQ-G10 | tracks / `song_key, artist_key` | Uniqueness | exactly one primary song per (song_key, artist_key) | 0 duplicates | critical | eliminates duplicate song inflation (T15) | R1 |
 | DQ-P6 | grammys / `year` | Validity | 1958 ≤ year ≤ current year | 100% | critical | re-check after type conversion (`int64`) | R3,R4 |
 | DQ-P7 | grammys / `category` | Completeness | never null after transformation | 100% | critical | feed of `dim_award_category` | R4 |
 | DQ-P8 | grammys / `winner_flag` | Validity | ∈ {0,1} | 100% | critical | derived from `winner` (T9) — proves the conversion happened | R3 |
 | DQ-P9 | grammys / `artist_key` | Completeness | ≥ 60% of rows carry a key | 60% | warning | mirrors DQ-G5 (observed 61.75%) — transformation must not lose keys | R1,R2 |
+| DQ-G6 | grammys / `match_method` | Validity | match_method in {exact, split, workers, nominee, fuzzy, none} | 100% in set | critical | valid cascade methods recorded under T12 | R2-R4 |
+| DQ-G7 | grammys / `artist_source` | Validity | artist_source in {credit, workers, nominee, none} | 100% in set | critical | valid origin provenance recorded under T12 | R4 |
+| DQ-G9 | grammys / `category_family` (2) | Completeness | not null (100%) and share Other ≤ 10% | 100% not null, ≥ 90% in families | critical | T13 category family classification | R2 |
 | DQ-P10 | metrics / `duplicate_grain_rows` | Uniqueness | prepared grain `(track_id, track_genre, artist_key)` unique | = 0 rows | critical | observed 0 after T2 (450 duplicates removed); any value >0 double-counts facts | R1 |
-| DQ-P11 | metrics / `grammy_match_rate_pct` | Consistency | ≥ 25% of award rows resolve to a Spotify artist | ≥ 25% | warning | observed 29.0021%; threshold sits below the measured value so normal source variation passes, while a broken normalization/matching change (which would collapse the rate) is caught and surfaced | R1,R2,R3 |
+| DQ-P11 | metrics / `grammy_match_rate_pct` | Consistency | ≥ 25% of award rows resolve to a Spotify artist | ≥ 25% | warning | baseline coverage gate | R1,R2,R3 |
 | DQ-P12 | metrics / `fact_track_rows` | Completeness | prepared fact has ≥ 100,000 rows | ≥ 100,000 | critical | observed 157,530; a drop below the threshold means rows were lost in explode/dedupe and every KPI would be understated | R1 |
+| DQ-P14 | metrics / `grammy_match_rate_pct` | Consistency | match rate ≥ observed - 5pp | ≥ 47.2% | warning | upgrade cascade target (observed 52.2% - 5pp) | all |
+| DQ-P15 | metrics / `song_confirmation_rate_pct` | Consistency | song confirmation rate ≥ observed - 5pp | ≥ 21.4% | warning | song confirmation target (observed 26.4% - 5pp) | R1 |
+| DQ-P16 | metrics / `genre_tie_share_pct` | Consistency | artist genre tie share ≤ 15% | ≤ 15% (obs 4.7%) | warning | artist dominant genre tie-breaker health | R2 |
+| DQ-G11 | bridge / `award_bk, artist_key` | Uniqueness | bridge grain unique | 0 duplicates | critical | prevents duplicate associations in award-artist bridge (T12) | R4 |
 
 ## 4. Threshold reasoning (why these numbers)
 

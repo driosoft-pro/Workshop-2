@@ -1,0 +1,22 @@
+{
+  "data": {
+    "asset": {
+      "id": "344bc9ab-ccaa-4458-97ae-d7cf11f7c32e",
+      "name": "prepared_bridge_asset"
+    },
+    "batch_definition": {
+      "id": "4eea1649-b814-4f07-a828-9532b1117dc1",
+      "name": "prepared_bridge_batch"
+    },
+    "datasource": {
+      "id": "e135f6c3-08f0-45ee-934b-f4276073a976",
+      "name": "music_pipeline"
+    }
+  },
+  "id": "33852814-cc3d-4288-b04a-db7cc1f0769f",
+  "name": "prepared_bridge_validation",
+  "suite": {
+    "id": "b025ae79-71e5-490f-8e5e-266ceefa86bb",
+    "name": "prepared_bridge_suite"
+  }
+}

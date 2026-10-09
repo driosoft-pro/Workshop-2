@@ -5,26 +5,38 @@ from __future__ import annotations
 import pandas as pd
 import pytest
 
-from src import validation
+from src import config, validation
 from src.validation import ValidationGateError, enforce_policy, validate_gate
-
-BASE_COLUMNS = [
-    "track_id", "artists", "popularity", "duration_ms",
-    "danceability", "energy", "valence", "track_genre",
-]
 
 
 def _frame(popularity: int = 50, duration_ms: int = 200000, rows: int = 5) -> pd.DataFrame:
-    return pd.DataFrame({
+    """Synthetic batch that satisfies the full 22-column raw contract (DQ-S7)."""
+    values = {
         "track_id": [f"t{i}" for i in range(rows)],
         "artists": [f"Artist {i}" for i in range(rows)],
+        "album_name": [f"Album {i}" for i in range(rows)],
+        "track_name": [f"Track {i}" for i in range(rows)],
         "popularity": [popularity] * rows,
         "duration_ms": [duration_ms] * rows,
+        "explicit": [False] * rows,
         "danceability": [0.5] * rows,
         "energy": [0.5] * rows,
         "valence": [0.5] * rows,
+        "acousticness": [0.2] * rows,
+        "speechiness": [0.05] * rows,
+        "liveness": [0.1] * rows,
+        "loudness": [-5.0] * rows,
+        "tempo": [120.0] * rows,
         "track_genre": ["pop"] * rows,
-    })
+        "key": [5] * rows,
+        "mode": [1] * rows,
+        "instrumentalness": [0.0] * rows,
+        "time_signature": [4] * rows,
+        "source_row_index": list(range(rows)),
+        "duration_min": [3.33] * rows,
+    }
+    assert list(values) == list(config.SPOTIFY_REQUIRED_COLUMNS)
+    return pd.DataFrame(values)
 
 
 @pytest.fixture(autouse=True)
@@ -64,9 +76,9 @@ def test_gate_writes_machine_readable_evidence(tmp_path):
     payload_on_disk = json.loads(evidence.read_text())
     assert payload_on_disk["stage"] == "raw_spotify"
     assert payload_on_disk["run_context"]["run_id"] == "test-evidence"
-    assert len(payload_on_disk["expectations"]) == 8  # S1..S6 with S5 x3
+    assert len(payload_on_disk["expectations"]) == 9  # S1..S7 with S5 x3
     rule_ids = {item["rule_id"] for item in payload_on_disk["expectations"]}
-    assert rule_ids == {"DQ-S1", "DQ-S2", "DQ-S3", "DQ-S4", "DQ-S5", "DQ-S6"}
+    assert rule_ids == {"DQ-S1", "DQ-S2", "DQ-S3", "DQ-S4", "DQ-S5", "DQ-S6", "DQ-S7"}
     assert all(item["requirement"].startswith("R") for item in payload_on_disk["expectations"])
 
 

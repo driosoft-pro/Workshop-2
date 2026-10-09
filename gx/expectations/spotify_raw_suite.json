@@ -1,7 +1,7 @@
 {
   "expectations": [
     {
-      "id": "3c9ac0e1-ebcc-4a34-8084-8f8f7777e593",
+      "id": "c7722619-d8a2-4f5d-8cc0-e49ddef9b39e",
       "kwargs": {
         "column": "track_id"
       },
@@ -15,7 +15,7 @@
       "type": "expect_column_values_to_not_be_null"
     },
     {
-      "id": "33528272-bc1b-434d-8a0e-14299493747c",
+      "id": "53e9e5b9-6ffb-4daf-a263-b06f37c4fba4",
       "kwargs": {
         "column": "artists",
         "mostly": 0.999
@@ -30,7 +30,7 @@
       "type": "expect_column_values_to_not_be_null"
     },
     {
-      "id": "21eed221-5572-4e5d-9533-0afc4883a2cf",
+      "id": "edfd78d2-5740-429b-a44d-14c779d23560",
       "kwargs": {
         "column": "popularity",
         "max_value": 100.0,
@@ -46,7 +46,7 @@
       "type": "expect_column_values_to_be_between"
     },
     {
-      "id": "846c022b-8d48-491a-807a-847fcff6b16c",
+      "id": "32424a6c-4105-4049-802d-6430f0ded956",
       "kwargs": {
         "column": "duration_ms",
         "max_value": 600000.0,
@@ -63,7 +63,7 @@
       "type": "expect_column_values_to_be_between"
     },
     {
-      "id": "22ba228f-2384-4699-a3c6-4c3b9e498d0b",
+      "id": "407643a1-e541-4f55-9a3b-541a45813804",
       "kwargs": {
         "column": "danceability",
         "max_value": 1.0,
@@ -79,7 +79,7 @@
       "type": "expect_column_values_to_be_between"
     },
     {
-      "id": "d2109875-4277-4e3b-b3c6-2d78d4061344",
+      "id": "32ef2b7f-4488-413b-a5f0-dc0b524ef50c",
       "kwargs": {
         "column": "energy",
         "max_value": 1.0,
@@ -95,7 +95,7 @@
       "type": "expect_column_values_to_be_between"
     },
     {
-      "id": "762fb4f5-6b3a-4ce6-8ce5-382a400309b4",
+      "id": "cd617809-0dbb-46e1-b6b9-760addfbe4f1",
       "kwargs": {
         "column": "valence",
         "max_value": 1.0,
@@ -111,7 +111,7 @@
       "type": "expect_column_values_to_be_between"
     },
     {
-      "id": "54fe7d7f-3548-4ff4-b9d5-1d18fd4f0528",
+      "id": "cd8d6685-08fa-425e-9af6-ba380cf14ec2",
       "kwargs": {
         "column": "track_genre",
         "mostly": 0.999
@@ -124,9 +124,46 @@
       },
       "severity": "critical",
       "type": "expect_column_values_to_not_be_null"
+    },
+    {
+      "id": "11a3fde2-948b-48ba-9a0c-1817a3a442bf",
+      "kwargs": {
+        "column_set": [
+          "track_id",
+          "artists",
+          "album_name",
+          "track_name",
+          "popularity",
+          "duration_ms",
+          "explicit",
+          "danceability",
+          "energy",
+          "valence",
+          "acousticness",
+          "speechiness",
+          "liveness",
+          "loudness",
+          "tempo",
+          "track_genre",
+          "key",
+          "mode",
+          "instrumentalness",
+          "time_signature",
+          "source_row_index",
+          "duration_min"
+        ]
+      },
+      "meta": {
+        "quality_dimension": "Completeness",
+        "requirement": "R1,R2,R3",
+        "rule_id": "DQ-S7",
+        "severity": "critical"
+      },
+      "severity": "critical",
+      "type": "expect_table_columns_to_match_set"
     }
   ],
-  "id": "b39b1c1d-8dd0-4915-abd5-af4be69c08c8",
+  "id": "69ce4a1e-2baf-4dd7-b73e-5241265543a0",
   "meta": {
     "great_expectations_version": "1.23.1"
   },
