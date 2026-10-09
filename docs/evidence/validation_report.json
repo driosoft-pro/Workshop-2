@@ -94,7 +94,7 @@
     {
       "id": "V15",
       "status": "PASS",
-      "value": "dashboard found, 22 charts present, filters OK",
+      "value": "granularity: 11 charts/3 filters; requirements: 15 charts/5 filters",
       "expected": "all OK"
     },
     {

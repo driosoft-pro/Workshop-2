@@ -379,30 +379,40 @@ def check_v14() -> tuple[str, str, str]:
 
 
 def check_v15(superset_flag: bool) -> tuple[str, str, str]:
+    """Both dashboards exist, every declared chart is placed in its layout, filters present."""
     if not superset_flag:
         return "SKIP", "flag --superset not provided", "all OK"
     try:
-        from scripts.superset_bootstrap import SupersetClient, BASE_URL, DASHBOARD_TITLE, CHART_SPECS
+        from scripts.superset_bootstrap import SupersetClient, BASE_URL, DASHBOARDS, CHART_SPECS
         client = SupersetClient(BASE_URL)
         client.login()
         dashboards = client.list("/api/v1/dashboard/", "dashboard_title")
-        if DASHBOARD_TITLE not in dashboards:
-            return "FAIL", f"Dashboard '{DASHBOARD_TITLE}' not found", "all OK"
-        dash_id = dashboards[DASHBOARD_TITLE]["id"]
-        status, dash_detail = client.call("GET", f"/api/v1/dashboard/{dash_id}")
-        if status != 200:
-            return "FAIL", f"Failed to get dashboard detail: {status}", "all OK"
-        dash = dash_detail.get("result", {})
-        meta = json.loads(dash.get("json_metadata") or "{}")
-        filters = meta.get("native_filter_configuration", [])
-        filter_names = {f.get("name") for f in filters}
-        if "recognition" not in filter_names or "basis" not in filter_names:
-            return "FAIL", f"native filters missing (found: {filter_names})", "all OK"
         charts = client.list("/api/v1/chart/", "slice_name")
         missing = [spec["slice_name"] for spec in CHART_SPECS if spec["slice_name"] not in charts]
         if missing:
             return "FAIL", f"missing {len(missing)} charts: {missing[:2]}", "all OK"
-        return "PASS", f"dashboard found, {len(CHART_SPECS)} charts present, filters OK", "all OK"
+        required = {"requirements": {"basis", "recognition"}, "granularity": set()}
+        summary = []
+        for key, info in DASHBOARDS.items():
+            title = info["title"]
+            if title not in dashboards:
+                return "FAIL", f"Dashboard '{title}' not found", "all OK"
+            status, detail = client.call("GET", f"/api/v1/dashboard/{dashboards[title]['id']}")
+            if status != 200:
+                return "FAIL", f"Failed to get dashboard detail: {status}", "all OK"
+            dash = detail.get("result", {})
+            meta = json.loads(dash.get("json_metadata") or "{}")
+            names = {f.get("name") for f in meta.get("native_filter_configuration", [])}
+            if not required[key] <= names:
+                return "FAIL", f"{key}: native filters missing (found: {names})", "all OK"
+            positions = json.loads(dash.get("position_json") or "{}")
+            placed = {v["meta"].get("chartId") for v in positions.values()
+                      if isinstance(v, dict) and v.get("type") == "CHART"}
+            expected = {charts[s["slice_name"]]["id"] for s in CHART_SPECS if s["dashboard"] == key}
+            if expected - placed:
+                return "FAIL", f"{key}: {len(expected - placed)} charts not in layout", "all OK"
+            summary.append(f"{key}: {len(placed)} charts/{len(names)} filters")
+        return "PASS", "; ".join(summary), "all OK"
     except Exception as e:
         return "FAIL", f"Superset API error: {str(e)[:40]}", "all OK"
 

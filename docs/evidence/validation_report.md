@@ -16,7 +16,7 @@
 | V12 | **PASS** | zero_pop=0.146, genre_tie=0.047 | 0.141 / known / <= 0.15 |
 | V13 | **PASS** | AUDIT PENDING | informational |
 | V14 | **PASS** | 0 mismatches | 0 mismatches |
-| V15 | **PASS** | dashboard found, 22 charts present, filters OK | all OK |
+| V15 | **PASS** | granularity: 11 charts/3 filters; requirements: 15 charts/5 filters | all OK |
 | V16 | **PASS** | all present | present |
 
 ### Summary
