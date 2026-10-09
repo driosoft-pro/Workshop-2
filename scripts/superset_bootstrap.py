@@ -778,6 +778,12 @@ def main() -> int:
                 "filterType": "filter_select",
                 "targets": [{"column": {"name": "decade"}}],
                 "defaultDataMask": {"filterState": {"value": None}},
+                "scope": {
+                    "rootPath": ["ROOT_ID"],
+                    "excluded": [],
+                },
+                "chartsInScope": all_chart_ids,
+                "cascadeParentIds": [],
             },
             {
                 "id": "NATIVE_FILTER_genre_family",
@@ -785,6 +791,12 @@ def main() -> int:
                 "filterType": "filter_select",
                 "targets": [{"column": {"name": "genre_family"}}],
                 "defaultDataMask": {"filterState": {"value": None}},
+                "scope": {
+                    "rootPath": ["ROOT_ID"],
+                    "excluded": [],
+                },
+                "chartsInScope": all_chart_ids,
+                "cascadeParentIds": [],
             },
             {
                 "id": "NATIVE_FILTER_category_family",
@@ -792,6 +804,12 @@ def main() -> int:
                 "filterType": "filter_select",
                 "targets": [{"column": {"name": "category_family"}}],
                 "defaultDataMask": {"filterState": {"value": None}},
+                "scope": {
+                    "rootPath": ["ROOT_ID"],
+                    "excluded": [],
+                },
+                "chartsInScope": all_chart_ids,
+                "cascadeParentIds": [],
             },
             {
                 "id": "NATIVE_FILTER_match_method",
@@ -799,6 +817,12 @@ def main() -> int:
                 "filterType": "filter_select",
                 "targets": [{"column": {"name": "match_method"}}],
                 "defaultDataMask": {"filterState": {"value": None}},
+                "scope": {
+                    "rootPath": ["ROOT_ID"],
+                    "excluded": [],
+                },
+                "chartsInScope": all_chart_ids,
+                "cascadeParentIds": [],
             },
             {
                 "id": "NATIVE_FILTER_basis",
@@ -812,6 +836,7 @@ def main() -> int:
                     "excluded": non_r1_chart_ids,
                 },
                 "chartsInScope": r1_chart_ids,
+                "cascadeParentIds": [],
             },
             {
                 "id": "NATIVE_FILTER_recognition",
@@ -825,6 +850,7 @@ def main() -> int:
                     "excluded": non_r1_chart_ids,
                 },
                 "chartsInScope": r1_chart_ids,
+                "cascadeParentIds": [],
             },
         ],
     }
