@@ -1,0 +1,82 @@
+{
+  "generated_at": "2026-10-09T01:46:32.636175+00:00",
+  "rows_grammy": 4810,
+  "rows_spotify": 157530,
+  "match_rate_pct": 52.2245,
+  "match_rate_strict_pct": 29.4179,
+  "match_rate_by_method": {
+    "exact": {
+      "rows": 1415,
+      "share_pct": 29.4179
+    },
+    "split": {
+      "rows": 333,
+      "share_pct": 6.9231
+    },
+    "workers": {
+      "rows": 702,
+      "share_pct": 14.5946
+    },
+    "nominee": {
+      "rows": 62,
+      "share_pct": 1.289
+    },
+    "fuzzy": {
+      "rows": 0,
+      "share_pct": 0.0
+    },
+    "none": {
+      "rows": 2298,
+      "share_pct": 47.7755
+    }
+  },
+  "match_rate_by_decade": {
+    "1950": {
+      "rows": 63,
+      "matched": 31,
+      "match_rate_pct": 49.2063
+    },
+    "1960": {
+      "rows": 433,
+      "matched": 188,
+      "match_rate_pct": 43.418
+    },
+    "1970": {
+      "rows": 487,
+      "matched": 245,
+      "match_rate_pct": 50.308
+    },
+    "1980": {
+      "rows": 684,
+      "matched": 326,
+      "match_rate_pct": 47.6608
+    },
+    "1990": {
+      "rows": 866,
+      "matched": 456,
+      "match_rate_pct": 52.6559
+    },
+    "2000": {
+      "rows": 1067,
+      "matched": 596,
+      "match_rate_pct": 55.8575
+    },
+    "2010": {
+      "rows": 1210,
+      "matched": 670,
+      "match_rate_pct": 55.3719
+    }
+  },
+  "song_confirmation_rate_pct": 26.4085,
+  "song_type_rows": 407,
+  "song_type_matched_rows": 284,
+  "workers_recovered": 702,
+  "split_recovered": 333,
+  "nominee_recovered": 62,
+  "fuzzy_recovered": 0,
+  "bridge_rows": 2757,
+  "artist_keys_with_genre_tie": 1389,
+  "genre_tie_share_pct": 4.6628,
+  "primary_song_rows": 111206,
+  "enable_fuzzy": false
+}

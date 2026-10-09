@@ -82,7 +82,7 @@ DW_LOAD_STRATEGY = os.environ.get("DW_LOAD_STRATEGY", "replace")
 
 GRAMMY_SOURCE_TABLE = "grammy_awards"
 
-SPOTIFY_REQUIRED_COLUMNS = [
+SPOTIFY_SOURCE_COLUMNS = [
     "track_id",
     "artists",
     "album_name",
@@ -99,6 +99,20 @@ SPOTIFY_REQUIRED_COLUMNS = [
     "loudness",
     "tempo",
     "track_genre",
+    # audio/musical metadata previously profiled but not loaded (T15 contract)
+    "key",
+    "mode",
+    "instrumentalness",
+    "time_signature",
+]
+
+# Raw Spotify contract (22 columns): the 20 source columns above plus
+# source_row_index (CSV row provenance, values untouched) and duration_min
+# (derived presentation measure). Every source column is now loaded, so no
+# profiled-but-dropped column can hide a quality problem.
+SPOTIFY_REQUIRED_COLUMNS = SPOTIFY_SOURCE_COLUMNS + [
+    "source_row_index",
+    "duration_min",
 ]
 
 GRAMMY_REQUIRED_COLUMNS = [
@@ -118,7 +132,9 @@ GRAMMY_RAW_PATH = WORK_DIR / "grammys_raw.csv"
 PREPARED_TRACKS_PATH = WORK_DIR / "prepared_tracks.csv"
 PREPARED_GRAMMYS_PATH = WORK_DIR / "prepared_grammys.csv"
 PREPARED_METRICS_PATH = WORK_DIR / "prepared_metrics.csv"
+BRIDGE_AWARD_ARTIST_PATH = WORK_DIR / "bridge_award_artist.csv"
 TRANSFORM_SUMMARY_PATH = WORK_DIR / "transform_summary.json"
+INTEGRATION_METRICS_PATH = RUNS_EVIDENCE_DIR / "integration_metrics.json"
 
 ARTIST_DIM_PATH = OUTPUT_DIR / "dim_artist.csv"
 GENRE_DIM_PATH = OUTPUT_DIR / "dim_genre.csv"

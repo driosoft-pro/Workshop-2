@@ -4,9 +4,10 @@ Spotify  : CSV file (documented project path data/raw/).
 Grammy   : PostgreSQL source database table ``grammy_awards`` (source
            preparation import performed by scripts/prepare_source_db.py).
 
-Extraction performs projection and source-contract verification only.
-No cleaning happens here: source-quality problems must remain visible to the
-raw validation gate (Workshop-2, section 6.7).
+Extraction performs projection, source-contract verification and the
+derivation of two contract columns (``source_row_index`` provenance and
+``duration_min``). No source value is altered: source-quality problems must
+remain visible to the raw validation gate (Workshop-2, section 6.7).
 """
 
 from __future__ import annotations
@@ -44,9 +45,28 @@ def extract_spotify(
         raise FileNotFoundError(f"Spotify source file not found: {source_path}")
 
     frame = config.read_csv(source_path)
-    _verify_columns(frame, config.SPOTIFY_REQUIRED_COLUMNS, f"Spotify CSV {source_path.name}")
+    _verify_columns(frame, config.SPOTIFY_SOURCE_COLUMNS, f"Spotify CSV {source_path.name}")
 
-    raw = frame[config.SPOTIFY_REQUIRED_COLUMNS].copy()
+    # The source CSV carries an unnamed index column; keep it as provenance
+    # (values are copied, never rewritten). If the file has none, generate it.
+    if "source_row_index" not in frame.columns:
+        unnamed = [
+            column
+            for column in frame.columns
+            if str(column).startswith("Unnamed") or str(column).strip() == ""
+        ]
+        if unnamed:
+            frame = frame.rename(columns={unnamed[0]: "source_row_index"})
+        else:
+            frame = frame.copy()
+            frame["source_row_index"] = range(len(frame))
+
+    raw = frame[
+        [column for column in config.SPOTIFY_REQUIRED_COLUMNS if column != "duration_min"]
+    ].copy()
+    # derived presentation measure only; source values stay untouched (T5)
+    raw["duration_min"] = (raw["duration_ms"] / 60000).round(2)
+    raw = raw[config.SPOTIFY_REQUIRED_COLUMNS]
     raw.to_csv(output_path, index=False)
 
     metadata = {

@@ -38,7 +38,9 @@ def isolated_config(tmp_path, monkeypatch):
     monkeypatch.setattr(config, "PREPARED_TRACKS_PATH", work / "prepared_tracks.csv")
     monkeypatch.setattr(config, "PREPARED_GRAMMYS_PATH", work / "prepared_grammys.csv")
     monkeypatch.setattr(config, "PREPARED_METRICS_PATH", work / "prepared_metrics.csv")
+    monkeypatch.setattr(config, "BRIDGE_AWARD_ARTIST_PATH", work / "bridge_award_artist.csv")
     monkeypatch.setattr(config, "TRANSFORM_SUMMARY_PATH", work / "transform_summary.json")
+    monkeypatch.setattr(config, "INTEGRATION_METRICS_PATH", evidence / "runs" / "integration_metrics.json")
     monkeypatch.setattr(config, "SPOTIFY_RAW_PATH", work / "spotify_raw.csv")
     monkeypatch.setattr(config, "GRAMMY_RAW_PATH", work / "grammys_raw.csv")
     return config

@@ -22,9 +22,11 @@ def _header(path: Path) -> list[str]:
 
 def test_spotify_csv_has_all_contract_columns():
     header = _header(SPOTIFY_CSV)
-    missing = [column for column in config.SPOTIFY_REQUIRED_COLUMNS if column not in header]
+    missing = [column for column in config.SPOTIFY_SOURCE_COLUMNS if column not in header]
     assert not missing, missing
-    assert len(config.SPOTIFY_REQUIRED_COLUMNS) == 16
+    assert len(config.SPOTIFY_SOURCE_COLUMNS) == 20
+    assert len(config.SPOTIFY_REQUIRED_COLUMNS) == 22
+    assert config.SPOTIFY_REQUIRED_COLUMNS[-2:] == ["source_row_index", "duration_min"]
 
 
 def test_grammy_csv_has_all_contract_columns():

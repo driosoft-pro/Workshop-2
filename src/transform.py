@@ -24,6 +24,14 @@ and is justified independently of the current validation result:
     T9  Derive winner_flag (1/0) from the boolean winner column.
     T10 Derive is_matched_spotify and spotify_track_count for every award row.
     T11 Emit integration metrics used by the prepared gate (DQ-P10..DQ-P12).
+    T12 Artist matching cascade (exact -> split -> workers -> nominee -> fuzzy
+        -> none) with match_method / artist_source, plus the collaborative
+        bridge_award_artist frame (one row per matched artist of a credit).
+    T13 Category cleaning: category_clean + category_family (src/mappings.py).
+    T14 Genre family: GENRE_FAMILY dictionary, 114/114 genres mapped.
+    T15 Spotify quality flags + song_key + exactly one is_primary_song per
+        (song_key, artist_key). Flags derive; source values never change.
+    T16 Artist dominant genre profile (feeds dim_artist).
 
 Integration contract summary
     Key            : artist_key (normalized artist name)
@@ -45,32 +53,27 @@ Integration contract summary
 from __future__ import annotations
 
 import json
-import unicodedata
 from datetime import datetime, timezone
 from pathlib import Path
 
 import pandas as pd
 
 from src import config
+from src.artist_match import (
+    SONG_TYPE_CATEGORY_RE,
+    SpotifyArtistIndex,
+    match_award,
+)
+from src.mappings import (
+    QUOTE_CHARS,
+    category_family,
+    clean_category,
+    genre_family,
+    norm_key,
+    normalize_artist_name,
+)
 
-QUOTE_CHARS = "\"'`."
-
-
-def normalize_artist_name(value) -> str | None:
-    if value is None or (isinstance(value, float) and pd.isna(value)):
-        return None
-    text = str(value).strip()
-    if not text:
-        return None
-    folded = unicodedata.normalize("NFKD", text)
-    folded = "".join(char for char in folded if not unicodedata.combining(char))
-    folded = " ".join(folded.lower().split())
-    folded = folded.strip(QUOTE_CHARS)
-    if not folded:
-        return None
-    if "various artists" in folded:
-        return "various artists"
-    return folded
+__all__ = ["normalize_artist_name", "transform_and_integrate"]
 
 
 def _split_artists(value) -> list[str]:
@@ -86,9 +89,54 @@ def _split_artists(value) -> list[str]:
     return cleaned
 
 
+def build_artist_genre_profile(tracks: pd.DataFrame) -> pd.DataFrame:
+    """T16 dominant genre per artist (dim_artist).
+
+    Computed on ``is_primary_song = 1`` rows only, so repeated listings of the
+    same song in several genres cannot inflate the genre vote. Tie-break:
+    more tracks -> higher mean popularity -> alphabetical genre.
+    """
+    columns = [
+        "artist_key", "dominant_genre", "dominant_genre_family",
+        "n_genres", "genre_tie",
+    ]
+    primary = tracks.loc[tracks["is_primary_song"] == 1]
+    if primary.empty:
+        return pd.DataFrame(columns=columns)
+
+    frame = primary[["artist_key", "track_genre", "popularity"]].copy()
+    stats = (
+        frame.groupby(["artist_key", "track_genre"])
+        .agg(n_tracks=("track_genre", "size"), mean_popularity=("popularity", "mean"))
+        .reset_index()
+    )
+    stats["n_genres"] = stats.groupby("artist_key")["track_genre"].transform("nunique")
+    stats["max_tracks"] = stats.groupby("artist_key")["n_tracks"].transform("max")
+    stats = stats.sort_values(
+        ["artist_key", "n_tracks", "mean_popularity", "track_genre"],
+        ascending=[True, False, False, True],
+        kind="mergesort",
+    )
+    top = stats.groupby("artist_key", sort=True).head(1).set_index("artist_key")
+    ties = (
+        stats[stats["n_tracks"] == stats["max_tracks"]]
+        .groupby("artist_key")
+        .size()
+        .gt(1)
+    )
+    profile = pd.DataFrame(index=top.index)
+    profile["dominant_genre"] = top["track_genre"]
+    profile["n_genres"] = top["n_genres"].astype("int64")
+    profile["genre_tie"] = profile.index.map(ties).fillna(False).astype(bool)
+    profile["dominant_genre_family"] = profile["dominant_genre"].map(genre_family)
+    profile = profile.reset_index()
+    return profile[columns]
+
+
 def transform_and_integrate(
     spotify_raw_path: Path | None = None,
     grammy_raw_path: Path | None = None,
+    enable_fuzzy: bool = False,
 ) -> dict:
     config.ensure_directories()
     spotify_raw_path = Path(spotify_raw_path or config.SPOTIFY_RAW_PATH)
@@ -125,7 +173,26 @@ def transform_and_integrate(
 
     exploded["duration_min"] = (exploded["duration_ms"] / 60000).round(2)
 
-    awards["artist_key"] = awards["artist"].map(normalize_artist_name)
+    # --- T15: quality flags, song_key and the primary-song selection ------
+    exploded["is_zero_popularity"] = (exploded["popularity"] == 0).astype("int64")
+    exploded["is_outlier_duration"] = (
+        (exploded["duration_ms"] == 0) | (exploded["duration_ms"] > 600000)
+    ).astype("int64")
+    exploded["is_outlier_loudness"] = (exploded["loudness"] > 0).astype("int64")
+    exploded["is_outlier_tempo"] = (exploded["tempo"] <= 0).astype("int64")
+    exploded["song_key"] = (
+        exploded["track_name"].map(norm_key).fillna("")
+        + "|"
+        + exploded["artist_display_name"].map(norm_key).fillna("")
+    )
+    ranked = exploded.sort_values(
+        ["song_key", "artist_key", "popularity", "track_id", "track_genre"],
+        ascending=[True, True, False, True, True],
+        kind="mergesort",
+    )
+    not_primary = ranked.duplicated(subset=["song_key", "artist_key"], keep="first")
+    exploded["is_primary_song"] = (~not_primary.reindex(exploded.index)).astype("int64")
+
     awards["winner_flag"] = (
         awards["winner"].astype("string").str.strip().str.lower().eq("true").astype(int)
     )
@@ -139,8 +206,67 @@ def transform_and_integrate(
         + awards["artist"].fillna("").astype(str)
     )
     awards = awards.drop(columns=["img"], errors="ignore")
+    # --- T13: category cleaning (source category column is never rewritten) --
+    awards["category_clean"] = awards["category"].map(clean_category)
+    awards["category_family"] = awards["category_clean"].map(category_family)
 
     spotify_artist_keys = set(exploded["artist_key"].dropna().unique())
+    artist_index = SpotifyArtistIndex(spotify_artist_keys)
+
+    # song titles published by each matched artist (T12 song confirmation)
+    name_keys = exploded[["artist_key", "track_name"]].copy()
+    name_keys["song_name_key"] = name_keys["track_name"].map(norm_key)
+    song_names = (
+        name_keys.dropna(subset=["song_name_key"])
+        .drop_duplicates()
+        .groupby("artist_key")["song_name_key"]
+        .apply(set)
+    )
+
+    # --- T12: matching cascade --------------------------------------------
+    results = [
+        match_award(
+            artist=artist,
+            workers=workers,
+            category=category,
+            nominee=nominee,
+            index=artist_index,
+            enable_fuzzy=enable_fuzzy,
+        )
+        for artist, workers, category, nominee in zip(
+            awards["artist"], awards["workers"], awards["category"], awards["nominee"]
+        )
+    ]
+    awards["artist_key"] = [result.artist_key for result in results]
+    awards["match_method"] = [result.match_method for result in results]
+    awards["artist_source"] = [result.artist_source for result in results]
+    awards["credit_artist_count"] = [result.credit_artist_count for result in results]
+    awards["is_matched_strict"] = [int(result.is_strict) for result in results]
+    awards["is_matched_spotify"] = [int(result.is_matched) for result in results]
+    awards["is_song_confirmed"] = [
+        int(
+            result.is_matched
+            and (name_key := norm_key(nominee)) is not None
+            and name_key in song_names.get(result.artist_key, set())
+        )
+        for result, nominee in zip(results, awards["nominee"])
+    ]
+
+    bridge_rows = [
+        {
+            "award_bk": award_bk,
+            "artist_key": key,
+            "artist_position": position,
+            "match_method": result.match_method,
+        }
+        for award_bk, result in zip(awards["award_bk"], results)
+        for position, key in enumerate(result.matched_keys, start=1)
+    ]
+    bridge = pd.DataFrame(
+        bridge_rows,
+        columns=["award_bk", "artist_key", "artist_position", "match_method"],
+    )
+
     grammy_artist_keys = set(awards["artist_key"].dropna().unique())
     matched_artist_keys = spotify_artist_keys & grammy_artist_keys
 
@@ -166,9 +292,6 @@ def transform_and_integrate(
     )
     awards = awards.join(spotify_track_count, on="artist_key")
     awards["spotify_track_count"] = awards["spotify_track_count"].fillna(0).astype("int64")
-    awards["is_matched_spotify"] = (
-        awards["artist_key"].isin(spotify_artist_keys).astype("int64")
-    )
 
     prepared_tracks = exploded.sort_values(
         ["track_id", "track_genre", "artist_position"]
@@ -176,6 +299,9 @@ def transform_and_integrate(
     prepared_grammys = awards.sort_values(["year", "category", "nominee"]).reset_index(
         drop=True
     )
+
+    # --- T16: artist dominant genre profile (consumed by load/dim_artist) --
+    artist_profile = build_artist_genre_profile(prepared_tracks)
 
     duplicate_grain_rows = int(
         prepared_tracks.duplicated(
@@ -212,6 +338,80 @@ def transform_and_integrate(
         display_per_key.groupby("artist_key")["display_name"].nunique().gt(1).sum()
     )
 
+    # --- T11/T12 integration report ---------------------------------------
+    total_awards = len(prepared_grammys)
+    strict_rows = int(prepared_grammys["is_matched_strict"].sum())
+    method_counts = (
+        prepared_grammys["match_method"].value_counts().reindex(
+            ["exact", "split", "workers", "nominee", "fuzzy", "none"], fill_value=0
+        )
+    )
+    method_rates = {
+        method: {
+            "rows": int(count),
+            "share_pct": round(100.0 * int(count) / total_awards, 4) if total_awards else 0.0,
+        }
+        for method, count in method_counts.items()
+    }
+    song_rows = prepared_grammys[
+        prepared_grammys["category_clean"].fillna("").map(
+            lambda text: bool(SONG_TYPE_CATEGORY_RE.search(text))
+        )
+    ]
+    song_matched_rows = int(song_rows["is_matched_spotify"].sum())
+    song_confirmed_rows = int(song_rows["is_song_confirmed"].sum())
+    song_confirmation_rate_pct = (
+        round(100.0 * song_confirmed_rows / song_matched_rows, 4)
+        if song_matched_rows
+        else 0.0
+    )
+    decade_frame = prepared_grammys.copy()
+    decade_frame["decade"] = (decade_frame["year"] // 10 * 10).astype(int)
+    by_decade = {
+        str(decade): {
+            "rows": int(group.shape[0]),
+            "matched": int(group["is_matched_spotify"].sum()),
+            "match_rate_pct": round(
+                100.0 * int(group["is_matched_spotify"].sum()) / int(group.shape[0]), 4
+            ),
+        }
+        for decade, group in decade_frame.groupby("decade")
+    }
+    strict_match_rate_pct = round(100.0 * strict_rows / total_awards, 4) if total_awards else 0.0
+    workers_recovered = int(
+        (prepared_grammys["match_method"] == "workers").sum()
+    )
+    split_recovered = int((prepared_grammys["match_method"] == "split").sum())
+    nominee_recovered = int((prepared_grammys["match_method"] == "nominee").sum())
+    fuzzy_recovered = int((prepared_grammys["match_method"] == "fuzzy").sum())
+    genre_tie_share = (
+        round(100.0 * float(artist_profile["genre_tie"].mean()), 4)
+        if len(artist_profile)
+        else 0.0
+    )
+
+    integration_metrics = {
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "rows_grammy": total_awards,
+        "rows_spotify": len(prepared_tracks),
+        "match_rate_pct": grammy_match_rate_pct,
+        "match_rate_strict_pct": strict_match_rate_pct,
+        "match_rate_by_method": method_rates,
+        "match_rate_by_decade": by_decade,
+        "song_confirmation_rate_pct": song_confirmation_rate_pct,
+        "song_type_rows": int(len(song_rows)),
+        "song_type_matched_rows": song_matched_rows,
+        "workers_recovered": workers_recovered,
+        "split_recovered": split_recovered,
+        "nominee_recovered": nominee_recovered,
+        "fuzzy_recovered": fuzzy_recovered,
+        "bridge_rows": int(len(bridge)),
+        "artist_keys_with_genre_tie": int(artist_profile["genre_tie"].sum()),
+        "genre_tie_share_pct": genre_tie_share,
+        "primary_song_rows": int(prepared_tracks["is_primary_song"].sum()),
+        "enable_fuzzy": bool(enable_fuzzy),
+    }
+
     metrics = pd.DataFrame(
         [
             {
@@ -225,19 +425,35 @@ def transform_and_integrate(
                 "grammy_rows_with_artist_key": grammy_rows_with_key,
                 "grammy_rows_matched": grammy_rows_matched,
                 "grammy_match_rate_pct": grammy_match_rate_pct,
+                "grammy_match_rate_strict_pct": strict_match_rate_pct,
                 "grammy_rows_without_artist_pct": grammy_rows_without_artist_pct,
                 "unmatched_artist_rows": unmatched_artist_rows,
                 "spotify_artist_keys": len(spotify_artist_keys),
                 "grammy_artist_keys": len(grammy_artist_keys),
                 "matched_artist_keys": len(matched_artist_keys),
                 "normalized_display_name_conflicts": normalized_display_name_conflicts,
+                "bridge_award_artist_rows": int(len(bridge)),
+                "workers_recovered": workers_recovered,
+                "split_recovered": split_recovered,
+                "nominee_recovered": nominee_recovered,
+                "song_confirmation_rate_pct": song_confirmation_rate_pct,
+                "primary_song_rows": integration_metrics["primary_song_rows"],
+                "genre_tie_share_pct": genre_tie_share,
+                "zero_popularity_share_pct": round(
+                    100.0 * float(prepared_tracks["is_zero_popularity"].mean()), 4
+                ),
             }
         ]
     )
 
     prepared_tracks.to_csv(config.PREPARED_TRACKS_PATH, index=False)
     prepared_grammys.to_csv(config.PREPARED_GRAMMYS_PATH, index=False)
+    bridge.to_csv(config.BRIDGE_AWARD_ARTIST_PATH, index=False)
     metrics.to_csv(config.PREPARED_METRICS_PATH, index=False)
+    config.RUNS_EVIDENCE_DIR.mkdir(parents=True, exist_ok=True)
+    config.INTEGRATION_METRICS_PATH.write_text(
+        json.dumps(integration_metrics, indent=2, default=str)
+    )
 
     summary = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -255,10 +471,18 @@ def transform_and_integrate(
             "T6_is_grammy_artist_rows": int(prepared_tracks["is_grammy_artist"].sum()),
             "T9_award_rows_with_winner_flag_1": int(prepared_grammys["winner_flag"].sum()),
             "T10_award_rows_matched_to_spotify": grammy_rows_matched,
+            "T11_match_rate_strict_pct": strict_match_rate_pct,
+            "T12_bridge_award_artist_rows": int(len(bridge)),
+            "T12_workers_recovered": workers_recovered,
+            "T12_split_recovered": split_recovered,
+            "T12_song_confirmation_rate_pct": song_confirmation_rate_pct,
+            "T15_primary_song_rows": integration_metrics["primary_song_rows"],
+            "T16_artist_genre_ties": int(artist_profile["genre_tie"].sum()),
         },
         "reconciliation": {
             "prepared_tracks_rows": len(prepared_tracks),
             "prepared_grammys_rows": len(prepared_grammys),
+            "bridge_award_artist_rows": int(len(bridge)),
             "grammy_row_balance": (
                 f"{rows_grammy_raw} source rows -> {len(prepared_grammys)} prepared rows "
                 "(no Grammy row is dropped by design)"
@@ -268,6 +492,8 @@ def transform_and_integrate(
             "prepared_tracks": str(config.PREPARED_TRACKS_PATH),
             "prepared_grammys": str(config.PREPARED_GRAMMYS_PATH),
             "prepared_metrics": str(config.PREPARED_METRICS_PATH),
+            "bridge_award_artist": str(config.BRIDGE_AWARD_ARTIST_PATH),
+            "integration_metrics": str(config.INTEGRATION_METRICS_PATH),
         },
         "metrics": metrics.to_dict(orient="records")[0],
     }
