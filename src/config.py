@@ -13,9 +13,35 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 
+def _load_env_file() -> None:
+    env_file = PROJECT_ROOT / ".env"
+    if not env_file.exists():
+        return
+    try:
+        with open(env_file, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith("#") or "=" not in line:
+                    continue
+                key, val = line.split("=", 1)
+                key = key.strip()
+                val = val.strip().strip("\"'")
+                if key and key not in os.environ:
+                    os.environ[key] = val
+    except Exception:
+        pass
+
+
+_load_env_file()
+
+
 def _env_path(name: str, default: Path) -> Path:
     value = os.environ.get(name)
-    return Path(value) if value else default
+    if value:
+        if value.startswith("/opt/airflow") and not Path("/opt/airflow").exists():
+            return default
+        return Path(value)
+    return default
 
 
 def _default_data_dir() -> Path:
@@ -70,14 +96,21 @@ def resolve_source(filename: str) -> Path:
 SPOTIFY_SOURCE_PATH = _resolve_source(SPOTIFY_SOURCE_FILENAME)
 GRAMMY_SOURCE_PATH = _resolve_source(GRAMMY_SOURCE_FILENAME)
 
-SOURCE_DB_URL = os.environ.get(
-    "MUSIC_SOURCE_DB_URL",
-    "postgresql+psycopg2://music:music@localhost:5432/music_source",
-)
-DW_DB_URL = os.environ.get(
-    "MUSIC_DW_DB_URL",
-    "postgresql+psycopg2://music:music@localhost:5432/music_dw",
-)
+def _resolve_db_url(env_var: str, default_db_name: str) -> str:
+    url = os.environ.get(env_var)
+    if url:
+        return url
+    user = os.environ.get("POSTGRES_USER")
+    password = os.environ.get("POSTGRES_PASSWORD")
+    host = os.environ.get("POSTGRES_HOST", "localhost")
+    port = os.environ.get("MUSIC_POSTGRES_PORT", "5432")
+    if user and password:
+        return f"postgresql+psycopg2://{user}:{password}@{host}:{port}/{default_db_name}"
+    return f"postgresql+psycopg2://{host}:{port}/{default_db_name}"
+
+
+SOURCE_DB_URL = _resolve_db_url("MUSIC_SOURCE_DB_URL", os.environ.get("POSTGRES_DB", "music_source"))
+DW_DB_URL = _resolve_db_url("MUSIC_DW_DB_URL", "music_dw")
 
 DW_LOAD_STRATEGY = os.environ.get("DW_LOAD_STRATEGY", "replace")
 

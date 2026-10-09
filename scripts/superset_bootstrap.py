@@ -39,13 +39,47 @@ import urllib.error
 import urllib.request
 from http.cookiejar import CookieJar
 
+def _load_env() -> None:
+    """Best-effort loader for .env when executing on the host without compose."""
+    env_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".env"))
+    if not os.path.exists(env_path):
+        return
+    try:
+        with open(env_path, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith("#") or "=" not in line:
+                    continue
+                key, val = line.split("=", 1)
+                key = key.strip()
+                val = val.strip().strip("\"'")
+                if key and key not in os.environ:
+                    os.environ[key] = val
+    except Exception:
+        pass
+
+
+_load_env()
+
 BASE_URL = os.environ.get("SUPERSET_URL", "http://localhost:8088").rstrip("/")
 ADMIN_USER = os.environ.get("SUPERSET_ADMIN_USER", "admin")
 ADMIN_PASSWORD = os.environ.get("SUPERSET_ADMIN_PASSWORD", "admin")
-DW_URI = os.environ.get(
-    "SUPERSET_DW_SQLALCHEMY_URI",
-    "postgresql+psycopg2://music:music@music-postgres:5432/music_dw",
-)
+
+
+def _resolve_dw_uri() -> str:
+    uri = os.environ.get("SUPERSET_DW_SQLALCHEMY_URI") or os.environ.get("MUSIC_DW_DB_URL")
+    if uri:
+        return uri
+    user = os.environ.get("POSTGRES_USER")
+    password = os.environ.get("POSTGRES_PASSWORD")
+    host = os.environ.get("POSTGRES_HOST", "music-postgres")
+    port = os.environ.get("MUSIC_POSTGRES_PORT", "5432")
+    if user and password:
+        return f"postgresql+psycopg2://{user}:{password}@{host}:{port}/music_dw"
+    return f"postgresql+psycopg2://{host}:{port}/music_dw"
+
+
+DW_URI = _resolve_dw_uri()
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 KPI_SQL_PATH = os.path.join(PROJECT_ROOT, "sql", "kpi_queries.sql")
 

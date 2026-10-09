@@ -32,7 +32,7 @@ x-airflow-common: &airflow-common
     HOME: /home/airflow
     AIRFLOW__CORE__EXECUTOR: LocalExecutor
     AIRFLOW__CORE__AUTH_MANAGER: airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager
-    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: ${AIRFLOW__DATABASE__SQL_ALCHEMY_CONN:-postgresql+psycopg2://${AIRFLOW_DATABASE_USER:-airflow}:${AIRFLOW_DATABASE_PASSWORD:-airflow}@postgres/${AIRFLOW_DATABASE_NAME:-airflow}}
     AIRFLOW__CORE__FERNET_KEY: ''
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
     AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
@@ -47,8 +47,8 @@ x-airflow-common: &airflow-common
     MUSIC_GX_DIR: /opt/airflow/gx
     MUSIC_EVIDENCE_DIR: /opt/airflow/docs/evidence
     # --- database connectivity ---------------------------------------------
-    MUSIC_SOURCE_DB_URL: postgresql+psycopg2://music:music@music-postgres:5432/music_source
-    MUSIC_DW_DB_URL: postgresql+psycopg2://music:music@music-postgres:5432/music_dw
+    MUSIC_SOURCE_DB_URL: ${MUSIC_SOURCE_DB_URL:-postgresql+psycopg2://${POSTGRES_USER:-music}:${POSTGRES_PASSWORD:-music}@music-postgres:5432/${POSTGRES_DB:-music_source}}
+    MUSIC_DW_DB_URL: ${MUSIC_DW_DB_URL:-postgresql+psycopg2://${POSTGRES_USER:-music}:${POSTGRES_PASSWORD:-music}@music-postgres:5432/music_dw}
     # --- source selection (switch to spotify_bad.csv for Test B) ------------
     SPOTIFY_SOURCE_FILENAME: ${SPOTIFY_SOURCE_FILENAME:-spotify_dataset.csv}
     GRAMMY_SOURCE_FILENAME: ${GRAMMY_SOURCE_FILENAME:-the_grammy_awards.csv}
@@ -87,8 +87,9 @@ x-superset-common: &superset-common
   environment: &superset-common-env
     SUPERSET_CONFIG_PATH: /app/pythonpath/superset_config.py
     SUPERSET_SECRET_KEY: ${SUPERSET_SECRET_KEY:-workshop2-dev-secret-change-me}
-    SUPERSET_SQLALCHEMY_DATABASE_URI: postgresql+psycopg2://${POSTGRES_USER:-music}:${POSTGRES_PASSWORD:-music}@music-postgres:5432/superset
-    SUPERSET_METADATA_ADMIN_URI: postgresql+psycopg2://${POSTGRES_USER:-music}:${POSTGRES_PASSWORD:-music}@music-postgres:5432/${POSTGRES_DB:-music_source}
+    SUPERSET_SQLALCHEMY_DATABASE_URI: ${SUPERSET_SQLALCHEMY_DATABASE_URI:-postgresql+psycopg2://${POSTGRES_USER:-music}:${POSTGRES_PASSWORD:-music}@music-postgres:5432/superset}
+    SUPERSET_METADATA_ADMIN_URI: ${SUPERSET_METADATA_ADMIN_URI:-${DEFAULT_ADMIN_URI:-postgresql+psycopg2://${POSTGRES_USER:-music}:${POSTGRES_PASSWORD:-music}@music-postgres:5432/${POSTGRES_DB:-music_source}}}
+    DEFAULT_ADMIN_URI: ${DEFAULT_ADMIN_URI:-${SUPERSET_METADATA_ADMIN_URI:-postgresql+psycopg2://${POSTGRES_USER:-music}:${POSTGRES_PASSWORD:-music}@music-postgres:5432/${POSTGRES_DB:-music_source}}}
     SUPERSET_ADMIN_USER: ${SUPERSET_ADMIN_USER:-admin}
     SUPERSET_ADMIN_PASSWORD: ${SUPERSET_ADMIN_PASSWORD:-admin}
     SUPERSET_URL: http://superset:8088
@@ -108,13 +109,13 @@ services:
   postgres:
     image: postgres:16
     environment:
-      POSTGRES_USER: airflow
-      POSTGRES_PASSWORD: airflow
-      POSTGRES_DB: airflow
+      POSTGRES_USER: ${AIRFLOW_DATABASE_USER:-airflow}
+      POSTGRES_PASSWORD: ${AIRFLOW_DATABASE_PASSWORD:-airflow}
+      POSTGRES_DB: ${AIRFLOW_DATABASE_NAME:-airflow}
     volumes:
       - postgres-db-volume:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "airflow"]
+      test: ["CMD", "pg_isready", "-U", "${AIRFLOW_DATABASE_USER:-airflow}"]
       interval: 10s
       retries: 5
       start_period: 5s
@@ -314,6 +315,7 @@ services:
     environment:
       <<: *superset-common-env
       SUPERSET_URL: http://superset:8088
+      SUPERSET_DW_SQLALCHEMY_URI: ${SUPERSET_DW_SQLALCHEMY_URI:-${MUSIC_DW_DB_URL:-postgresql+psycopg2://${POSTGRES_USER:-music}:${POSTGRES_PASSWORD:-music}@music-postgres:5432/music_dw}}
     entrypoint: /bin/bash
     command:
       - -c

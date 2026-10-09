@@ -13,12 +13,63 @@ from __future__ import annotations
 import os
 import sys
 
-DEFAULT_ADMIN_URI = "postgresql+psycopg2://music:music@music-postgres:5432/music_source"
+def _load_env() -> None:
+    """Best-effort loader for .env when executing on the host without compose."""
+    env_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".env"))
+    if not os.path.exists(env_path):
+        return
+    try:
+        with open(env_path, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith("#") or "=" not in line:
+                    continue
+                key, val = line.split("=", 1)
+                key = key.strip()
+                val = val.strip().strip("\"'")
+                if key and key not in os.environ:
+                    os.environ[key] = val
+    except Exception:
+        pass
+
+
+_load_env()
+
+DEFAULT_ADMIN_URI = os.environ.get("DEFAULT_ADMIN_URI") or os.environ.get("SUPERSET_METADATA_ADMIN_URI")
 METADATA_DB = os.environ.get("SUPERSET_METADATA_DB_NAME", "superset")
 
 
+def _resolve_admin_uri() -> str:
+    uri = (
+        os.environ.get("SUPERSET_METADATA_ADMIN_URI")
+        or os.environ.get("DEFAULT_ADMIN_URI")
+        or DEFAULT_ADMIN_URI
+        or os.environ.get("MUSIC_SOURCE_DB_URL")
+    )
+    if uri:
+        return uri
+
+    user = os.environ.get("POSTGRES_USER")
+    password = os.environ.get("POSTGRES_PASSWORD")
+    host = os.environ.get("POSTGRES_HOST", "music-postgres")
+    port = os.environ.get("MUSIC_POSTGRES_PORT", "5432")
+    db = os.environ.get("POSTGRES_DB", "music_source")
+    if user and password:
+        return f"postgresql+psycopg2://{user}:{password}@{host}:{port}/{db}"
+
+    raise RuntimeError(
+        "Admin URI is not configured. Please define DEFAULT_ADMIN_URI or "
+        "SUPERSET_METADATA_ADMIN_URI in your .env file."
+    )
+
+
 def main() -> int:
-    admin_uri = os.environ.get("SUPERSET_METADATA_ADMIN_URI", DEFAULT_ADMIN_URI)
+    try:
+        admin_uri = _resolve_admin_uri()
+    except Exception as exc:
+        print(f"[superset-init] error: {exc}", file=sys.stderr)
+        return 1
+
     autocommit_uri = admin_uri.replace("+psycopg2", "")
 
     import psycopg2

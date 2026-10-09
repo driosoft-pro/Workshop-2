@@ -505,7 +505,20 @@ solo entonces levanta el stack. Verificación rápida:
 Opcional (solo si no usas Nix): `python -m venv .venv && pip install -r
 requirements.txt`.
 
+#### 18.2.1 Variables de entorno e higiene de seguridad (`.env` / `.env.example`)
+
+Para evitar filtraciones de seguridad y exposición de credenciales sensibles:
+* **Cero credenciales fijas en el código fuente**: Todas las URLs de conexión a bases de datos y secretos (`DEFAULT_ADMIN_URI`, `SUPERSET_METADATA_ADMIN_URI`, `SUPERSET_SQLALCHEMY_DATABASE_URI`, `SUPERSET_DW_SQLALCHEMY_URI`, `MUSIC_SOURCE_DB_URL`, `MUSIC_DW_DB_URL`, etc.) están externalizadas en `.env` y nunca codificadas directamente en Python (`scripts/superset_create_metadata_db.py`, `scripts/superset_bootstrap.py`, `config/superset_config.py`, `src/config.py`) ni en `docker-compose.yaml`.
+* **`.env` está estrictamente excluido por Git** (`.gitignore`), garantizando que contraseñas locales o de entornos compartidos no se suban al repositorio.
+* **`.env.example`** sirve como plantilla completa que documenta todas las variables requeridas con valores de ejemplo y configuración por defecto para desarrollo.
+* **Descubrimiento y carga automática de `.env`**: Al ejecutar scripts localmente en el host (fuera de Docker/Podman Compose), estos leen automáticamente el archivo `.env` si existe y construyen las conexiones de forma dinámica a partir de las variables de entorno, sin valores por defecto con credenciales en texto plano.
+* **Variables de entorno administradas**:
+  * **Airflow**: `AIRFLOW_UID`, `_AIRFLOW_WWW_USER_USERNAME`, `_AIRFLOW_WWW_USER_PASSWORD`, `AIRFLOW__API_AUTH__JWT_SECRET`, `AIRFLOW_DATABASE_USER`, `AIRFLOW_DATABASE_PASSWORD`, `AIRFLOW_DATABASE_NAME`, `AIRFLOW__DATABASE__SQL_ALCHEMY_CONN`.
+  * **PostgreSQL (fuente Grammy y Data Warehouse)**: `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `MUSIC_POSTGRES_PORT`, `MUSIC_SOURCE_DB_URL`, `MUSIC_DW_DB_URL`.
+  * **Apache Superset**: `SUPERSET_SECRET_KEY`, `SUPERSET_PORT`, `SUPERSET_ADMIN_USER`, `SUPERSET_ADMIN_PASSWORD`, `DEFAULT_ADMIN_URI`, `SUPERSET_METADATA_ADMIN_URI`, `SUPERSET_METADATA_DB_NAME`, `SUPERSET_SQLALCHEMY_DATABASE_URI`, `SUPERSET_DW_SQLALCHEMY_URI`.
+
 ### 18.3 `run.sh` / `run.bat` (punto de entrada único)
+
 
 ```bash
 ./run.sh up                    # valida/libera puertos + compose up -d --build + fuente + bootstrap Superset

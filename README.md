@@ -501,7 +501,20 @@ the stack. Quick verification:
 Optional (only if you do not use Nix): `python -m venv .venv && pip install -r
 requirements.txt`.
 
+#### 18.2.1 Environment variables and security hygiene (`.env` / `.env.example`)
+
+To avoid security leaks and sensitive credential exposure:
+* **Zero hardcoded credentials in source code**: All database URLs and secrets (`DEFAULT_ADMIN_URI`, `SUPERSET_METADATA_ADMIN_URI`, `SUPERSET_SQLALCHEMY_DATABASE_URI`, `SUPERSET_DW_SQLALCHEMY_URI`, `MUSIC_SOURCE_DB_URL`, `MUSIC_DW_DB_URL`, etc.) are externalized to `.env` and never hardcoded in Python code (`scripts/superset_create_metadata_db.py`, `scripts/superset_bootstrap.py`, `config/superset_config.py`, `src/config.py`) or in `docker-compose.yaml`.
+* **`.env` is strictly ignored by Git** (`.gitignore`), ensuring that development and production credentials are never committed to version control.
+* **`.env.example`** provides a complete template documenting all required variables, placeholders, and development defaults.
+* **Automated `.env` discovery**: When executing scripts locally outside of Docker/Podman Compose, scripts automatically load `.env` if present and dynamically resolve connection parameters from environment variables without plaintext credentials in code.
+* **Key environment variables**:
+  * **Airflow**: `AIRFLOW_UID`, `_AIRFLOW_WWW_USER_USERNAME`, `_AIRFLOW_WWW_USER_PASSWORD`, `AIRFLOW__API_AUTH__JWT_SECRET`, `AIRFLOW_DATABASE_USER`, `AIRFLOW_DATABASE_PASSWORD`, `AIRFLOW_DATABASE_NAME`, `AIRFLOW__DATABASE__SQL_ALCHEMY_CONN`.
+  * **PostgreSQL (Grammy source & Data Warehouse)**: `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `MUSIC_POSTGRES_PORT`, `MUSIC_SOURCE_DB_URL`, `MUSIC_DW_DB_URL`.
+  * **Apache Superset**: `SUPERSET_SECRET_KEY`, `SUPERSET_PORT`, `SUPERSET_ADMIN_USER`, `SUPERSET_ADMIN_PASSWORD`, `DEFAULT_ADMIN_URI`, `SUPERSET_METADATA_ADMIN_URI`, `SUPERSET_METADATA_DB_NAME`, `SUPERSET_SQLALCHEMY_DATABASE_URI`, `SUPERSET_DW_SQLALCHEMY_URI`.
+
 ### 18.3 `run.sh` / `run.bat` (single entry point)
+
 
 ```bash
 ./run.sh up                    # frees ports + compose up -d --build + source prep + Superset bootstrap
