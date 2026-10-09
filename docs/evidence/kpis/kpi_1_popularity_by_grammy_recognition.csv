@@ -1,3 +1,5 @@
-artist_group,track_listings,distinct_tracks,avg_popularity,avg_energy,avg_danceability,avg_valence
-Not Grammy-recognized,142495,83081,33.82,0.6434,0.5754,0.4638
-Grammy-recognized,15035,9247,29.84,0.5802,0.5654,0.5089
+basis,artist_group,is_grammy_artist,n_tracks,n_artists,mean_popularity,median_popularity,p25_popularity,p75_popularity,stddev_popularity,mean_danceability,mean_energy,mean_valence,mean_acousticness,mean_speechiness
+all,Grammy-recognized,1,7271,793,40.13,44.0,20.0,62.0,26.08,0.5359,0.5437,0.4723,0.4088,0.0719
+all,Not Grammy-recognized,0,103935,28996,35.25,36.0,21.0,49.0,19.18,0.5662,0.6332,0.4555,0.3316,0.0928
+excl_zero,Grammy-recognized,1,6484,720,45.0,50.0,23.0,64.0,23.31,0.5364,0.5492,0.472,0.3993,0.0727
+excl_zero,Not Grammy-recognized,0,97723,27792,37.49,38.0,23.0,50.0,17.52,0.5699,0.6405,0.4591,0.3222,0.0937

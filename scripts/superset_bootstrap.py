@@ -591,6 +591,7 @@ def ensure_dataset(client: SupersetClient, database_id: int, table_name: str,
     if status != 200:
         raise SystemExit(f"[superset-bootstrap] metrics for {table_name} failed: "
                          f"{status} {json.dumps(out)[:400]}")
+    client.call("PUT", f"/api/v1/dataset/{dataset_id}/refresh")
     return dataset_id
 
 
@@ -668,7 +669,14 @@ def main() -> int:
     queries = load_kpi_queries()
     all_queries = {
         **queries,
-        "etl_batch_log": "SELECT * FROM etl_batch_log ORDER BY started_at DESC LIMIT 5",
+        "etl_batch_log": (
+            "SELECT batch_id, COALESCE(dag_id, 'manual') AS dag_id, "
+            "COALESCE(run_id, batch_id) AS run_id, status, "
+            "COALESCE((target_rows_after->>'fact_track_artist')::bigint, 0) AS rows_fact_track_artist, "
+            "COALESCE((target_rows_after->>'fact_grammy_award')::bigint, 0) AS rows_fact_grammy_award, "
+            "COALESCE((target_rows_after->>'bridge_award_artist')::bigint, 0) AS rows_bridge_award_artist "
+            "FROM etl_batch_log ORDER BY started_at DESC LIMIT 5"
+        ),
     }
 
     dashboard_metadata = {

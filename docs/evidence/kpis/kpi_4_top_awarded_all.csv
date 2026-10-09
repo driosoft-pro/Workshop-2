@@ -1,0 +1,131 @@
+artist_display_name,awards,first_award_year,last_award_year,spotify_track_count,in_spotify,rank
+Chicago Symphony Orchestra,30,1960,2008,6,1,1
+John Williams,27,1975,2019,7,1,2
+Beyoncé,24,2003,2019,6,1,3
+Stevie Wonder,24,1973,2006,238,1,3
+Ray Charles & Chaka Khan,23,1960,2012,23,1,4
+Jay-Z & Swizz Beatz,22,1998,2014,3,1,5
+Tony Bennett,22,1962,2015,17,1,5
+Aretha Franklin,21,1967,2007,15,1,6
+Bruce Springsteen,21,1984,2011,6,1,6
+Eric Clapton,21,1972,2007,14,1,6
+Kanye West,20,2004,2012,12,1,7
+Vince Gill,20,1990,2019,5,1,7
+Frank Sinatra And Original Cast,19,1958,1995,5,1,8
+Quincy Jones (And Various Artists),19,1969,2018,3,1,8
+Barbra Streisand,17,1963,2019,3,1,9
+Linda Ronstadt,17,1975,1999,1,1,9
+B.B. King,16,1970,2008,27,1,10
+Ella Fitzgerald,16,1958,1994,262,1,10
+The Beatles,16,1964,2016,280,1,10
+Alicia Keys,15,2001,2013,9,1,11
+Bob Dylan,15,1967,2016,17,1,11
+Boston Symphony Orchestra,15,1959,2018,12,1,11
+Eminem,15,1999,2014,32,1,11
+Johnny Cash,15,1967,2007,2,1,11
+Michael Jackson,15,1979,1995,18,1,11
+Miles Davis,15,1960,2019,2,1,11
+Adele,14,2008,2016,75,1,12
+Alison Krauss & Union Station,14,1992,2011,34,1,12
+"Béla Fleck, Edgar Meyer, Joshua Bell, John Williams & Evelyn Glennie",14,1995,2015,7,1,12
+George Benson,14,1976,2006,16,1,12
+"Natalie Cole (With Nat ""King"" Cole)",14,1975,2008,3,1,12
+Willie Nelson,14,1975,2019,6,1,12
+Alison Krauss,13,1990,2008,8,1,13
+Duke Ellington,13,1959,1999,9,1,13
+John Legend,13,2005,2019,45,1,13
+"Kendrick Lamar Featuring Bilal, Anna Wise & Thundercat",13,2014,2018,9,1,13
+Sting,13,1983,2018,12,1,13
+Taylor Swift,13,2009,2019,19,1,13
+Bruno Mars,12,2010,2017,85,1,14
+Emmylou Harris,12,1976,2013,9,1,14
+Foo Fighters,12,2000,2017,35,1,14
+Lady Gaga,12,2009,2019,67,1,14
+Paul McCartney,12,1966,2013,4,1,14
+"Ricky Skaggs, Steve Wariner & Vince Gill",12,1984,2008,6,1,14
+Roger Miller,12,1964,1968,1,1,14
+Yo-Yo Ma,12,1998,2016,11,1,14
+Al Green,11,1981,2008,5,1,15
+Bonnie Raitt & Delbert McClinton,11,1989,2012,3,1,15
+Chaka Khan,11,1983,2007,17,1,15
+Count Basie,11,1958,1984,2,1,15
+Herbie Hancock,11,1983,2010,2,1,15
+Madonna,11,1991,2019,4,1,15
+Carrie Underwood,10,2006,2014,16,1,16
+Justin Timberlake,10,2003,2016,11,1,16
+Kirk Franklin,10,1996,2019,2,1,16
+Norah Jones,10,2002,2004,151,1,16
+Rihanna,10,2007,2017,10,1,16
+Santana,10,1999,2002,8,1,16
+Sheryl Crow,10,1994,2002,25,1,16
+Dolly Parton,9,1978,2019,17,1,17
+Mary J. Blige,9,1995,2008,10,1,17
+Metallica,9,1989,2008,51,1,17
+New York Philharmonic,9,1962,2019,2,1,17
+Simon & Garfunkel,9,1968,1970,5,1,17
+Anita Baker & The Winans,8,1986,1995,2,1,18
+Beck,8,1996,2018,2,1,18
+Billie Eilish,8,2019,2019,70,1,18
+Buddy Guy,8,1991,2018,3,1,18
+Coldplay,8,2001,2008,23,1,18
+David Bowie,8,1984,2016,1,1,18
+"Earth, Wind & Fire",8,1975,1982,14,1,18
+Glen Campbell,8,1967,2014,13,1,18
+"Jeff Beck, Terry Bozzio & Tony Hymas",8,1985,2010,4,1,18
+John Mayer,8,2002,2010,69,1,18
+Lizzo,8,2019,2019,48,1,18
+Luther Vandross,8,1990,2003,1,1,18
+Randy Travis,8,1987,2009,9,1,18
+Rubén Blades,8,1986,2019,9,1,18
+Usher,8,2001,2012,15,1,18
+Alanis Morissette,7,1995,1998,4,1,19
+Amy Winehouse,7,2007,2015,19,1,19
+Billie Holiday,7,1979,2001,12,1,19
+Celine Dion,7,1992,1998,1,1,19
+Cleveland Orchestra,7,1969,2010,2,1,19
+Daft Punk,7,2008,2013,11,1,19
+Doc Watson,7,1973,2006,17,1,19
+Eddie Palmieri,7,1975,2005,2,1,19
+H.E.R,7,2018,2019,3,1,19
+James Taylor,7,1971,2003,16,1,19
+Lady Antebellum,7,2009,2011,2,1,19
+Pat Metheny,7,1982,2011,4,1,19
+Pharrell Williams,7,2013,2018,32,1,19
+Randy Newman,7,1984,2017,61,1,19
+Roberta Flack,7,1972,1986,2,1,19
+Skrillex,7,2011,2019,52,1,19
+Steely Dan,7,1977,2000,23,1,19
+The Chemical Brothers,7,1997,2019,90,1,19
+Tina Turner,7,1984,1988,8,1,19
+Toni Braxton,7,1993,2014,3,1,19
+Whitney Houston,7,1985,1999,1,1,19
+Andre Previn,6,1958,2002,1,1,20
+Ariana Grande,6,2018,2019,21,1,20
+Babyface,6,1992,2014,2,1,20
+Black Eyed Peas,6,2004,2009,14,1,20
+Bon Iver,6,2011,2019,7,1,20
+Boyz II Men,6,1991,1994,11,1,20
+Chris Stapleton,6,2015,2019,1,1,20
+Dionne Warwick,6,1968,1986,2,1,20
+Donna Summer,6,1978,1997,12,1,20
+Drake,6,2012,2019,50,1,20
+Dr. John And The Lower 911,6,1989,2012,8,1,20
+Eagles,6,1975,2008,27,1,20
+John Coltrane,6,1999,2019,14,1,20
+Kacey Musgraves,6,2013,2018,62,1,20
+Leonard Bernstein,6,1961,2017,3,1,20
+London Symphony Orchestra,6,1971,2004,58,1,20
+Muddy Waters,6,1971,1979,1,1,20
+Nat King Cole,6,1959,1996,116,1,20
+Philadelphia Orchestra,6,1961,2019,1,1,20
+Pierre Boulez,6,1970,1993,1,1,20
+Pittsburgh Symphony Orchestra,6,1992,2019,1,1,20
+Prince & The Revolution,6,1984,2007,1,1,20
+Radiohead,6,1997,2008,20,1,20
+Red Hot Chili Peppers,6,1992,2006,158,1,20
+Richard Pryor,6,1974,2001,2,1,20
+The Black Keys,6,2010,2012,45,1,20
+The Police,6,1980,1983,8,1,20
+The White Stripes,6,2003,2010,29,1,20
+Tito Puente,6,1978,2000,2,1,20
+Toto,6,1982,1982,1,1,20

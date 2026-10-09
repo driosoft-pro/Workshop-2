@@ -15,7 +15,36 @@ set -euo pipefail
 
 cd "$(dirname "$0")"
 
+if [ -z "${CONTAINER_HOST:-}" ] && [ -S "/run/user/$(id -u)/podman/podman.sock" ]; then
+  export CONTAINER_HOST="unix:///run/user/$(id -u)/podman/podman.sock"
+fi
+
 PROJECT=$(basename "$PWD" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9_-]//g')
+
+ASSUME_YES="${ASSUME_YES:-0}"
+FILTERED_ARGS=()
+for arg in "$@"; do
+  if [ "$arg" = "--yes" ] || [ "$arg" = "-y" ]; then
+    ASSUME_YES=1
+  else
+    FILTERED_ARGS+=("$arg")
+  fi
+done
+if [ "${#FILTERED_ARGS[@]}" -gt 0 ]; then
+  set -- "${FILTERED_ARGS[@]}"
+else
+  set -- "help"
+fi
+
+warn() { echo "$@" >&2; }
+
+get_port() {
+  local var="$1" default="$2" envf=".env"
+  [ -f "$envf" ] || envf=".env.example"
+  local val
+  val=$(sed -n "s/^${var}=//p" "$envf" 2>/dev/null | head -1)
+  echo "${val:-$default}"
+}
 
 # --- motor de contenedores (podman primero, docker como respaldo) -----------
 detect_engine() {
@@ -28,12 +57,11 @@ detect_engine() {
 
 # puertos que este proyecto debe publicar (del .env si existe)
 required_ports() {
-  local envf=".env"; [ -f "$envf" ] || envf=".env.example"
   local pg af sp
-  pg=$(sed -n 's/^MUSIC_POSTGRES_PORT=//p' "$envf" 2>/dev/null | head -1)
-  af=$(sed -n 's/^AIRFLOW_PORT=//p' "$envf" 2>/dev/null | head -1)
-  sp=$(sed -n 's/^SUPERSET_PORT=//p' "$envf" 2>/dev/null | head -1)
-  echo "${pg:-5432} ${af:-8080} ${sp:-8088} ${EXTRA_PORTS:-}"
+  pg=$(get_port "MUSIC_POSTGRES_PORT" "5432")
+  af=$(get_port "AIRFLOW_PORT" "8080")
+  sp=$(get_port "SUPERSET_PORT" "8088")
+  echo "${pg} ${af} ${sp} ${EXTRA_PORTS:-}"
 }
 
 # --- compose provider -------------------------------------------------------
@@ -93,7 +121,15 @@ cmd_ports() {
         owned="$owned$port "
         continue
       fi
-      echo "[run] conflicto en :$port -> $name (contenedor ajeno) — deteniendo ..."
+      echo "[run] conflicto en :$port -> $name (contenedor ajeno)"
+      if [ "${ASSUME_YES:-0}" != "1" ]; then
+        read -r -p "[run] ¿Detener contenedor ajeno $name en :$port? [y/N] " resp
+        case "$resp" in
+          [yY][eE][sS]|[yY]) ;;
+          *) echo "[run] cancelado por el usuario" >&2; return 1 ;;
+        esac
+      fi
+      echo "[run] deteniendo contenedor ajeno $name ..."
       if "$ENGINE_BIN" stop "$id" >/dev/null 2>&1; then
         echo "[run]   detenido: $name"
         stopped=1
@@ -115,28 +151,43 @@ cmd_ports() {
   echo "[run] puertos listos: $ports"
 }
 
-warn() { echo "$@" >&2; }
-
 cmd_up() {
   [ -f .env ] || { cp .env.example .env; echo "[run] creado .env desde .env.example"; }
   cmd_ports
   compose up -d --build
   echo "[run] esperando servicios ..."
-  wait_http "http://localhost:8080/api/v2/monitor/health" 90 || true
-  wait_http "http://localhost:8088/health" 90 || true
+  local af_port sp_port
+  af_port=$(get_port "AIRFLOW_PORT" "8080")
+  sp_port=$(get_port "SUPERSET_PORT" "8088")
+  wait_http "http://localhost:${af_port}/api/v2/monitor/health" 90 || true
+  wait_http "http://localhost:${sp_port}/health" 90 || true
   cmd_source
   cmd_superset
   cmd_status
 }
 
 cmd_down()     { compose down; echo "[run] servicios del proyecto detenidos (volumenes conservados)"; }
-cmd_reset()    { compose down -v; echo "[run] volumenes eliminados (estado del DW borrado)"; }
+cmd_reset()    {
+  if [ "${ASSUME_YES:-0}" != "1" ]; then
+    read -r -p "[run] ¿Eliminar todos los volumenes y borrar estado del DW? [y/N] " resp
+    case "$resp" in
+      [yY][eE][sS]|[yY]) ;;
+      *) echo "[run] cancelado por el usuario" >&2; return 1 ;;
+    esac
+  fi
+  compose down -v
+  echo "[run] volumenes eliminados (estado del DW borrado)"
+}
 cmd_logs()     { compose logs -f "${1:-airflow-scheduler}"; }
 cmd_status()   { compose ps; echo; cmd_urls; }
 cmd_urls()     {
-  echo "  Airflow UI : http://localhost:8080   (airflow / airflow)"
-  echo "  Superset UI : http://localhost:8088   (admin / admin)"
-  echo "  PostgreSQL  : localhost:5432          (music / music -> music_dw, music_source, superset)"
+  local pg_port af_port sp_port
+  pg_port=$(get_port "MUSIC_POSTGRES_PORT" "5432")
+  af_port=$(get_port "AIRFLOW_PORT" "8080")
+  sp_port=$(get_port "SUPERSET_PORT" "8088")
+  echo "  Airflow UI : http://localhost:${af_port}   (airflow / airflow)"
+  echo "  Superset UI : http://localhost:${sp_port}   (admin / admin)"
+  echo "  PostgreSQL  : localhost:${pg_port}          (music / music -> music_dw, music_source, superset)"
 }
 
 cmd_source() {
@@ -154,6 +205,12 @@ cmd_trigger_bad() {
   echo "[run] disparando el Test B (fallo controlado, spotify_bad.csv) ..."
   compose exec -T airflow-apiserver airflow dags trigger reliable_music_pipeline \
     --conf '{"spotify_source_file":"spotify_bad.csv"}'
+}
+
+cmd_trigger_fuzzy() {
+  echo "[run] disparando reliable_music_pipeline con enable_fuzzy=true ..."
+  compose exec -T airflow-apiserver airflow dags trigger reliable_music_pipeline \
+    --conf '{"enable_fuzzy": true}'
 }
 
 cmd_test()     { run_python -m pytest "$@"; }
@@ -181,6 +238,7 @@ Uso: ./run.sh <comando>
   source              re-importa el CSV de Grammy a music_source
   trigger             DAG Test A (corrida exitosa)
   trigger-bad         genera spotify_bad.csv y dispara el Test B (fallo controlado)
+  trigger-fuzzy       dispara reliable_music_pipeline con enable_fuzzy=true
   test [pytest args]  pruebas unitarias + de integracion (auto-skip sin BD)
   unit  [pytest args] solo pruebas offline
   smoke [args]        pipeline local sin Airflow (scripts/smoke_test.py)
@@ -202,6 +260,7 @@ case "${1:-help}" in
   source)       cmd_source ;;
   trigger)      cmd_trigger ;;
   trigger-bad)  cmd_trigger_bad ;;
+  trigger-fuzzy) cmd_trigger_fuzzy ;;
   test)         shift; cmd_test "$@" ;;
   unit)         shift; cmd_unit "$@" ;;
   smoke)        shift; cmd_smoke "$@" ;;

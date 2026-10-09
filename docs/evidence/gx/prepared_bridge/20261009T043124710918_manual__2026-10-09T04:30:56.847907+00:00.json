@@ -1,0 +1,44 @@
+{
+  "stage": "prepared_bridge",
+  "generated_at": "2026-10-09T04:31:24.710864+00:00",
+  "run_context": {
+    "dag_id": "reliable_music_pipeline",
+    "task_id": "validate_prepared",
+    "run_id": "manual__2026-10-09T04:30:56.847907+00:00",
+    "try_number": 1,
+    "logical_date": "",
+    "stage": "prepared_bridge"
+  },
+  "checkpoint": "prepared_bridge_checkpoint",
+  "suite": "prepared_bridge_suite",
+  "success": true,
+  "max_failure_severity": null,
+  "statistics": {
+    "evaluated_expectations": 1,
+    "successful_expectations": 1,
+    "unsuccessful_expectations": 0,
+    "success_percent": 100.0
+  },
+  "failed_critical_rules": [],
+  "failed_warning_rules": [],
+  "expectations": [
+    {
+      "rule_id": "DQ-G11",
+      "quality_dimension": "Uniqueness",
+      "requirement": "R1,R2",
+      "expectation": "expect_compound_columns_to_be_unique",
+      "column": null,
+      "thresholds": {},
+      "severity": "critical",
+      "success": true,
+      "result": {
+        "element_count": 2841,
+        "unexpected_count": 0,
+        "unexpected_percent": 0.0,
+        "partial_unexpected_list": [],
+        "missing_count": 0,
+        "missing_percent": 0.0
+      }
+    }
+  ]
+}

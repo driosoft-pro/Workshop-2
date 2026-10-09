@@ -1,232 +1,569 @@
 {
-  "generated_at": "2026-10-09T01:54:28.370809+00:00",
+  "generated_at": "2026-10-09T04:31:57.473632+00:00",
   "source": "music_dw",
   "kpi_csvs": {
-    "kpi_0_integration_coverage": "/home/drz/Documents/semesterV/etl/Activities/Workshop/2/docs/evidence/kpis/kpi_0_integration_coverage.csv",
-    "kpi_1_popularity_by_grammy_recognition": "/home/drz/Documents/semesterV/etl/Activities/Workshop/2/docs/evidence/kpis/kpi_1_popularity_by_grammy_recognition.csv",
-    "kpi_1_genre_split": "/home/drz/Documents/semesterV/etl/Activities/Workshop/2/docs/evidence/kpis/kpi_1_genre_split.csv",
-    "kpi_2_awards_by_dominant_genre": "/home/drz/Documents/semesterV/etl/Activities/Workshop/2/docs/evidence/kpis/kpi_2_awards_by_dominant_genre.csv",
-    "kpi_3_awards_and_profile_by_decade": "/home/drz/Documents/semesterV/etl/Activities/Workshop/2/docs/evidence/kpis/kpi_3_awards_and_profile_by_decade.csv",
-    "kpi_3_awards_per_year": "/home/drz/Documents/semesterV/etl/Activities/Workshop/2/docs/evidence/kpis/kpi_3_awards_per_year.csv",
-    "kpi_4_top_awarded_artists_on_spotify": "/home/drz/Documents/semesterV/etl/Activities/Workshop/2/docs/evidence/kpis/kpi_4_top_awarded_artists_on_spotify.csv"
+    "kpi_0_integration_coverage": "/opt/airflow/docs/evidence/kpis/kpi_0_integration_coverage.csv",
+    "kpi_0_coverage_by_method": "/opt/airflow/docs/evidence/kpis/kpi_0_coverage_by_method.csv",
+    "kpi_0_coverage_by_decade": "/opt/airflow/docs/evidence/kpis/kpi_0_coverage_by_decade.csv",
+    "kpi_1_popularity_by_grammy_recognition": "/opt/airflow/docs/evidence/kpis/kpi_1_popularity_by_grammy_recognition.csv",
+    "kpi_1_artist_level": "/opt/airflow/docs/evidence/kpis/kpi_1_artist_level.csv",
+    "kpi_1_within_genre_diff": "/opt/airflow/docs/evidence/kpis/kpi_1_within_genre_diff.csv",
+    "kpi_2_awards_by_dominant_genre": "/opt/airflow/docs/evidence/kpis/kpi_2_awards_by_dominant_genre.csv",
+    "kpi_2_heatmap": "/opt/airflow/docs/evidence/kpis/kpi_2_heatmap.csv",
+    "kpi_3_awards_and_profile_by_decade": "/opt/airflow/docs/evidence/kpis/kpi_3_awards_and_profile_by_decade.csv",
+    "kpi_3_awards_per_year": "/opt/airflow/docs/evidence/kpis/kpi_3_awards_per_year.csv",
+    "kpi_3_awards_by_family_decade": "/opt/airflow/docs/evidence/kpis/kpi_3_awards_by_family_decade.csv",
+    "kpi_4_top_awarded_artists_on_spotify": "/opt/airflow/docs/evidence/kpis/kpi_4_top_awarded_artists_on_spotify.csv",
+    "kpi_4_top_awarded_all": "/opt/airflow/docs/evidence/kpis/kpi_4_top_awarded_all.csv"
   },
   "charts": {
-    "kpi_1_genre_split": "/home/drz/Documents/semesterV/etl/Activities/Workshop/2/docs/evidence/kpis/ar1_popularity_by_genre.png",
-    "kpi_2_awards_by_dominant_genre": "/home/drz/Documents/semesterV/etl/Activities/Workshop/2/docs/evidence/kpis/ar2_awards_by_dominant_genre.png",
-    "kpi_3_awards_and_profile_by_decade": "/home/drz/Documents/semesterV/etl/Activities/Workshop/2/docs/evidence/kpis/ar3_awards_and_profile_by_decade.png",
-    "kpi_4_top_awarded_artists_on_spotify": "/home/drz/Documents/semesterV/etl/Activities/Workshop/2/docs/evidence/kpis/ar4_top_awarded_artists.png"
+    "kpi_1_within_genre_diff": "/opt/airflow/docs/evidence/kpis/ar1_popularity_by_genre.png",
+    "kpi_2_awards_by_dominant_genre": "/opt/airflow/docs/evidence/kpis/ar2_awards_by_dominant_genre.png",
+    "kpi_3_awards_and_profile_by_decade": "/opt/airflow/docs/evidence/kpis/ar3_awards_and_profile_by_decade.png",
+    "kpi_4_top_awarded_artists_on_spotify": "/opt/airflow/docs/evidence/kpis/ar4_top_awarded_artists.png"
   },
   "row_counts": {
     "kpi_0_integration_coverage": 1,
-    "kpi_1_popularity_by_grammy_recognition": 2,
-    "kpi_1_genre_split": 12,
-    "kpi_2_awards_by_dominant_genre": 15,
+    "kpi_0_coverage_by_method": 5,
+    "kpi_0_coverage_by_decade": 7,
+    "kpi_1_popularity_by_grammy_recognition": 4,
+    "kpi_1_artist_level": 29789,
+    "kpi_1_within_genre_diff": 12,
+    "kpi_2_awards_by_dominant_genre": 12,
+    "kpi_2_heatmap": 136,
     "kpi_3_awards_and_profile_by_decade": 7,
     "kpi_3_awards_per_year": 62,
-    "kpi_4_top_awarded_artists_on_spotify": 10
+    "kpi_3_awards_by_family_decade": 89,
+    "kpi_4_top_awarded_artists_on_spotify": 19,
+    "kpi_4_top_awarded_all": 130
   },
   "preview": {
     "kpi_0_integration_coverage": [
       {
         "award_rows": 4810,
-        "matched_award_rows": 2512,
-        "matched_award_pct": 52.22,
+        "matched_strict_rows": 1415,
+        "matched_strict_pct": 29.42,
+        "matched_enriched_rows": 2525,
+        "matched_enriched_pct": 52.49,
+        "rows_without_artist": 339,
         "rows_without_artist_pct": 7.05
+      }
+    ],
+    "kpi_0_coverage_by_method": [
+      {
+        "match_method": "none",
+        "award_rows": 2285,
+        "share_pct": 47.51
+      },
+      {
+        "match_method": "exact",
+        "award_rows": 1415,
+        "share_pct": 29.42
+      },
+      {
+        "match_method": "workers",
+        "award_rows": 704,
+        "share_pct": 14.64
+      },
+      {
+        "match_method": "split",
+        "award_rows": 344,
+        "share_pct": 7.15
+      },
+      {
+        "match_method": "nominee",
+        "award_rows": 62,
+        "share_pct": 1.29
+      }
+    ],
+    "kpi_0_coverage_by_decade": [
+      {
+        "decade": 1950,
+        "award_rows": 63,
+        "matched_rows": 31,
+        "match_rate_pct": 49.21,
+        "matched_strict_rows": 16,
+        "match_rate_strict_pct": 25.4
+      },
+      {
+        "decade": 1960,
+        "award_rows": 433,
+        "matched_rows": 188,
+        "match_rate_pct": 43.42,
+        "matched_strict_rows": 99,
+        "match_rate_strict_pct": 22.86
+      },
+      {
+        "decade": 1970,
+        "award_rows": 487,
+        "matched_rows": 245,
+        "match_rate_pct": 50.31,
+        "matched_strict_rows": 124,
+        "match_rate_strict_pct": 25.46
+      },
+      {
+        "decade": 1980,
+        "award_rows": 684,
+        "matched_rows": 327,
+        "match_rate_pct": 47.81,
+        "matched_strict_rows": 172,
+        "match_rate_strict_pct": 25.15
+      },
+      {
+        "decade": 1990,
+        "award_rows": 866,
+        "matched_rows": 457,
+        "match_rate_pct": 52.77,
+        "matched_strict_rows": 269,
+        "match_rate_strict_pct": 31.06
       }
     ],
     "kpi_1_popularity_by_grammy_recognition": [
       {
-        "artist_group": "Not Grammy-recognized",
-        "track_listings": 142495,
-        "distinct_tracks": 83081,
-        "avg_popularity": 33.82,
-        "avg_energy": 0.6434,
-        "avg_danceability": 0.5754,
-        "avg_valence": 0.4638
+        "basis": "all",
+        "artist_group": "Grammy-recognized",
+        "is_grammy_artist": 1,
+        "n_tracks": 7271,
+        "n_artists": 793,
+        "mean_popularity": 40.13,
+        "median_popularity": 44.0,
+        "p25_popularity": 20.0,
+        "p75_popularity": 62.0,
+        "stddev_popularity": 26.08,
+        "mean_danceability": 0.5359,
+        "mean_energy": 0.5437,
+        "mean_valence": 0.4723,
+        "mean_acousticness": 0.4088,
+        "mean_speechiness": 0.0719
       },
       {
+        "basis": "all",
+        "artist_group": "Not Grammy-recognized",
+        "is_grammy_artist": 0,
+        "n_tracks": 103935,
+        "n_artists": 28996,
+        "mean_popularity": 35.25,
+        "median_popularity": 36.0,
+        "p25_popularity": 21.0,
+        "p75_popularity": 49.0,
+        "stddev_popularity": 19.18,
+        "mean_danceability": 0.5662,
+        "mean_energy": 0.6332,
+        "mean_valence": 0.4555,
+        "mean_acousticness": 0.3316,
+        "mean_speechiness": 0.0928
+      },
+      {
+        "basis": "excl_zero",
         "artist_group": "Grammy-recognized",
-        "track_listings": 15035,
-        "distinct_tracks": 9247,
-        "avg_popularity": 29.84,
-        "avg_energy": 0.5802,
-        "avg_danceability": 0.5654,
-        "avg_valence": 0.5089
+        "is_grammy_artist": 1,
+        "n_tracks": 6484,
+        "n_artists": 720,
+        "mean_popularity": 45.0,
+        "median_popularity": 50.0,
+        "p25_popularity": 23.0,
+        "p75_popularity": 64.0,
+        "stddev_popularity": 23.31,
+        "mean_danceability": 0.5364,
+        "mean_energy": 0.5492,
+        "mean_valence": 0.472,
+        "mean_acousticness": 0.3993,
+        "mean_speechiness": 0.0727
+      },
+      {
+        "basis": "excl_zero",
+        "artist_group": "Not Grammy-recognized",
+        "is_grammy_artist": 0,
+        "n_tracks": 97723,
+        "n_artists": 27792,
+        "mean_popularity": 37.49,
+        "median_popularity": 38.0,
+        "p25_popularity": 23.0,
+        "p75_popularity": 50.0,
+        "stddev_popularity": 17.52,
+        "mean_danceability": 0.5699,
+        "mean_energy": 0.6405,
+        "mean_valence": 0.4591,
+        "mean_acousticness": 0.3222,
+        "mean_speechiness": 0.0937
       }
     ],
-    "kpi_1_genre_split": [
+    "kpi_1_artist_level": [
       {
-        "genre": "opera",
-        "track_listings": 2463,
-        "avg_popularity_grammy_artist": 24.51,
-        "avg_popularity_other_artist": 23.52
+        "artist_sk": 1,
+        "artist_display_name": "!nvite",
+        "artist_group": "Not Grammy-recognized",
+        "is_grammy_artist": 0,
+        "mean_popularity": 23.0,
+        "primary_tracks": 2
       },
       {
-        "genre": "show-tunes",
-        "track_listings": 2425,
-        "avg_popularity_grammy_artist": 34.69,
-        "avg_popularity_other_artist": 32.72
+        "artist_sk": 2,
+        "artist_display_name": "#Kids",
+        "artist_group": "Not Grammy-recognized",
+        "is_grammy_artist": 0,
+        "mean_popularity": 34.0,
+        "primary_tracks": 1
       },
       {
-        "genre": "classical",
-        "track_listings": 2297,
-        "avg_popularity_grammy_artist": 7.03,
-        "avg_popularity_other_artist": 10.77
+        "artist_sk": 3,
+        "artist_display_name": "$affie",
+        "artist_group": "Not Grammy-recognized",
+        "is_grammy_artist": 0,
+        "mean_popularity": 41.0,
+        "primary_tracks": 2
       },
       {
-        "genre": "pop-film",
-        "track_listings": 2161,
-        "avg_popularity_grammy_artist": 59.14,
-        "avg_popularity_other_artist": 59.85
+        "artist_sk": 4,
+        "artist_display_name": "$NOT",
+        "artist_group": "Not Grammy-recognized",
+        "is_grammy_artist": 0,
+        "mean_popularity": 63.0,
+        "primary_tracks": 1
       },
       {
-        "genre": "edm",
-        "track_listings": 2075,
-        "avg_popularity_grammy_artist": 36.81,
-        "avg_popularity_other_artist": 35.04
+        "artist_sk": 5,
+        "artist_display_name": "$pyda",
+        "artist_group": "Not Grammy-recognized",
+        "is_grammy_artist": 0,
+        "mean_popularity": 59.0,
+        "primary_tracks": 1
+      }
+    ],
+    "kpi_1_within_genre_diff": [
+      {
+        "genre_family": "Metal",
+        "n_grammy_artists": 39,
+        "n_non_grammy_artists": 1414,
+        "mean_pop_grammy": 51.36,
+        "mean_pop_non": 31.26,
+        "diff": 20.11,
+        "mean_pop_grammy_strict": 56.48,
+        "diff_strict": 25.22,
+        "stratified_weighted_diff": 2.81
+      },
+      {
+        "genre_family": "Electronic",
+        "n_grammy_artists": 119,
+        "n_non_grammy_artists": 6584,
+        "mean_pop_grammy": 49.88,
+        "mean_pop_non": 34.49,
+        "diff": 15.39,
+        "mean_pop_grammy_strict": 50.19,
+        "diff_strict": 15.7,
+        "stratified_weighted_diff": 2.81
+      },
+      {
+        "genre_family": "World",
+        "n_grammy_artists": 72,
+        "n_non_grammy_artists": 3678,
+        "mean_pop_grammy": 40.99,
+        "mean_pop_non": 35.96,
+        "diff": 5.02,
+        "mean_pop_grammy_strict": 46.21,
+        "diff_strict": 10.25,
+        "stratified_weighted_diff": 2.81
+      },
+      {
+        "genre_family": "Reggae & Caribbean",
+        "n_grammy_artists": 53,
+        "n_non_grammy_artists": 1578,
+        "mean_pop_grammy": 43.24,
+        "mean_pop_non": 38.22,
+        "diff": 5.02,
+        "mean_pop_grammy_strict": 42.88,
+        "diff_strict": 4.66,
+        "stratified_weighted_diff": 2.81
+      },
+      {
+        "genre_family": "Latin",
+        "n_grammy_artists": 71,
+        "n_non_grammy_artists": 2935,
+        "mean_pop_grammy": 41.82,
+        "mean_pop_non": 37.88,
+        "diff": 3.94,
+        "mean_pop_grammy_strict": 41.39,
+        "diff_strict": 3.51,
+        "stratified_weighted_diff": 2.81
       }
     ],
     "kpi_2_awards_by_dominant_genre": [
       {
-        "dominant_spotify_genre": "country",
-        "grammy_awards": 170,
-        "recognized_artists": 47,
-        "award_share_pct": 6.75
+        "dominant_genre_family": "Jazz Blues Soul",
+        "awards": 655,
+        "n_artists": 1845,
+        "award_share_pct": 25.71,
+        "awards_per_100_artists": 35.5
       },
       {
-        "dominant_spotify_genre": "blues",
-        "grammy_awards": 161,
-        "recognized_artists": 33,
-        "award_share_pct": 6.39
+        "dominant_genre_family": "Country & Folk",
+        "awards": 496,
+        "n_artists": 1296,
+        "award_share_pct": 19.47,
+        "awards_per_100_artists": 38.27
       },
       {
-        "dominant_spotify_genre": "bluegrass",
-        "grammy_awards": 147,
-        "recognized_artists": 41,
-        "award_share_pct": 5.83
+        "dominant_genre_family": "Rock",
+        "awards": 298,
+        "n_artists": 2735,
+        "award_share_pct": 11.7,
+        "awards_per_100_artists": 10.9
       },
       {
-        "dominant_spotify_genre": "disco",
-        "grammy_awards": 139,
-        "recognized_artists": 36,
-        "award_share_pct": 5.52
+        "dominant_genre_family": "Classical & Instrumental",
+        "awards": 282,
+        "n_artists": 2728,
+        "award_share_pct": 11.07,
+        "awards_per_100_artists": 10.34
       },
       {
-        "dominant_spotify_genre": "soul",
-        "grammy_awards": 137,
-        "recognized_artists": 28,
-        "award_share_pct": 5.44
+        "dominant_genre_family": "Electronic",
+        "awards": 263,
+        "n_artists": 6002,
+        "award_share_pct": 10.32,
+        "awards_per_100_artists": 4.38
+      }
+    ],
+    "kpi_2_heatmap": [
+      {
+        "dominant_genre_family": "Country & Folk",
+        "category_family": "Country & Folk",
+        "awards": 254
+      },
+      {
+        "dominant_genre_family": "Jazz Blues Soul",
+        "category_family": "R&B & Rap",
+        "awards": 217
+      },
+      {
+        "dominant_genre_family": "Classical & Instrumental",
+        "category_family": "Classical",
+        "awards": 157
+      },
+      {
+        "dominant_genre_family": "Rock",
+        "category_family": "Rock & Metal",
+        "awards": 106
+      },
+      {
+        "dominant_genre_family": "Jazz Blues Soul",
+        "category_family": "Pop",
+        "awards": 90
       }
     ],
     "kpi_3_awards_and_profile_by_decade": [
       {
         "decade": 1950,
-        "grammy_awards": 63,
-        "recognized_artists": 37,
-        "avg_artist_popularity": 17.09,
-        "avg_artist_energy": 0.3308
+        "awards": 63,
+        "distinct_artists": 37,
+        "matched_awards": 31,
+        "matched_share_pct": 49.21,
+        "mean_energy": 0.3262,
+        "mean_valence": 0.5017,
+        "mean_danceability": 0.4821,
+        "mean_acousticness": 0.7084
       },
       {
         "decade": 1960,
-        "grammy_awards": 433,
-        "recognized_artists": 214,
-        "avg_artist_popularity": 23.51,
-        "avg_artist_energy": 0.3289
+        "awards": 433,
+        "distinct_artists": 214,
+        "matched_awards": 188,
+        "matched_share_pct": 43.42,
+        "mean_energy": 0.3237,
+        "mean_valence": 0.4677,
+        "mean_danceability": 0.4772,
+        "mean_acousticness": 0.7157
       },
       {
         "decade": 1970,
-        "grammy_awards": 487,
-        "recognized_artists": 255,
-        "avg_artist_popularity": 29.51,
-        "avg_artist_energy": 0.4398
+        "awards": 487,
+        "distinct_artists": 255,
+        "matched_awards": 245,
+        "matched_share_pct": 50.31,
+        "mean_energy": 0.4259,
+        "mean_valence": 0.4918,
+        "mean_danceability": 0.5107,
+        "mean_acousticness": 0.593
       },
       {
         "decade": 1980,
-        "grammy_awards": 684,
-        "recognized_artists": 368,
-        "avg_artist_popularity": 32.08,
-        "avg_artist_energy": 0.475
+        "awards": 684,
+        "distinct_artists": 368,
+        "matched_awards": 327,
+        "matched_share_pct": 47.81,
+        "mean_energy": 0.4703,
+        "mean_valence": 0.5129,
+        "mean_danceability": 0.5408,
+        "mean_acousticness": 0.4994
       },
       {
         "decade": 1990,
-        "grammy_awards": 866,
-        "recognized_artists": 454,
-        "avg_artist_popularity": 31.56,
-        "avg_artist_energy": 0.5072
+        "awards": 866,
+        "distinct_artists": 453,
+        "matched_awards": 457,
+        "matched_share_pct": 52.77,
+        "mean_energy": 0.5109,
+        "mean_valence": 0.4984,
+        "mean_danceability": 0.5348,
+        "mean_acousticness": 0.4396
       }
     ],
     "kpi_3_awards_per_year": [
       {
         "year": 1958,
-        "grammy_awards": 28,
+        "awards": 28,
         "recognized_artists": 18,
-        "matched_award_rows": 14
+        "matched_awards": 14,
+        "matched_share_pct": 50.0
       },
       {
         "year": 1959,
-        "grammy_awards": 35,
+        "awards": 35,
         "recognized_artists": 25,
-        "matched_award_rows": 17
+        "matched_awards": 17,
+        "matched_share_pct": 48.57
       },
       {
         "year": 1960,
-        "grammy_awards": 39,
+        "awards": 39,
         "recognized_artists": 24,
-        "matched_award_rows": 16
+        "matched_awards": 16,
+        "matched_share_pct": 41.03
       },
       {
         "year": 1961,
-        "grammy_awards": 41,
+        "awards": 41,
         "recognized_artists": 27,
-        "matched_award_rows": 13
+        "matched_awards": 13,
+        "matched_share_pct": 31.71
       },
       {
         "year": 1962,
-        "grammy_awards": 39,
+        "awards": 39,
         "recognized_artists": 29,
-        "matched_award_rows": 13
+        "matched_awards": 13,
+        "matched_share_pct": 33.33
+      }
+    ],
+    "kpi_3_awards_by_family_decade": [
+      {
+        "decade": 1950,
+        "category_family": "Classical",
+        "awards": 21
+      },
+      {
+        "decade": 1950,
+        "category_family": "Visual Media & Theater",
+        "awards": 7
+      },
+      {
+        "decade": 1950,
+        "category_family": "Pop",
+        "awards": 7
+      },
+      {
+        "decade": 1950,
+        "category_family": "General Field",
+        "awards": 7
+      },
+      {
+        "decade": 1950,
+        "category_family": "Spoken & Comedy",
+        "awards": 6
       }
     ],
     "kpi_4_top_awarded_artists_on_spotify": [
       {
         "artist_display_name": "Chicago Symphony Orchestra",
-        "grammy_awards": 29,
+        "awards": 30,
         "first_award_year": 1960,
         "last_award_year": 2008,
         "spotify_track_count": 6,
-        "avg_track_popularity": 0.0
-      },
-      {
-        "artist_display_name": "Beyonc\u00e9",
-        "grammy_awards": 24,
-        "first_award_year": 2003,
-        "last_award_year": 2019,
-        "spotify_track_count": 6,
-        "avg_track_popularity": 68.17
+        "in_spotify": 1,
+        "rank": 1
       },
       {
         "artist_display_name": "John Williams",
-        "grammy_awards": 24,
+        "awards": 27,
         "first_award_year": 1975,
         "last_award_year": 2019,
         "spotify_track_count": 7,
-        "avg_track_popularity": 26.14
+        "in_spotify": 1,
+        "rank": 2
       },
       {
-        "artist_display_name": "Ray Charles & Various Artists",
-        "grammy_awards": 22,
+        "artist_display_name": "Beyonc\u00e9",
+        "awards": 24,
+        "first_award_year": 2003,
+        "last_award_year": 2019,
+        "spotify_track_count": 6,
+        "in_spotify": 1,
+        "rank": 3
+      },
+      {
+        "artist_display_name": "Stevie Wonder",
+        "awards": 24,
+        "first_award_year": 1973,
+        "last_award_year": 2006,
+        "spotify_track_count": 238,
+        "in_spotify": 1,
+        "rank": 3
+      },
+      {
+        "artist_display_name": "Ray Charles & Chaka Khan",
+        "awards": 23,
         "first_award_year": 1960,
         "last_award_year": 2012,
         "spotify_track_count": 23,
-        "avg_track_popularity": 44.48
+        "in_spotify": 1,
+        "rank": 4
+      }
+    ],
+    "kpi_4_top_awarded_all": [
+      {
+        "artist_display_name": "Chicago Symphony Orchestra",
+        "awards": 30,
+        "first_award_year": 1960,
+        "last_award_year": 2008,
+        "spotify_track_count": 6,
+        "in_spotify": 1,
+        "rank": 1
       },
       {
-        "artist_display_name": "Tony Bennett",
-        "grammy_awards": 22,
-        "first_award_year": 1962,
-        "last_award_year": 2015,
-        "spotify_track_count": 17,
-        "avg_track_popularity": 6.82
+        "artist_display_name": "John Williams",
+        "awards": 27,
+        "first_award_year": 1975,
+        "last_award_year": 2019,
+        "spotify_track_count": 7,
+        "in_spotify": 1,
+        "rank": 2
+      },
+      {
+        "artist_display_name": "Beyonc\u00e9",
+        "awards": 24,
+        "first_award_year": 2003,
+        "last_award_year": 2019,
+        "spotify_track_count": 6,
+        "in_spotify": 1,
+        "rank": 3
+      },
+      {
+        "artist_display_name": "Stevie Wonder",
+        "awards": 24,
+        "first_award_year": 1973,
+        "last_award_year": 2006,
+        "spotify_track_count": 238,
+        "in_spotify": 1,
+        "rank": 3
+      },
+      {
+        "artist_display_name": "Ray Charles & Chaka Khan",
+        "awards": 23,
+        "first_award_year": 1960,
+        "last_award_year": 2012,
+        "spotify_track_count": 23,
+        "in_spotify": 1,
+        "rank": 4
       }
     ]
   }

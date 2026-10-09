@@ -54,3 +54,10 @@ DW → KPI) are materialized in [`traceability_matrix.md`](traceability_matrix.m
 The requirement tags carried inside the code are the single source of truth:
 `RULES[*].requirement` in `src/validation.py` and the `-- Rn` comments in
 `sql/kpi_queries.sql`.
+
+## Analytical Limitations and Methodological Caveats
+
+1. **Popularity is Current, Not Historical**: Spotify `popularity` represents real-time stream volume at the time of extract, not historical popularity when awards were won. Comparing 1960s Grammy winners with modern non-Grammy tracks reflects enduring contemporary streaming demand, not historical impact.
+2. **Coverage Inequity by Decade**: Integration coverage varies dramatically across decades (under 15% in the 1950s–1960s vs ~50% in the 2000s–2010s). Decade-level trends in R3 must be interpreted in conjunction with `matched_share_pct` (KPI-0 / KPI-3).
+3. **Selection Bias in Control Group**: Because cross-source matching is strictly name-based without value repair (Rule T5), unmatched awardees fall into the non-Grammy control group. The measured popularity differences in R1 represent conservative lower bounds of the true effect.
+4. **Winners-Only Dataset**: The Grammy source records award recipients without non-winning nominees (4,810 winners), precluding win-rate probability modeling.
