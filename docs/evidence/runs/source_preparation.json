@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-09T08:08:51.857696+00:00",
+  "generated_at": "2026-10-09T19:45:12.296915+00:00",
   "source_file": "/opt/airflow/data/raw/the_grammy_awards.csv",
   "source_rows_in_csv": 4810,
   "rows_loaded": 4810,
