@@ -391,7 +391,7 @@ def check_v15(superset_flag: bool) -> tuple[str, str, str]:
         missing = [spec["slice_name"] for spec in CHART_SPECS if spec["slice_name"] not in charts]
         if missing:
             return "FAIL", f"missing {len(missing)} charts: {missing[:2]}", "all OK"
-        required = {"requirements": {"basis", "recognition"}, "granularity": set()}
+        required = {"requirements": {"basis", "recognition"}, "granularity": set(), "workshop": set()}
         summary = []
         for key, info in DASHBOARDS.items():
             title = info["title"]
@@ -403,7 +403,7 @@ def check_v15(superset_flag: bool) -> tuple[str, str, str]:
             dash = detail.get("result", {})
             meta = json.loads(dash.get("json_metadata") or "{}")
             names = {f.get("name") for f in meta.get("native_filter_configuration", [])}
-            if not required[key] <= names:
+            if not required.get(key, set()) <= names:
                 return "FAIL", f"{key}: native filters missing (found: {names})", "all OK"
             positions = json.loads(dash.get("position_json") or "{}")
             placed = {v["meta"].get("chartId") for v in positions.values()

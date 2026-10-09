@@ -18,7 +18,7 @@ def test_every_chart_dataset_exists_in_sql_and_specs():
     queries = boot.load_kpi_queries()
     for spec in boot.CHART_SPECS:
         dataset = spec["dataset"]
-        if dataset != "etl_batch_log":
+        if dataset not in boot.INLINE_QUERIES and dataset != "etl_batch_log":
             assert dataset in queries, dataset
         assert dataset in boot.DATASET_SPECS, dataset
         assert spec["requirement"] and set(

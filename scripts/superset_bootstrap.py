@@ -52,9 +52,11 @@ KPI_SQL_PATH = os.path.join(PROJECT_ROOT, "sql", "kpi_queries.sql")
 # Kept for backwards compatibility (validate_report / tests): the R1-R4 dashboard.
 DASHBOARD_TITLE = "Workshop-2 - KPIs (R1-R4)"
 GRANULARITY_TITLE = "Workshop-2 - Granularity & Data Quality"
+WORKSHOP_TITLE = "Workshop Dashboard"
 DASHBOARDS: dict[str, dict[str, str]] = {
     "granularity": {"title": GRANULARITY_TITLE, "slug": "w2-granularity"},
     "requirements": {"title": DASHBOARD_TITLE, "slug": "w2-requirements"},
+    "workshop": {"title": WORKSHOP_TITLE, "slug": "workshop-dashboard"},
 }
 
 # metric_name -> SQL aggregate used by the charts
@@ -159,6 +161,7 @@ DATASET_SPECS.update({
     "gran_award_funnel": {"row_count": "SUM(row_count)"},
     "gran_track_funnel": {"row_count": "SUM(row_count)"},
     "gran_grammy_artists": {"grammy_artists": "MAX(grammy_artists)"},
+    "workshop_awards_breakdown": {"awards": "SUM(awards)"},
 })
 
 INLINE_QUERIES: dict[str, str] = {
@@ -187,6 +190,17 @@ INLINE_QUERIES: dict[str, str] = {
         "SELECT 1 AS step, 'Track listings (track x genre x artist)' AS stage, count(*)::bigint AS row_count FROM fact_track_artist "
         "UNION ALL SELECT 2, 'Primary songs (is_primary_song = 1)', COALESCE(SUM(is_primary_song), 0)::bigint FROM fact_track_artist "
         "UNION ALL SELECT 3, 'Distinct artists', count(DISTINCT artist_sk) FROM fact_track_artist"
+    ),
+    "workshop_awards_breakdown": (
+        "SELECT y.decade, c.category_family, "
+        "COALESCE(a.dominant_genre_family, 'Other / Unclassified') AS genre_family, "
+        "COALESCE(w.match_method, 'none') AS match_method, "
+        "count(*)::bigint AS awards "
+        "FROM fact_grammy_award w "
+        "JOIN dim_year y ON y.year_sk = w.year_sk "
+        "JOIN dim_award_category c ON c.category_sk = w.category_sk "
+        "LEFT JOIN dim_artist a ON a.artist_sk = w.artist_sk "
+        "GROUP BY y.decade, c.category_family, COALESCE(a.dominant_genre_family, 'Other / Unclassified'), COALESCE(w.match_method, 'none')"
     ),
 }
 
@@ -256,7 +270,7 @@ def _simple_filter(col, op, val):
             "comparator": val, "clause": "WHERE"}
 
 
-G, R = "granularity", "requirements"
+G, R, W = "granularity", "requirements", "workshop"
 ALL_REQ = "R1,R2,R3,R4"
 
 # Charts: preferred viz type first, "table" always last as the safe fallback.
@@ -291,8 +305,8 @@ CHART_SPECS: list[dict] = [
 
     _spec(G, "kpi_0_coverage_by_method", "[Quality] Match Method Distribution", "R1,R2,R3",
           "Hierarchical cascade: exact -> split -> workers -> nominee -> fuzzy -> none.",
-          [("pie", {"groupby": ["match_method"], "metrics": ["award_rows"], "donut": True,
-                    "show_legend": True, "label_type": "key_percent", "row_limit": 10}),
+          [("pie", {"groupby": ["match_method"], "metric": "award_rows", "metrics": ["award_rows"],
+                    "donut": True, "show_legend": True, "label_type": "key_percent", "row_limit": 10}),
            _table(["match_method", "award_rows", "share_pct"], 10)]),
     _spec(G, "kpi_0_coverage_by_tier", "[Quality] Awards by recognition tier", "R1,R2,R3",
           "Grammy awards by recognition tier (A, B, C, none) and match cascade method.",
@@ -322,7 +336,7 @@ CHART_SPECS: list[dict] = [
           "14.1% of raw tracks have zero popularity.",
           [("box_plot", {"columns": ["artist_group"], "groupby": ["artist_display_name"],
                          "metrics": ["mean_popularity"], "whiskerOptions": "Tukey",
-                         "row_limit": 50000}),
+                         "row_limit": 500}),
            _table(["artist_group", "artist_display_name", "mean_popularity", "primary_tracks"], 100)]),
     _spec(R, "kpi_1_popularity_by_grammy_recognition", "[R1] Audio Features: Grammy vs Non-Grammy", "R1",
           "Audio features in [0, 1]; comparisons reflect surviving catalog tracks (primary songs).",
@@ -395,6 +409,39 @@ CHART_SPECS: list[dict] = [
           [_table(["artist_display_name", "recognition_tier", "awards", "first_award_year", "last_award_year"], 15,
                   order=[["awards", False]],
                   filters=[_simple_filter("recognition_tier", "==", "C")])]),
+
+    # ===== Dashboard 3: Workshop Dashboard ==========================================
+    _spec(W, "etl_batch_log", "[Workshop Header] Premios Evaluados", ALL_REQ,
+          "Total de premios Grammy evaluados en el Data Warehouse.",
+          _big("rows_fact_grammy_award", "Total Premios Grammy", ",d")),
+    _spec(W, "kpi_0_integration_coverage", "[Workshop Header] Cobertura Integración %", ALL_REQ,
+          "Porcentaje de premios asociados a un artista del catálogo de Spotify.",
+          _big("matched_enriched_pct", "Premios Vinculados a Spotify (%)", ".1f")),
+    _spec(W, "gran_grammy_artists", "[Workshop Header] Artistas Grammy en Spotify", ALL_REQ,
+          "Artistas reconocidos con el Grammy presentes en el catálogo Spotify.",
+          _big("grammy_artists", "Artistas Galardonados Únicos", ",d")),
+    _spec(W, "kpi_0_integration_coverage", "[Workshop Header] Cobertura Estricta %", ALL_REQ,
+          "Línea base de cruce exacto directo antes de la cascada.",
+          _big("matched_strict_pct", "Cruce Estricto Inicial (%)", ".1f")),
+
+    _spec(W, "kpi_1_within_genre_diff", "[Workshop] Diferencia de Popularidad por Género (R1/R2)", "R1,R2",
+          "Diferencia de popularidad promedio (Grammy vs No-Grammy) por familia de género musical.",
+          _hbar("genre_family", "diff", 15, ".1f", ascending=True)
+          + [_table(["genre_family", "diff", "mean_pop_grammy", "mean_pop_non"], 20)]),
+
+    _spec(W, "workshop_awards_breakdown", "[Workshop] Evolución de Premios por Categoría y Década (R3)", "R3",
+          "Distribución histórica de premios Grammy por década y familia de categoría.",
+          [("echarts_timeseries_bar", {"x_axis": "decade", "groupby": ["category_family"],
+                                       "metrics": ["awards"], "stack": True, "show_legend": True,
+                                       "y_axis_format": ",d", "row_limit": 100}),
+           ("dist_bar", {"groupby": ["decade"], "columns": ["category_family"],
+                         "metrics": ["awards"], "bar_stacked": True, "row_limit": 100}),
+           _table(["decade", "category_family", "awards"], 100)]),
+
+    _spec(W, "kpi_4_top_awarded_artists_on_spotify", "[Workshop] Top Artistas Premiados en Spotify (R4)", "R4",
+          "Artistas más galardonados con presencia en el catálogo de Spotify.",
+          [_table(["rank", "artist_display_name", "awards", "spotify_track_count",
+                   "first_award_year", "last_award_year"], 15, order=[["awards", False]])]),
 ]
 
 # --- Layouts: str = section header, list = one row of (kind, ref, width, height) ----------
@@ -437,10 +484,27 @@ LAYOUTS: dict[str, list] = {
          ("chart", "[R4] Top Awarded Artists Overall", 7, 50)],
         [("chart", "[R4] Top Artists Absent from Spotify", 6, 34), ("md", "r4_guide", 6, 34)],
     ],
+    "workshop": [
+        [("md", "workshop_intro", 12, 10)],
+        [("chart", "[Workshop Header] Premios Evaluados", 3, 16),
+         ("chart", "[Workshop Header] Cobertura Integración %", 3, 16),
+         ("chart", "[Workshop Header] Artistas Grammy en Spotify", 3, 16),
+         ("chart", "[Workshop Header] Cobertura Estricta %", 3, 16)],
+        "R1 & R2: Desempeño Musical y Géneros | R3: Evolución Histórica",
+        [("chart", "[Workshop] Diferencia de Popularidad por Género (R1/R2)", 6, 48),
+         ("chart", "[Workshop] Evolución de Premios por Categoría y Década (R3)", 6, 48)],
+        "R4: Ranking de Artistas Más Galardonados Presentes en Spotify",
+        [("chart", "[Workshop] Top Artistas Premiados en Spotify (R4)", 12, 38)],
+    ],
 }
 
 # Markdown cards (Spanish; no hard-coded figures, numbers come from the charts).
 MARKDOWN: dict[str, str] = {
+    "workshop_intro": (
+        "## Workshop Dashboard · Resumen Ejecutivo (R1–R4)\n"
+        "**Pipeline batch analítico Spotify × Premios Grammy** (PostgreSQL `music_dw` → Superset).\n"
+        "Tablero consolidado con indicadores clave (KPIs R1–R4), sin saturación y con filtros dinámicos."
+    ),
     "gran_intro": (
         "## Workshop-2 · Granularidad y calidad de datos\n"
         "**Spotify × Grammy Awards** · pipeline batch confiable "
@@ -479,6 +543,12 @@ MARKDOWN: dict[str, str] = {
 
 # --- Native filters: column must exist in the datasets of the charts to be scoped --------
 FILTER_DEFS: dict[str, list[dict]] = {
+    "workshop": [
+        {"name": "decade", "column": "decade"},
+        {"name": "category_family", "column": "category_family"},
+        {"name": "genre_family", "column": "genre_family"},
+        {"name": "match_method", "column": "match_method"},
+    ],
     "granularity": [
         {"name": "decade", "column": "decade"},
         {"name": "match_method", "column": "match_method"},
@@ -514,15 +584,77 @@ CSS_BASE = """\
 .dashboard-markdown h2 { margin-top: 0; }
 .dashboard-markdown blockquote { border-left: 4px solid #C9A227; padding-left: 12px; }
 """
-# Superset 4.x has no native dark mode: dark page + inverted cards (gold/slate survive hue-rotate).
-CSS_DARK_LEGACY = CSS_BASE + """\
-.dashboard, .dashboard-content { background-color: #0f1115 !important; }
-.dashboard-component-chart-holder, .dashboard-markdown, .dashboard-component-header {
-  filter: invert(.92) hue-rotate(180deg);
+# Superset 4.x has no native dark mode toggle: modern CSS dark theme.
+CSS_DARK = """\
+body, #app, .dashboard, .dashboard-content, .grid-container, .dragdroptarget {
+  background-color: #0b0f19 !important;
+  color: #f1f5f9 !important;
 }
-.dashboard-markdown a { color: #1d4ed8; }
+.dashboard-header, .dashboard-filter-bar, .filter-bar, .filter-bar-container {
+  background-color: #111827 !important;
+  border-bottom: 1px solid #1f2937 !important;
+  color: #f1f5f9 !important;
+}
+.dashboard-component-chart-holder, .chart-slice, .slice_container {
+  background-color: #151d30 !important;
+  border: 1px solid #1f2937 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+  color: #f1f5f9 !important;
+}
+.dashboard-component-header .header-title, .header-title, h1, h2, h3, h4,
+.dashboard-markdown h2, .dashboard-markdown h3 {
+  color: #f8fafc !important;
+  font-weight: 700 !important;
+  letter-spacing: .2px;
+}
+.dashboard-markdown, .dashboard-markdown p, .dashboard-markdown li {
+  color: #94a3b8 !important;
+}
+.dashboard-markdown a {
+  color: #E5C158 !important;
+  text-decoration: underline;
+  font-weight: 600;
+}
+.dashboard-markdown blockquote {
+  border-left: 4px solid #C9A227 !important;
+  background: rgba(201, 162, 39, 0.08) !important;
+  color: #f1f5f9 !important;
+  padding: 8px 12px !important;
+  border-radius: 4px;
+}
+.big-number-total, .header-line {
+  color: #f8fafc !important;
+}
+.subheader-line {
+  color: #94a3b8 !important;
+}
+.table, .table-condensed, table, .table-bordered {
+  background-color: #151d30 !important;
+  color: #e2e8f0 !important;
+}
+table th, .table th {
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+  border-bottom: 2px solid #334155 !important;
+}
+table td, .table td {
+  border-color: #1e293b !important;
+  color: #cbd5e1 !important;
+}
+.table-striped tbody tr:nth-of-type(odd) {
+  background-color: rgba(255, 255, 255, 0.02) !important;
+}
+.ant-select, .ant-select-selector {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f1f5f9 !important;
+}
+.ant-select-selection-item {
+  color: #f1f5f9 !important;
+}
 """
-CSS_TEMPLATES = {"W2 Light": CSS_BASE, "W2 Dark (Superset 4.x)": CSS_DARK_LEGACY}
+CSS_TEMPLATES = {"W2 Light": CSS_BASE, "W2 Dark (Superset 4.x)": CSS_DARK, "W2 Dark": CSS_DARK}
 
 NATIVE_THEMES = {
     "W2 Light": {"token": {"colorPrimary": "#C9A227", "brandLogoHref": "/"}},
@@ -910,8 +1042,8 @@ def apply_dashboard(client: SupersetClient, dash_id: int, info: dict, layout: di
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Bootstrap Superset dashboards for Workshop-2")
     parser.add_argument("--theme", choices=["light", "dark", "none"],
-                        default=os.environ.get("W2_THEME", "light"),
-                        help="CSS theme applied to the dashboards (Superset 4.x); default light")
+                        default=os.environ.get("W2_THEME", "dark"),
+                        help="CSS theme applied to the dashboards (Superset 4.x); default dark")
     args = parser.parse_args(argv)
 
     check_layouts()
@@ -956,7 +1088,7 @@ def main(argv: list[str] | None = None) -> int:
         ensure_css_templates(client)
     css = None
     if args.theme != "none":
-        css = CSS_DARK_LEGACY if (args.theme == "dark" and not native) else CSS_BASE
+        css = CSS_DARK if args.theme == "dark" else CSS_BASE
 
     for key, info in DASHBOARDS.items():
         dash_id = dashboard_ids[key]
