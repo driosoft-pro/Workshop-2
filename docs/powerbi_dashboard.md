@@ -87,6 +87,10 @@ Matched Award Rows:= SUM ( kpi_0_integration_coverage[matched_award_rows] )
 Award Rows        := SUM ( kpi_0_integration_coverage[award_rows] )
 ```
 
+### New Columns and Measures (P1–P5 Upgrade)
+
+New model columns include: `dim_genre.genre_family`; `dim_award_category.category_clean` and `category_family`; `dim_artist.dominant_genre`, `dominant_genre_family`, `n_genres`, and `genre_tie`; `fact_track_artist.song_key`, `is_primary_song`, `is_zero_popularity`, `is_outlier_duration`, `is_outlier_loudness`, `is_outlier_tempo`, `danceability`, `acousticness`, `speechiness`, `loudness`, `tempo`, `explicit`; `fact_grammy_award.artist_source`, `match_method`, `credit_artist_count`, `is_matched_strict`, `is_song_confirmed`; and new bridge table `bridge_award_artist(grammy_award_sk, artist_sk, artist_position, match_method)`. Corresponding new DAX measures include: `Enriched Recognition Rate := DIVIDE(SUM(kpi_0_integration_coverage[matched_award_rows]), SUM(kpi_0_integration_coverage[award_rows]))`, `Strict Recognition Rate := DIVIDE(SUM(kpi_0_integration_coverage[matched_award_rows_strict]), SUM(kpi_0_integration_coverage[award_rows]))`, `Song Confirmation Rate := DIVIDE(SUM(kpi_0_integration_coverage[song_confirmed_award_rows]), SUM(kpi_0_integration_coverage[matched_award_rows]))`, `Primary Tracks := CALCULATE(COUNTROWS(fact_track_artist), fact_track_artist[is_primary_song] = 1)`, and `Awards Per 100 Artists := DIVIDE([Awards Total] * 100, DISTINCTCOUNT(dim_artist[artist_sk]))`.
+
 Star-schema alternative (recommended for exploration): load the six DW tables,
 relate `fact_track_artist[artist_sk] → dim_artist[artist_sk]`,
 `fact_grammy_award[artist_sk] → dim_artist[artist_sk]`, `…[year_sk] → dim_year[year_sk]`,
