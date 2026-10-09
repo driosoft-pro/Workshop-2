@@ -15,7 +15,8 @@ conformed `dim_artist` (and `dim_year` for the temporal context).
 | Fact | Grain (one row = …) | Rows in this batch | Key measures |
 | --- | --- | --- | --- |
 | `fact_track_artist` | one Spotify **track listing** (`track_id` × `track_genre`) **× one performing artist** | **157,530** | `popularity`, `duration_ms`/`duration_ms→duration_min`, `explicit`, `danceability`, `energy`, `valence`, `acousticness`, `speechiness`, `liveness`, `loudness`, `tempo`, `artist_position`, `artist_total`, `is_grammy_artist`, `artist_grammy_awards` (degenerate/repeated measures, not additive across artists — see §6) |
-| `fact_grammy_award` | one **Grammy award record** (`year` × `category` × `nominee` × `artist`) | **4,810** | `winner`, `winner_flag`, `is_matched_spotify`, `spotify_track_count`, `award_count` |
+| `fact_grammy_award` | one **Grammy award record** (`year` × `category` × `nominee` × `artist`) | **4,810** | `winner`, `winner_flag`, `is_matched_spotify`, `is_matched_strict`, `is_song_confirmed`, `artist_source`, `match_method`, `credit_artist_count`, `spotify_track_count`, `award_count` |
+| `bridge_award_artist` | one **matched artist of a Grammy credit** (`award_bk` × `artist_key`) | **2,757** | `artist_position`, `match_method` (T12 collaborative credits) |
 
 Grain justification: a Spotify track may be attributed to several genres *and*
 several artists; the finest level at which all R1-R4 measures are consistent is
@@ -26,10 +27,10 @@ has 0 duplicates).
 
 | Dimension | Grain / business key | Surrogate key | Columns | Attributes used by |
 | --- | --- | --- | --- | --- |
-| `dim_artist` | **`artist_bk`** = normalized `artist_key` (TEXT, UNIQUE) | `artist_sk` BIGSERIAL (1-based, rebuilt each load) | `artist_display_name`, `from_spotify`, `from_grammy`, `grammy_award_count`, `spotify_track_count` | R1 (recognition flag), R4 (award rank + catalogue coverage) |
-| `dim_genre` | `genre` = Spotify `track_genre` (114 values, UNIQUE) | `genre_sk` BIGSERIAL | – | R2 (genre split), R1 per-genre view |
+| `dim_artist` | **`artist_bk`** = normalized `artist_key` (TEXT, UNIQUE) | `artist_sk` BIGSERIAL (1-based, rebuilt each load) | `artist_display_name`, `from_spotify`, `from_grammy`, `grammy_award_count`, `spotify_track_count`, **`dominant_genre`, `dominant_genre_family`, `n_genres`, `genre_tie`** (T16, primary-song rows only) | R1 (recognition flag), R2 (dominant genre family), R4 (award rank + catalogue coverage) |
+| `dim_genre` | `genre` = Spotify `track_genre` (114 values, UNIQUE) | `genre_sk` BIGSERIAL | **`genre_family`** (T14, 12 families) | R2 (genre split), R1 per-genre view |
 | `dim_year` | `year` (natural key = `year_sk`, INTEGER) | *none needed* — year is already a stable integer key | `decade` (derived `year/10*10`) | R3 (decade + per-year series) |
-| `dim_award_category` | `category` (638 values, UNIQUE) | `category_sk` BIGSERIAL | – | R4 award analysis, drill-down |
+| `dim_award_category` | `category` (638 values, UNIQUE) | `category_sk` BIGSERIAL | **`category_clean`** (T13: parentheses removed, 8 Producer variants merged into 2), **`category_family`** (T13) | R4 award analysis, drill-down |
 
 **Surrogate/business-key strategy**
 
@@ -65,18 +66,23 @@ dim_artist ---|<== fact_track_artist  |  fact_grammy_award  |==> dim_year (year_
 | `dim_genre` 1 → n `fact_track_artist` | one-to-many | FK `genre_sk NOT NULL` |
 | `dim_year` 1 → n `fact_grammy_award` | one-to-many | FK `year_sk NOT NULL` |
 | `dim_award_category` 1 → n `fact_grammy_award` | one-to-many | FK `category_sk NOT NULL` |
+| `fact_grammy_award` 1 → n `bridge_award_artist` | one-to-many | FK `grammy_award_sk NOT NULL` + `ON DELETE CASCADE` |
+| `dim_artist` 1 → n `bridge_award_artist` | one-to-many | FK `artist_sk NOT NULL` |
 | fact ↔ fact | conformed through `dim_artist` (many-to-many at source level) | modelled, not FK'd (facts never reference each other) |
 
 ## 5. Keys and integrity constraints (DDL)
 
 * PK: `artist_sk`, `genre_sk`, `year_sk`, `category_sk`, `track_artist_sk`,
-  `grammy_award_sk`, `etl_batch_log.batch_id`.
+  `grammy_award_sk`, `etl_batch_log.batch_id`. The bridge has no surrogate key
+  of its own: `(grammy_award_sk, artist_sk)` is UNIQUE by design.
 * UNIQUE: `dim_artist.artist_bk`, `dim_genre.genre`, `dim_year.year`,
   `dim_award_category.category`, `fact_track_artist (track_id, track_genre,
   artist_sk)` — **the prepared grain, enforced by the database** — and
   `fact_grammy_award.award_bk`.
 * CHECK: `is_grammy_artist IN (0,1)`, `winner_flag IN (0,1)`,
-  `is_matched_spotify IN (0,1)` (mirrors GX rules DQ-P5/P8).
+  `is_matched_spotify IN (0,1)`, plus the T15/T12 flags
+  (`is_primary_song`, `is_zero_popularity`, `is_outlier_*`,
+  `is_matched_strict`, `is_song_confirmed`) (mirrors GX rules DQ-P5/P8/DQ-G*).
 * FKs as in §4 (all `REFERENCES` clauses in `sql/dw_schema.sql`).
 * Indexes on every FK plus `batch_id` and the R1 segmentation flag.
 
@@ -91,11 +97,16 @@ dim_artist ---|<== fact_track_artist  |  fact_grammy_award  |==> dim_year (year_
 
 ## 7. Load strategy (idempotence)
 
-1. `build_dimensional_frames()` derives all six frames from the prepared CSVs
-   (deterministic ordering; surrogate keys 1..n assigned explicitly).
-2. Inside **one transaction**: `DELETE` existing rows of the six tables
-   (strategy `replace`), `INSERT` the new frames, `setval` the three sequences
-   to `MAX(sk)`, upsert `etl_batch_log` (`batch_id = <dag_id>__<run_id>`).
+1. `build_dimensional_frames()` derives all seven frames from the prepared
+   CSVs plus `bridge_award_artist.csv` (deterministic ordering; surrogate keys
+   1..n assigned explicitly).
+2. Inside **one transaction**: `DELETE` existing rows starting with the bridge
+   (it references facts and dimensions), then the facts and dimensions
+   (strategy `replace`), `INSERT` dims → facts → bridge (the bridge resolves
+   `award_bk → grammy_award_sk` inside the same transaction), `setval` the
+   three sequences to `MAX(sk)`, upsert `etl_batch_log`
+   (`batch_id = <dag_id>__<run_id>`) with before/after counts for all seven
+   tables.
 3. Any failure rolls the whole batch back → the target keeps the previous
    consistent state (never a half-loaded warehouse).
 4. Consequences for reruns: a rerun of the same batch replaces rows instead of

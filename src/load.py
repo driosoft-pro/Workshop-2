@@ -24,8 +24,13 @@ import pandas as pd
 from sqlalchemy import create_engine, text
 
 from src import config
+from src.mappings import category_family, clean_category, genre_family
+from src.transform import build_artist_genre_profile
 
+# Deletion order matters: the bridge references both facts and dimensions, so
+# it is cleared first. Insertion order is dims -> facts -> bridge.
 TABLE_ORDER = [
+    "bridge_award_artist",
     "fact_track_artist",
     "fact_grammy_award",
     "dim_artist",
@@ -33,6 +38,16 @@ TABLE_ORDER = [
     "dim_year",
     "dim_award_category",
 ]
+
+INSERT_ORDER = (
+    "dim_artist",
+    "dim_genre",
+    "dim_year",
+    "dim_award_category",
+    "fact_track_artist",
+    "fact_grammy_award",
+    "bridge_award_artist",
+)
 
 
 def _sql_object(series: pd.Series) -> pd.Series:
@@ -113,6 +128,13 @@ def build_dimensional_frames(
     dim_artist["grammy_award_count"] = dim_artist["grammy_award_count"].fillna(0).astype("int32")
     dim_artist["spotify_track_count"] = dim_artist["spotify_track_count"].fillna(0).astype("int32")
     dim_artist = dim_artist.rename(columns={"artist_key": "artist_bk"})
+
+    # T16: dominant genre profile derived from the primary-song rows only
+    genre_profile = build_artist_genre_profile(tracks).rename(
+        columns={"artist_key": "artist_bk"}
+    )
+    dim_artist = dim_artist.merge(genre_profile, on="artist_bk", how="left")
+    dim_artist["genre_tie"] = dim_artist["genre_tie"].fillna(False).astype(bool)
     dim_artist = dim_artist[
         [
             "artist_sk",
@@ -122,11 +144,16 @@ def build_dimensional_frames(
             "from_grammy",
             "grammy_award_count",
             "spotify_track_count",
+            "dominant_genre",
+            "dominant_genre_family",
+            "n_genres",
+            "genre_tie",
         ]
     ]
 
     dim_genre = pd.DataFrame({"genre": sorted(tracks["track_genre"].dropna().unique())})
     dim_genre.insert(0, "genre_sk", range(1, len(dim_genre) + 1))
+    dim_genre["genre_family"] = dim_genre["genre"].map(genre_family)
 
     dim_year = pd.DataFrame({"year": sorted(awards["year"].unique())})
     dim_year["year"] = dim_year["year"].astype("int32")
@@ -138,6 +165,11 @@ def build_dimensional_frames(
         {"category": sorted(awards["category"].dropna().unique())}
     )
     dim_award_category.insert(0, "category_sk", range(1, len(dim_award_category) + 1))
+    # T13: clean label + family are derived attributes of the raw category
+    dim_award_category["category_clean"] = dim_award_category["category"].map(clean_category)
+    dim_award_category["category_family"] = dim_award_category["category_clean"].map(
+        category_family
+    )
 
     artist_sk = dim_artist[["artist_bk", "artist_sk"]]
     genre_sk = dim_genre[["genre", "genre_sk"]]
@@ -154,11 +186,18 @@ def build_dimensional_frames(
             "popularity", "duration_ms", "duration_min", "explicit", "danceability", "energy",
             "valence", "acousticness", "speechiness", "liveness", "loudness", "tempo",
             "artist_position", "artist_total", "is_grammy_artist", "artist_grammy_awards",
+            "song_key", "is_zero_popularity", "is_outlier_duration", "is_outlier_loudness",
+            "is_outlier_tempo", "is_primary_song",
         ]
     ].copy()
     fact_track_artist["artist_sk"] = fact_track_artist["artist_sk"].astype("int64")
     fact_track_artist["genre_sk"] = fact_track_artist["genre_sk"].astype("int64")
     fact_track_artist["explicit"] = fact_track_artist["explicit"].astype(bool)
+    for column in (
+        "is_zero_popularity", "is_outlier_duration", "is_outlier_loudness",
+        "is_outlier_tempo", "is_primary_song",
+    ):
+        fact_track_artist[column] = fact_track_artist[column].fillna(0).astype("int16")
     fact_track_artist["batch_id"] = batch_id
     fact_track_artist["track_name"] = _sql_object(fact_track_artist["track_name"])
     fact_track_artist["album_name"] = _sql_object(fact_track_artist["album_name"])
@@ -176,19 +215,47 @@ def build_dimensional_frames(
     fact_grammy_award = fact_grammy_award[
         [
             "award_bk", "artist_sk", "year_sk", "category_sk", "title", "nominee", "artist",
-            "workers", "winner", "winner_flag", "is_matched_spotify", "spotify_track_count",
+            "workers", "winner", "winner_flag", "is_matched_spotify", "is_matched_strict",
+            "is_song_confirmed", "artist_source", "match_method", "credit_artist_count",
+            "spotify_track_count",
         ]
     ].copy()
     fact_grammy_award = fact_grammy_award.rename(columns={"artist": "artist_credit"})
     fact_grammy_award["artist_sk"] = _sql_int(fact_grammy_award["artist_sk"])
     fact_grammy_award["year_sk"] = fact_grammy_award["year_sk"].astype("int32")
     fact_grammy_award["category_sk"] = fact_grammy_award["category_sk"].astype("int64")
+    fact_grammy_award["credit_artist_count"] = _sql_int(
+        fact_grammy_award["credit_artist_count"]
+    ).map(lambda value: 0 if value is None else int(value))
+    for column in ("is_matched_strict", "is_song_confirmed"):
+        fact_grammy_award[column] = fact_grammy_award[column].fillna(0).astype("int16")
+    for column in ("artist_source", "match_method"):
+        fact_grammy_award[column] = _sql_object(fact_grammy_award[column])
     fact_grammy_award["award_count"] = pd.Series(
         1, index=fact_grammy_award.index, dtype="int16"
     )
     fact_grammy_award["batch_id"] = batch_id
     for column in ("title", "nominee", "artist_credit", "workers"):
         fact_grammy_award[column] = _sql_object(fact_grammy_award[column])
+
+    # T12 bridge: award_bk + artist_key are resolved to surrogate keys at load
+    bridge = config.read_csv(config.BRIDGE_AWARD_ARTIST_PATH)
+    if bridge.empty:
+        bridge = pd.DataFrame(
+            columns=["award_bk", "artist_key", "artist_position", "match_method"]
+        )
+    artist_sk_map = dim_artist.set_index("artist_bk")["artist_sk"]
+    bridge = bridge.copy()
+    bridge["artist_sk"] = bridge["artist_key"].map(artist_sk_map)
+    if bridge["artist_sk"].isna().any():
+        missing = bridge.loc[bridge["artist_sk"].isna(), "artist_key"].unique()[:5]
+        raise RuntimeError(f"bridge_award_artist contains unresolved artist keys: {missing}")
+    bridge["artist_position"] = bridge["artist_position"].astype("int32")
+    bridge["match_method"] = bridge["match_method"].astype(str)
+    bridge["batch_id"] = batch_id
+    bridge = bridge[["award_bk", "artist_sk", "artist_position", "match_method", "batch_id"]]
+    if bridge.duplicated(subset=["award_bk", "artist_sk"]).any():
+        raise RuntimeError("bridge_award_artist violates (award_bk, artist_key) uniqueness")
 
     return {
         "dim_artist": dim_artist,
@@ -197,13 +264,21 @@ def build_dimensional_frames(
         "dim_award_category": dim_award_category,
         "fact_track_artist": fact_track_artist,
         "fact_grammy_award": fact_grammy_award,
+        "bridge_award_artist": bridge,
     }
 
 
 def _execute_schema(engine) -> None:
     schema_sql = config.SQL_DIR / "dw_schema.sql"
     script = schema_sql.read_text()
-    statements = [statement.strip() for statement in script.split(";") if statement.strip()]
+    statements = []
+    for raw_statement in script.split(";"):
+        statement = "\n".join(
+            line for line in raw_statement.splitlines()
+            if line.strip() and not line.strip().startswith("--")
+        ).strip()
+        if statement:
+            statements.append(statement)
     with engine.begin() as connection:
         for statement in statements:
             connection.execute(text(statement))
@@ -269,15 +344,30 @@ def load_dw(
         for table in TABLE_ORDER:
             connection.execute(text(f"DELETE FROM {table}"))
 
-        for name in (
-            "dim_artist",
-            "dim_genre",
-            "dim_year",
-            "dim_award_category",
-            "fact_track_artist",
-            "fact_grammy_award",
-        ):
+        for name in INSERT_ORDER:
+            if name == "bridge_award_artist":
+                continue
             frames[name].to_sql(name, connection, if_exists="append", index=False)
+
+        # bridge needs the surrogate key generated for each award row
+        award_sk = {
+            row[0]: row[1]
+            for row in connection.execute(
+                text("SELECT award_bk, grammy_award_sk FROM fact_grammy_award")
+            )
+        }
+        bridge = frames["bridge_award_artist"].copy()
+        bridge["grammy_award_sk"] = bridge["award_bk"].map(award_sk)
+        if bridge["grammy_award_sk"].isna().any():
+            raise RuntimeError("bridge_award_artist contains unresolved award_bk values")
+        if bridge.duplicated(subset=["grammy_award_sk", "artist_sk"]).any():
+            raise RuntimeError("bridge_award_artist violates UNIQUE (grammy_award_sk, artist_sk)")
+        bridge[
+            [
+                "grammy_award_sk", "artist_sk", "artist_position",
+                "match_method", "batch_id",
+            ]
+        ].to_sql("bridge_award_artist", connection, if_exists="append", index=False)
 
         for table, key_column in (
             ("dim_artist", "artist_sk"),

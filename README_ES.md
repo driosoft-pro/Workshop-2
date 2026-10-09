@@ -210,7 +210,9 @@ DDL [`sql/dw_schema.sql`](sql/dw_schema.sql) · creado automáticamente por
 erDiagram
     dim_artist ||--o{ fact_track_artist : "artist_sk"
     dim_genre ||--o{ fact_track_artist : "genre_sk"
-    dim_artist ||--o{ fact_grammy_award : "artist_sk"
+    dim_artist ||--o{ fact_grammy_award : "artist_sk primary, nullable"
+    fact_grammy_award ||--o{ bridge_award_artist : grammy_award_sk
+    dim_artist ||--o{ bridge_award_artist : artist_sk
     dim_year ||--o{ fact_grammy_award : "year_sk"
     dim_award_category ||--o{ fact_grammy_award : "category_sk"
 
@@ -222,10 +224,15 @@ erDiagram
         bool from_grammy
         int grammy_award_count
         int spotify_track_count
+        text dominant_genre "NUEVO T16"
+        text dominant_genre_family "NUEVO T16"
+        int n_genres "NUEVO T16"
+        bool genre_tie "NUEVO T16"
     }
     dim_genre {
         bigint genre_sk PK
         text genre UK
+        text genre_family "NUEVO T14"
     }
     dim_year {
         int year_sk PK
@@ -235,6 +242,8 @@ erDiagram
     dim_award_category {
         bigint category_sk PK
         text category UK
+        text category_clean "NUEVO T13"
+        text category_family "NUEVO T13"
     }
     fact_track_artist {
         bigint track_artist_sk PK
@@ -252,6 +261,18 @@ erDiagram
         int artist_total
         int is_grammy_artist "0/1"
         int artist_grammy_awards
+        text song_key "NUEVO T15"
+        int is_primary_song "NUEVO T15"
+        int is_zero_popularity "NUEVO T15"
+        int is_outlier_duration "NUEVO T15"
+        int is_outlier_loudness "NUEVO T15"
+        int is_outlier_tempo "NUEVO T15"
+        float danceability "contrato raw 22 columnas"
+        float acousticness "contrato raw 22 columnas"
+        float speechiness "contrato raw 22 columnas"
+        float loudness "contrato raw 22 columnas"
+        float tempo "contrato raw 22 columnas"
+        bool explicit "contrato raw 22 columnas"
         text batch_id
         timestamptz loaded_at
     }
@@ -268,8 +289,21 @@ erDiagram
         bool winner
         int winner_flag "0/1"
         int is_matched_spotify "0/1"
+        int is_matched_strict "NUEVO T12"
+        int is_song_confirmed "NUEVO T12"
+        text artist_source "NUEVO T12"
+        text match_method "NUEVO T12"
+        int credit_artist_count "NUEVO T12"
         int spotify_track_count
         int award_count
+        text batch_id
+        timestamptz loaded_at
+    }
+    bridge_award_artist {
+        bigint grammy_award_sk FK
+        bigint artist_sk FK
+        int artist_position
+        text match_method
         text batch_id
         timestamptz loaded_at
     }
@@ -288,8 +322,8 @@ erDiagram
 ```
 
 Filas actuales: `fact_track_artist` 157.530 · `fact_grammy_award` 4.810 ·
-`dim_artist` 30.894 · `dim_genre` 114 · `dim_year` 62 ·
-`dim_award_category` 638. Las claves sustitutas se generan dentro de la
+`bridge_award_artist` 2.757 · `dim_artist` 31.001 · `dim_genre` 114 ·
+`dim_year` 62 · `dim_award_category` 638. Las claves sustitutas se generan dentro de la
 transacción de carga; las claves de negocio tienen restricción UNIQUE; los
 premios sin coincidencia conservan `artist_sk NULL` por diseño.
 
@@ -302,6 +336,7 @@ premios sin coincidencia conservan `artist_sk NULL` por diseño.
 spotify CSV ─ extract_spotify ─ validate_spotify_raw ─┐
                                                       ├─ transform_and_integrate ─ validate_prepared ─ load_dw ─ build_kpis
 postgres   ─ extract_grammys ─ validate_grammys_raw ──┘                                     (music_dw)    (KPIs/PNG)
+             transform_and_integrate: +bridge, flags, match report   validate_prepared: +DQ-G6… rules
 ```
 
 ![Estructura del DAG implementado](docs/dag_structure.png)

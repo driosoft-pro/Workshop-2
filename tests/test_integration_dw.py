@@ -19,7 +19,7 @@ pytestmark = [
 
 DW_TABLES = [
     "dim_artist", "dim_genre", "dim_year", "dim_award_category",
-    "fact_track_artist", "fact_grammy_award", "etl_batch_log",
+    "fact_track_artist", "fact_grammy_award", "bridge_award_artist", "etl_batch_log",
 ]
 
 
@@ -48,10 +48,11 @@ def test_documented_row_counts_after_a_full_load(engine):
     expected = {
         "fact_track_artist": 157_530,
         "fact_grammy_award": 4_810,
-        "dim_artist": 30_894,
+        "dim_artist": 31_001,
         "dim_genre": 114,
         "dim_year": 62,
         "dim_award_category": 638,
+        "bridge_award_artist": 2_757,
     }
     actual = {table: _count(engine, table) for table in expected}
     if any(count == 0 for count in actual.values()):

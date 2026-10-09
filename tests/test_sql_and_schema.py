@@ -11,7 +11,7 @@ DW_SCHEMA = PROJECT_ROOT / "sql" / "dw_schema.sql"
 
 DW_OBJECTS = [
     "dim_artist", "dim_genre", "dim_year", "dim_award_category",
-    "fact_track_artist", "fact_grammy_award", "etl_batch_log",
+    "fact_track_artist", "fact_grammy_award", "bridge_award_artist", "etl_batch_log",
 ]
 
 
