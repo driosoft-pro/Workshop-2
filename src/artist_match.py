@@ -27,7 +27,7 @@ import pandas as pd
 from src.mappings import norm_key, normalize_artist_name
 
 SPLIT_RE = re.compile(
-    r"\s*(?:&|,|/|\band\b|\bfeat\.?|\bfeaturing\b|\bwith\b| x )\s*", re.IGNORECASE
+    r"\s*(?:&|,|/|\band\b|\bfeaturing\b|\bfeat\.?|\bwith\b| x )\s*", re.IGNORECASE
 )
 TRAILING_PAREN_RE = re.compile(r"\s*\(.*\)\s*$")
 WORKERS_PAREN_RE = re.compile(r"\(([^()]+)\)\s*(?:\(\w\))?\s*$")

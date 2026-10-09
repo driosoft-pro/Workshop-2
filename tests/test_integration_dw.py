@@ -70,6 +70,7 @@ def test_etl_batch_log_records_committed_batches(engine):
         pytest.skip("no batch logged yet - trigger the DAG first")
     assert all(row.status == "success" for row in rows)
     assert all("fact_track_artist" in row.target_rows_after for row in rows)
+    assert all("bridge_award_artist" in row.target_rows_after for row in rows)
 
 
 def test_surrogate_keys_are_unique_and_awards_may_be_unmatched(engine):
