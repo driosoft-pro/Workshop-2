@@ -1,17 +1,17 @@
 {
-  "generated_at": "2026-10-09T04:31:16.342975+00:00",
+  "generated_at": "2026-10-09T06:52:48.992954+00:00",
   "rows_grammy": 4810,
   "rows_spotify": 157530,
-  "match_rate_pct": 52.4948,
-  "match_rate_strict_pct": 29.4179,
+  "match_rate_pct": 51.1019,
+  "match_rate_strict_pct": 28.0457,
   "match_rate_by_method": {
     "exact": {
-      "rows": 1415,
-      "share_pct": 29.4179
+      "rows": 1349,
+      "share_pct": 28.0457
     },
     "split": {
-      "rows": 344,
-      "share_pct": 7.1518
+      "rows": 343,
+      "share_pct": 7.131
     },
     "workers": {
       "rows": 704,
@@ -26,15 +26,33 @@
       "share_pct": 0.0
     },
     "none": {
-      "rows": 2285,
-      "share_pct": 47.5052
+      "rows": 2352,
+      "share_pct": 48.8981
+    }
+  },
+  "match_rate_by_tier": {
+    "A": {
+      "rows": 1733,
+      "share_pct": 36.0291
+    },
+    "B": {
+      "rows": 429,
+      "share_pct": 8.9189
+    },
+    "C": {
+      "rows": 296,
+      "share_pct": 6.1538
+    },
+    "none": {
+      "rows": 2352,
+      "share_pct": 48.8981
     }
   },
   "match_rate_by_decade": {
     "1950": {
       "rows": 63,
-      "matched": 31,
-      "match_rate_pct": 49.2063
+      "matched": 30,
+      "match_rate_pct": 47.619
     },
     "1960": {
       "rows": 433,
@@ -43,38 +61,40 @@
     },
     "1970": {
       "rows": 487,
-      "matched": 245,
-      "match_rate_pct": 50.308
+      "matched": 243,
+      "match_rate_pct": 49.8973
     },
     "1980": {
       "rows": 684,
-      "matched": 327,
-      "match_rate_pct": 47.807
+      "matched": 321,
+      "match_rate_pct": 46.9298
     },
     "1990": {
       "rows": 866,
-      "matched": 457,
-      "match_rate_pct": 52.7714
+      "matched": 442,
+      "match_rate_pct": 51.0393
     },
     "2000": {
       "rows": 1067,
-      "matched": 601,
-      "match_rate_pct": 56.3261
+      "matched": 575,
+      "match_rate_pct": 53.8894
     },
     "2010": {
       "rows": 1210,
-      "matched": 676,
-      "match_rate_pct": 55.8678
+      "matched": 659,
+      "match_rate_pct": 54.4628
     }
   },
-  "song_confirmation_rate_pct": 26.1324,
+  "aggregate_excluded": 127,
+  "tier_c_share_pct": 12.0423,
+  "song_confirmation_rate_pct": 26.2238,
   "song_type_rows": 407,
-  "song_type_matched_rows": 287,
+  "song_type_matched_rows": 286,
   "workers_recovered": 704,
-  "split_recovered": 344,
+  "split_recovered": 343,
   "nominee_recovered": 62,
   "fuzzy_recovered": 0,
-  "bridge_rows": 2841,
+  "bridge_rows": 2772,
   "artist_keys_with_genre_tie": 1389,
   "genre_tie_share_pct": 4.6628,
   "primary_song_rows": 111206,

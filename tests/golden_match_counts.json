@@ -1,0 +1,24 @@
+{
+  "rows_grammy": 4810,
+  "matched_rows": 2458,
+  "unmatched_rows": 2352,
+  "match_rate_pct": 51.1019,
+  "match_rate_strict_pct": 28.0457,
+  "bridge_rows": 2772,
+  "aggregate_excluded": 127,
+  "tier_c_share_pct": 12.0423,
+  "methods": {
+    "exact": 1349,
+    "split": 343,
+    "workers": 704,
+    "nominee": 62,
+    "fuzzy": 0,
+    "none": 2352
+  },
+  "tiers": {
+    "A": 1733,
+    "B": 429,
+    "C": 296,
+    "none": 2352
+  }
+}

@@ -1,0 +1,107 @@
+{
+  "summary": {
+    "total_checks": 16,
+    "pass": 7,
+    "warn": 2,
+    "fail": 0,
+    "skip": 7
+  },
+  "checks": [
+    {
+      "id": "V1",
+      "status": "SKIP",
+      "value": "DB unreachable",
+      "expected": "equal; 0"
+    },
+    {
+      "id": "V2",
+      "status": "SKIP",
+      "value": "DB unreachable",
+      "expected": "0"
+    },
+    {
+      "id": "V3",
+      "status": "SKIP",
+      "value": "DB unreachable",
+      "expected": "0"
+    },
+    {
+      "id": "V4",
+      "status": "PASS",
+      "value": "overall=51.1019%, strict=28.0457%",
+      "expected": "tier consistency"
+    },
+    {
+      "id": "V5",
+      "status": "PASS",
+      "value": "rows=4810, bridge=2772",
+      "expected": "exact"
+    },
+    {
+      "id": "V6",
+      "status": "SKIP",
+      "value": "DB unreachable",
+      "expected": "0"
+    },
+    {
+      "id": "V7",
+      "status": "SKIP",
+      "value": "DB unreachable",
+      "expected": "equal"
+    },
+    {
+      "id": "V8",
+      "status": "SKIP",
+      "value": "DB unreachable",
+      "expected": "diff < 1e-6"
+    },
+    {
+      "id": "V9",
+      "status": "PASS",
+      "value": "core: delta=1.0, CI=[15.0,45.0], p=7.937e-03",
+      "expected": "informational"
+    },
+    {
+      "id": "V10",
+      "status": "WARN",
+      "value": "kpi_1_dedupe_impact.csv missing",
+      "expected": "informational"
+    },
+    {
+      "id": "V11",
+      "status": "PASS",
+      "value": "genres=114/114 mapped",
+      "expected": "114; <= 0.10"
+    },
+    {
+      "id": "V12",
+      "status": "PASS",
+      "value": "zero_pop~0.146, genre_tie=4.6628%",
+      "expected": "0.141 / known / <= 0.15"
+    },
+    {
+      "id": "V13",
+      "status": "PASS",
+      "value": "AUDIT PENDING",
+      "expected": "informational"
+    },
+    {
+      "id": "V14",
+      "status": "WARN",
+      "value": "8 mismatches: L53: claims 13 KPIs (actual: 14); L96: claims 34 rules (actual: 38); L99: claims 13 KPIs (actual: 14)",
+      "expected": "0 mismatches"
+    },
+    {
+      "id": "V15",
+      "status": "SKIP",
+      "value": "flag --superset not provided",
+      "expected": "all OK"
+    },
+    {
+      "id": "V16",
+      "status": "PASS",
+      "value": "all present",
+      "expected": "present"
+    }
+  ]
+}

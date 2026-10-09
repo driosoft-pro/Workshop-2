@@ -39,6 +39,8 @@ if "%1"=="status" goto :status
 if "%1"=="source" goto :source
 if "%1"=="trigger" goto :trigger
 if "%1"=="trigger-bad" goto :triggerbad
+if "%1"=="trigger-fuzzy" goto :triggerfuzzy
+if "%1"=="validate" goto :validate
 if "%1"=="test" goto :test
 if "%1"=="unit" goto :unit
 if "%1"=="smoke" goto :smoke
@@ -120,6 +122,15 @@ goto :eof
 %PY% -m scripts.make_bad_data
 echo [run] disparando el Test B (fallo controlado, spotify_bad.csv) ...
 %COMPOSE% -f docker-compose.yaml exec -T airflow-apiserver airflow dags trigger reliable_music_pipeline --conf "{\"spotify_source_file\":\"spotify_bad.csv\"}"
+goto :eof
+
+:triggerfuzzy
+echo [run] disparando reliable_music_pipeline con enable_fuzzy=true ...
+%COMPOSE% -f docker-compose.yaml exec -T airflow-apiserver airflow dags trigger reliable_music_pipeline --conf "{\"enable_fuzzy\":true}"
+goto :eof
+
+:validate
+%PY% -m scripts.validate_report %2 %3 %4 %5
 goto :eof
 
 :test

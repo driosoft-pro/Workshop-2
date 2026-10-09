@@ -109,6 +109,9 @@ wait_http() { # url, intentos
 # requerido se detienen automaticamente (podman/docker); procesos que no
 # son contenedores solo se reportan.
 cmd_ports() {
+  for arg in "$@"; do
+    case "$arg" in --yes|-y) export ASSUME_YES=1 ;; esac
+  done
   detect_engine || return 1
   local ports port id name pfmt owned=" " stopped=0
   ports=$(required_ports)
@@ -168,6 +171,9 @@ cmd_up() {
 
 cmd_down()     { compose down; echo "[run] servicios del proyecto detenidos (volumenes conservados)"; }
 cmd_reset()    {
+  for arg in "$@"; do
+    case "$arg" in --yes|-y) export ASSUME_YES=1 ;; esac
+  done
   if [ "${ASSUME_YES:-0}" != "1" ]; then
     read -r -p "[run] ¿Eliminar todos los volumenes y borrar estado del DW? [y/N] " resp
     case "$resp" in
@@ -225,20 +231,25 @@ cmd_superset() {
 
 cmd_dags()     { compose exec -T airflow-apiserver airflow dags list; }
 
+cmd_validate() {
+  run_python -m scripts.validate_report "$@"
+}
+
 usage() {
   cat <<'EOF'
 Uso: ./run.sh <comando>
 
   up                  .env + valida/libera puertos + compose up -d --build + fuente + superset
   down | stop         baja TODOS los servicios del proyecto (volumenes intactos)
-  reset               baja el stack y borra los volumenes (reset total)
-  ports               valida contenedores/puertos activos y detiene los ajenos (conflictos)
+  reset [--yes]       baja el stack y borra los volumenes (reset total)
+  ports [--yes]       valida contenedores/puertos activos y detiene los ajenos (conflictos)
   status              estado de contenedores y URLs
   urls                URLs de acceso
   source              re-importa el CSV de Grammy a music_source
   trigger             DAG Test A (corrida exitosa)
   trigger-bad         genera spotify_bad.csv y dispara el Test B (fallo controlado)
   trigger-fuzzy       dispara reliable_music_pipeline con enable_fuzzy=true
+  validate [args]     corre reporte de validacion automatizado (V1-V16, --superset, --json)
   test [pytest args]  pruebas unitarias + de integracion (auto-skip sin BD)
   unit  [pytest args] solo pruebas offline
   smoke [args]        pipeline local sin Airflow (scripts/smoke_test.py)
@@ -253,14 +264,15 @@ EOF
 case "${1:-help}" in
   up)           cmd_up ;;
   down|stop)    cmd_down ;;
-  reset)        cmd_reset ;;
-  ports|check-ports) cmd_ports ;;
+  reset)        shift; cmd_reset "$@" ;;
+  ports|check-ports) shift; cmd_ports "$@" ;;
   status)       cmd_status ;;
   urls)         cmd_urls ;;
   source)       cmd_source ;;
   trigger)      cmd_trigger ;;
   trigger-bad)  cmd_trigger_bad ;;
   trigger-fuzzy) cmd_trigger_fuzzy ;;
+  validate)     shift; cmd_validate "$@" ;;
   test)         shift; cmd_test "$@" ;;
   unit)         shift; cmd_unit "$@" ;;
   smoke)        shift; cmd_smoke "$@" ;;
