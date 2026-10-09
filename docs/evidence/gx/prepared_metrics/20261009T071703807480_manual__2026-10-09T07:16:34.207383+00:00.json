@@ -1,0 +1,173 @@
+{
+  "stage": "prepared_metrics",
+  "generated_at": "2026-10-09T07:17:03.807398+00:00",
+  "run_context": {
+    "dag_id": "reliable_music_pipeline",
+    "task_id": "validate_prepared",
+    "run_id": "manual__2026-10-09T07:16:34.207383+00:00",
+    "try_number": 1,
+    "logical_date": "",
+    "stage": "prepared_metrics"
+  },
+  "checkpoint": "prepared_metrics_checkpoint",
+  "suite": "prepared_metrics_suite",
+  "success": true,
+  "max_failure_severity": null,
+  "statistics": {
+    "evaluated_expectations": 7,
+    "successful_expectations": 7,
+    "unsuccessful_expectations": 0,
+    "success_percent": 100.0
+  },
+  "failed_critical_rules": [],
+  "failed_warning_rules": [],
+  "expectations": [
+    {
+      "rule_id": "DQ-P10",
+      "quality_dimension": "Uniqueness",
+      "requirement": "R1",
+      "expectation": "expect_column_values_to_be_between",
+      "column": "duplicate_grain_rows",
+      "thresholds": {
+        "min_value": 0.0,
+        "max_value": 0.0
+      },
+      "severity": "critical",
+      "success": true,
+      "result": {
+        "element_count": 1,
+        "unexpected_count": 0,
+        "unexpected_percent": 0.0,
+        "partial_unexpected_list": [],
+        "missing_count": 0,
+        "missing_percent": 0.0
+      }
+    },
+    {
+      "rule_id": "DQ-P11",
+      "quality_dimension": "Consistency",
+      "requirement": "R1,R2,R3",
+      "expectation": "expect_column_values_to_be_between",
+      "column": "grammy_match_rate_pct",
+      "thresholds": {
+        "min_value": 25.0,
+        "max_value": 100.0
+      },
+      "severity": "warning",
+      "success": true,
+      "result": {
+        "element_count": 1,
+        "unexpected_count": 0,
+        "unexpected_percent": 0.0,
+        "partial_unexpected_list": [],
+        "missing_count": 0,
+        "missing_percent": 0.0
+      }
+    },
+    {
+      "rule_id": "DQ-P14",
+      "quality_dimension": "Consistency",
+      "requirement": "R1,R2",
+      "expectation": "expect_column_values_to_be_between",
+      "column": "grammy_match_rate_pct",
+      "thresholds": {
+        "min_value": 40.0,
+        "max_value": 100.0
+      },
+      "severity": "warning",
+      "success": true,
+      "result": {
+        "element_count": 1,
+        "unexpected_count": 0,
+        "unexpected_percent": 0.0,
+        "partial_unexpected_list": [],
+        "missing_count": 0,
+        "missing_percent": 0.0
+      }
+    },
+    {
+      "rule_id": "DQ-P12",
+      "quality_dimension": "Completeness",
+      "requirement": "R1",
+      "expectation": "expect_column_values_to_be_between",
+      "column": "fact_track_rows",
+      "thresholds": {
+        "min_value": 100000.0,
+        "max_value": 10000000.0
+      },
+      "severity": "critical",
+      "success": true,
+      "result": {
+        "element_count": 1,
+        "unexpected_count": 0,
+        "unexpected_percent": 0.0,
+        "partial_unexpected_list": [],
+        "missing_count": 0,
+        "missing_percent": 0.0
+      }
+    },
+    {
+      "rule_id": "DQ-P15",
+      "quality_dimension": "Consistency",
+      "requirement": "R1",
+      "expectation": "expect_column_values_to_be_between",
+      "column": "song_confirmation_rate_pct",
+      "thresholds": {
+        "min_value": 0.0,
+        "max_value": 100.0
+      },
+      "severity": "info",
+      "success": true,
+      "result": {
+        "element_count": 1,
+        "unexpected_count": 0,
+        "unexpected_percent": 0.0,
+        "partial_unexpected_list": [],
+        "missing_count": 0,
+        "missing_percent": 0.0
+      }
+    },
+    {
+      "rule_id": "DQ-P16",
+      "quality_dimension": "Consistency",
+      "requirement": "R2",
+      "expectation": "expect_column_values_to_be_between",
+      "column": "genre_tie_share_pct",
+      "thresholds": {
+        "min_value": 0.0,
+        "max_value": 15.0
+      },
+      "severity": "warning",
+      "success": true,
+      "result": {
+        "element_count": 1,
+        "unexpected_count": 0,
+        "unexpected_percent": 0.0,
+        "partial_unexpected_list": [],
+        "missing_count": 0,
+        "missing_percent": 0.0
+      }
+    },
+    {
+      "rule_id": "DQ-P17",
+      "quality_dimension": "Validity",
+      "requirement": "R2",
+      "expectation": "expect_column_values_to_be_between",
+      "column": "tier_c_share_pct",
+      "thresholds": {
+        "min_value": 0.0,
+        "max_value": 17.1
+      },
+      "severity": "warning",
+      "success": true,
+      "result": {
+        "element_count": 1,
+        "unexpected_count": 0,
+        "unexpected_percent": 0.0,
+        "partial_unexpected_list": [],
+        "missing_count": 0,
+        "missing_percent": 0.0
+      }
+    }
+  ]
+}

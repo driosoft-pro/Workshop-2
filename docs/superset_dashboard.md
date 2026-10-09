@@ -41,10 +41,10 @@ Objects created:
 | Kind | Name | Source |
 | --- | --- | --- |
 | Database | `music_dw` | `config/superset_config.py` / `SUPERSET_DW_SQLALCHEMY_URI` |
-| Datasets (14, virtual) | `kpi_0_integration_coverage`, `kpi_0_coverage_by_method`, `kpi_0_coverage_by_decade`, `kpi_1_popularity_by_grammy_recognition`, `kpi_1_artist_level`, `kpi_1_within_genre_diff`, `kpi_2_awards_by_dominant_genre`, `kpi_2_heatmap`, `kpi_3_awards_and_profile_by_decade`, `kpi_3_awards_per_year`, `kpi_3_awards_by_family_decade`, `kpi_4_top_awarded_artists_on_spotify`, `kpi_4_top_awarded_all`, `etl_batch_log` | SQL extracted from [`sql/kpi_queries.sql`](../sql/kpi_queries.sql) by the `-- @name:` markers + `etl_batch_log` |
+| Datasets (15, virtual) | `kpi_0_integration_coverage`, `kpi_0_coverage_by_method`, `kpi_0_coverage_by_tier`, `kpi_0_coverage_by_decade`, `kpi_1_popularity_by_grammy_recognition`, `kpi_1_artist_level`, `kpi_1_within_genre_diff`, `kpi_2_awards_by_dominant_genre`, `kpi_2_heatmap`, `kpi_3_awards_and_profile_by_decade`, `kpi_3_awards_per_year`, `kpi_3_awards_by_family_decade`, `kpi_4_top_awarded_artists_on_spotify`, `kpi_4_top_awarded_all`, `etl_batch_log` | SQL extracted from [`sql/kpi_queries.sql`](../sql/kpi_queries.sql) by the `-- @name:` markers + `etl_batch_log` |
 | Metrics | one aggregate per charted column (`SUM`/`AVG`/`MAX`/`MIN`) | `DATASET_SPECS` in `scripts/superset_bootstrap.py` |
-| Charts (21) | see §3 | `CHART_SPECS` in `scripts/superset_bootstrap.py` |
-| Dashboard | `Workshop-2 - KPIs (R1-R4)` | published, contains all 21 charts across Header and 5 Tabs |
+| Charts (22) | see §3 | `CHART_SPECS` in `scripts/superset_bootstrap.py` |
+| Dashboard | `Workshop-2 - KPIs (R1-R4)` | published, contains all 22 charts across Header and 5 Tabs |
 
 ## 3. Charts per requirement and dashboard layout
 
@@ -68,6 +68,7 @@ Objects created:
 | [R4] Top-10 Awarded Artists on Spotify | R4 | `dist_bar` (`table`) | `kpi_4_top_awarded_artists_on_spotify` | Tab R4 |
 | [R4] Top Awarded Artists Overall | R4 | `table` | `kpi_4_top_awarded_all` | Tab R4 |
 | [R4] Top Artists Absent from Spotify | R4 | `table` | `kpi_4_top_awarded_all` | Tab R4 |
+| [Quality] Awards by recognition tier | R1, R2, R3 | `echarts_timeseries_bar` (`table`) | `kpi_0_coverage_by_tier` | Tab Quality |
 | [Quality] Match Method Distribution | R1, R2, R3 | `pie` (`table`) | `kpi_0_coverage_by_method` | Tab Quality |
 | [Quality] Coverage Trend by Decade | R1, R2, R3 | `echarts_timeseries_line` (`table`) | `kpi_0_coverage_by_decade` | Tab Quality |
 | [Quality] Last ETL Batches | R4 | `table` | `etl_batch_log` | Tab Quality |

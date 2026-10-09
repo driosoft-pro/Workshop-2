@@ -1,5 +1,9 @@
-basis,artist_group,is_grammy_artist,n_tracks,n_artists,mean_popularity,median_popularity,p25_popularity,p75_popularity,stddev_popularity,mean_danceability,mean_energy,mean_valence,mean_acousticness,mean_speechiness
-all,Grammy-recognized,1,7271,793,40.13,44.0,20.0,62.0,26.08,0.5359,0.5437,0.4723,0.4088,0.0719
-all,Not Grammy-recognized,0,103935,28996,35.25,36.0,21.0,49.0,19.18,0.5662,0.6332,0.4555,0.3316,0.0928
-excl_zero,Grammy-recognized,1,6484,720,45.0,50.0,23.0,64.0,23.31,0.5364,0.5492,0.472,0.3993,0.0727
-excl_zero,Not Grammy-recognized,0,97723,27792,37.49,38.0,23.0,50.0,17.52,0.5699,0.6405,0.4591,0.3222,0.0937
+recognition,basis,artist_group,is_grammy_artist,n_tracks,n_artists,mean_popularity,median_popularity,p25_popularity,p75_popularity,stddev_popularity,mean_danceability,mean_energy,mean_valence,mean_acousticness,mean_speechiness
+core,all,Grammy-recognized,1,7658,848,40.55,45.0,20.0,63.0,26.23,0.5455,0.552,0.4746,0.3951,0.0737
+core,all,Not Grammy-recognized,0,103548,28941,35.2,36.0,21.0,49.0,19.12,0.5656,0.6329,0.4552,0.3324,0.0928
+core,excl_zero,Grammy-recognized,1,6835,776,45.43,51.0,23.0,65.0,23.44,0.5448,0.5561,0.4734,0.3886,0.0741
+core,excl_zero,Not Grammy-recognized,0,97372,27736,37.44,38.0,23.0,50.0,17.47,0.5694,0.6403,0.459,0.3227,0.0936
+strict,all,Grammy-recognized,1,6821,738,41.47,47.0,20.0,64.0,26.36,0.5635,0.5744,0.4984,0.3698,0.0758
+strict,all,Not Grammy-recognized,0,104385,29051,35.19,36.0,21.0,49.0,19.16,0.5642,0.6308,0.4538,0.3345,0.0925
+strict,excl_zero,Grammy-recognized,1,6109,677,46.3,52.0,24.0,65.0,23.49,0.5626,0.5779,0.4972,0.3654,0.0762
+strict,excl_zero,Not Grammy-recognized,0,98098,27835,37.44,38.0,23.0,50.0,17.5,0.5681,0.6383,0.4576,0.3246,0.0934

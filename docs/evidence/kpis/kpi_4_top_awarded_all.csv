@@ -1,131 +1,1192 @@
-artist_display_name,awards,first_award_year,last_award_year,spotify_track_count,in_spotify,rank
-Chicago Symphony Orchestra,30,1960,2008,6,1,1
-John Williams,27,1975,2019,7,1,2
-Beyoncé,24,2003,2019,6,1,3
-Stevie Wonder,24,1973,2006,238,1,3
-Ray Charles & Chaka Khan,23,1960,2012,23,1,4
-Jay-Z & Swizz Beatz,22,1998,2014,3,1,5
-Tony Bennett,22,1962,2015,17,1,5
-Aretha Franklin,21,1967,2007,15,1,6
-Bruce Springsteen,21,1984,2011,6,1,6
-Eric Clapton,21,1972,2007,14,1,6
-Kanye West,20,2004,2012,12,1,7
-Vince Gill,20,1990,2019,5,1,7
-Frank Sinatra And Original Cast,19,1958,1995,5,1,8
-Quincy Jones (And Various Artists),19,1969,2018,3,1,8
-Barbra Streisand,17,1963,2019,3,1,9
-Linda Ronstadt,17,1975,1999,1,1,9
-B.B. King,16,1970,2008,27,1,10
-Ella Fitzgerald,16,1958,1994,262,1,10
-The Beatles,16,1964,2016,280,1,10
-Alicia Keys,15,2001,2013,9,1,11
-Bob Dylan,15,1967,2016,17,1,11
-Boston Symphony Orchestra,15,1959,2018,12,1,11
-Eminem,15,1999,2014,32,1,11
-Johnny Cash,15,1967,2007,2,1,11
-Michael Jackson,15,1979,1995,18,1,11
-Miles Davis,15,1960,2019,2,1,11
-Adele,14,2008,2016,75,1,12
-Alison Krauss & Union Station,14,1992,2011,34,1,12
-"Béla Fleck, Edgar Meyer, Joshua Bell, John Williams & Evelyn Glennie",14,1995,2015,7,1,12
-George Benson,14,1976,2006,16,1,12
-"Natalie Cole (With Nat ""King"" Cole)",14,1975,2008,3,1,12
-Willie Nelson,14,1975,2019,6,1,12
-Alison Krauss,13,1990,2008,8,1,13
-Duke Ellington,13,1959,1999,9,1,13
-John Legend,13,2005,2019,45,1,13
-"Kendrick Lamar Featuring Bilal, Anna Wise & Thundercat",13,2014,2018,9,1,13
-Sting,13,1983,2018,12,1,13
-Taylor Swift,13,2009,2019,19,1,13
-Bruno Mars,12,2010,2017,85,1,14
-Emmylou Harris,12,1976,2013,9,1,14
-Foo Fighters,12,2000,2017,35,1,14
-Lady Gaga,12,2009,2019,67,1,14
-Paul McCartney,12,1966,2013,4,1,14
-"Ricky Skaggs, Steve Wariner & Vince Gill",12,1984,2008,6,1,14
-Roger Miller,12,1964,1968,1,1,14
-Yo-Yo Ma,12,1998,2016,11,1,14
-Al Green,11,1981,2008,5,1,15
-Bonnie Raitt & Delbert McClinton,11,1989,2012,3,1,15
-Chaka Khan,11,1983,2007,17,1,15
-Count Basie,11,1958,1984,2,1,15
-Herbie Hancock,11,1983,2010,2,1,15
-Madonna,11,1991,2019,4,1,15
-Carrie Underwood,10,2006,2014,16,1,16
-Justin Timberlake,10,2003,2016,11,1,16
-Kirk Franklin,10,1996,2019,2,1,16
-Norah Jones,10,2002,2004,151,1,16
-Rihanna,10,2007,2017,10,1,16
-Santana,10,1999,2002,8,1,16
-Sheryl Crow,10,1994,2002,25,1,16
-Dolly Parton,9,1978,2019,17,1,17
-Mary J. Blige,9,1995,2008,10,1,17
-Metallica,9,1989,2008,51,1,17
-New York Philharmonic,9,1962,2019,2,1,17
-Simon & Garfunkel,9,1968,1970,5,1,17
-Anita Baker & The Winans,8,1986,1995,2,1,18
-Beck,8,1996,2018,2,1,18
-Billie Eilish,8,2019,2019,70,1,18
-Buddy Guy,8,1991,2018,3,1,18
-Coldplay,8,2001,2008,23,1,18
-David Bowie,8,1984,2016,1,1,18
-"Earth, Wind & Fire",8,1975,1982,14,1,18
-Glen Campbell,8,1967,2014,13,1,18
-"Jeff Beck, Terry Bozzio & Tony Hymas",8,1985,2010,4,1,18
-John Mayer,8,2002,2010,69,1,18
-Lizzo,8,2019,2019,48,1,18
-Luther Vandross,8,1990,2003,1,1,18
-Randy Travis,8,1987,2009,9,1,18
-Rubén Blades,8,1986,2019,9,1,18
-Usher,8,2001,2012,15,1,18
-Alanis Morissette,7,1995,1998,4,1,19
-Amy Winehouse,7,2007,2015,19,1,19
-Billie Holiday,7,1979,2001,12,1,19
-Celine Dion,7,1992,1998,1,1,19
-Cleveland Orchestra,7,1969,2010,2,1,19
-Daft Punk,7,2008,2013,11,1,19
-Doc Watson,7,1973,2006,17,1,19
-Eddie Palmieri,7,1975,2005,2,1,19
-H.E.R,7,2018,2019,3,1,19
-James Taylor,7,1971,2003,16,1,19
-Lady Antebellum,7,2009,2011,2,1,19
-Pat Metheny,7,1982,2011,4,1,19
-Pharrell Williams,7,2013,2018,32,1,19
-Randy Newman,7,1984,2017,61,1,19
-Roberta Flack,7,1972,1986,2,1,19
-Skrillex,7,2011,2019,52,1,19
-Steely Dan,7,1977,2000,23,1,19
-The Chemical Brothers,7,1997,2019,90,1,19
-Tina Turner,7,1984,1988,8,1,19
-Toni Braxton,7,1993,2014,3,1,19
-Whitney Houston,7,1985,1999,1,1,19
-Andre Previn,6,1958,2002,1,1,20
-Ariana Grande,6,2018,2019,21,1,20
-Babyface,6,1992,2014,2,1,20
-Black Eyed Peas,6,2004,2009,14,1,20
-Bon Iver,6,2011,2019,7,1,20
-Boyz II Men,6,1991,1994,11,1,20
-Chris Stapleton,6,2015,2019,1,1,20
-Dionne Warwick,6,1968,1986,2,1,20
-Donna Summer,6,1978,1997,12,1,20
-Drake,6,2012,2019,50,1,20
-Dr. John And The Lower 911,6,1989,2012,8,1,20
-Eagles,6,1975,2008,27,1,20
-John Coltrane,6,1999,2019,14,1,20
-Kacey Musgraves,6,2013,2018,62,1,20
-Leonard Bernstein,6,1961,2017,3,1,20
-London Symphony Orchestra,6,1971,2004,58,1,20
-Muddy Waters,6,1971,1979,1,1,20
-Nat King Cole,6,1959,1996,116,1,20
-Philadelphia Orchestra,6,1961,2019,1,1,20
-Pierre Boulez,6,1970,1993,1,1,20
-Pittsburgh Symphony Orchestra,6,1992,2019,1,1,20
-Prince & The Revolution,6,1984,2007,1,1,20
-Radiohead,6,1997,2008,20,1,20
-Red Hot Chili Peppers,6,1992,2006,158,1,20
-Richard Pryor,6,1974,2001,2,1,20
-The Black Keys,6,2010,2012,45,1,20
-The Police,6,1980,1983,8,1,20
-The White Stripes,6,2003,2010,29,1,20
-Tito Puente,6,1978,2000,2,1,20
-Toto,6,1982,1982,1,1,20
+artist_display_name,recognition_tier,awards,first_award_year,last_award_year,spotify_track_count,in_spotify,rank
+Chicago Symphony Orchestra,B,29,1960,2008,6,1,1
+John Williams,B,22,1975,2019,7,1,2
+Aretha Franklin & George Michael,A,18,1967,2007,15,1,3
+Ray Charles & Various Artists,A,18,1960,2005,23,1,3
+Tony Bennett,A,18,1962,2015,17,1,3
+Beyoncé,A,17,2003,2019,6,1,4
+Stevie Wonder,A,17,1973,2006,238,1,4
+Vince Gill,A,17,1990,2008,5,1,4
+Jay-Z,A,16,1998,2014,3,1,5
+B.B. King,A,15,1970,2008,27,1,6
+Bruce Springsteen,A,15,1984,2009,6,1,6
+Eric Clapton,A,15,1972,2007,14,1,6
+Boston Symphony Orchestra,B,14,1959,2016,12,1,7
+Eminem,A,14,1999,2014,32,1,7
+Kanye West,A,14,2004,2012,12,1,7
+Ella Fitzgerald,A,13,1958,1990,262,1,8
+Shenandoah & Alison Krauss,A,13,1990,2008,8,1,8
+Adele,A,12,2008,2016,75,1,9
+Alison Krauss & Union Station,A,12,1992,2011,34,1,9
+Emmylou Harris & The Nash Ramblers,A,12,1976,2013,9,1,9
+Ricky Skaggs,A,12,1984,2008,6,1,9
+Al Green,A,11,1981,2008,5,1,10
+Béla Fleck,A,11,1995,2015,7,1,10
+John Legend & The Roots,A,11,2005,2019,45,1,10
+Johnny Cash,A,11,1967,2007,2,1,10
+Alicia Keys,A,10,2001,2013,9,1,11
+Bob Dylan,A,10,1972,2006,17,1,11
+Bonnie Raitt,A,10,1989,2012,3,1,11
+Foo Fighters,A,10,2000,2011,35,1,11
+Frank Sinatra,C,10,1958,1986,5,1,11
+George Benson,A,10,1976,2006,16,1,11
+Kendrick Lamar,A,10,2014,2018,9,1,11
+Linda Ronstadt,A,10,1975,1999,1,1,11
+Michael Jackson,A,10,1979,1995,18,1,11
+Quincy Jones,C,10,1973,1996,3,1,11
+Sting,A,10,1983,2018,12,1,11
+Taylor Swift,A,10,2009,2019,19,1,11
+Frank Sinatra,A,9,1959,1995,5,1,12
+Justin Timberlake,A,9,2003,2016,11,1,12
+Lady Gaga,A,9,2009,2019,67,1,12
+Miles Davis,C,9,1986,2008,2,1,12
+Natalie Cole,A,9,1975,2008,3,1,12
+Quincy Jones,A,9,1969,2018,3,1,12
+Santana & Michelle Branch,A,9,1999,2002,8,1,12
+Sheryl Crow,A,9,1994,2002,25,1,12
+The Beatles,A,9,1964,2016,280,1,12
+Willie Nelson,A,9,1975,2019,6,1,12
+Barbra Streisand,A,8,1963,2019,3,1,13
+Bruno Mars,A,8,2010,2017,85,1,13
+Buddy Guy,A,8,1991,2018,3,1,13
+Chaka Khan & The Funk Brothers,A,8,1983,2007,17,1,13
+Count Basie,A,8,1958,1984,2,1,13
+Duke Ellington,A,8,1959,1979,9,1,13
+Herbie Hancock,A,8,1983,2010,2,1,13
+Jeff Beck,A,8,1985,2010,4,1,13
+Mary J. Blige,A,8,1995,2008,10,1,13
+Metallica,A,8,1989,2008,51,1,13
+New York Philharmonic,B,8,1962,2019,2,1,13
+Norah Jones,A,8,2002,2004,151,1,13
+Rihanna,A,8,2007,2017,10,1,13
+Roger Miller,A,8,1964,1965,1,1,13
+Rubén Blades,A,8,1986,2019,9,1,13
+Usher,A,8,2001,2012,15,1,13
+Billie Holiday,C,7,1979,2001,12,1,14
+Carrie Underwood,A,7,2006,2014,16,1,14
+Cleveland Orchestra,B,7,1969,2010,2,1,14
+Doc Watson,A,7,1973,2006,17,1,14
+Dolly Parton,A,7,1978,2016,17,1,14
+Eddie Palmieri,A,7,1975,2005,2,1,14
+Kirk Franklin,A,7,1996,2019,2,1,14
+Lizzo Featuring Gucci Mane,A,7,2019,2019,48,1,14
+Madonna,A,7,1991,2007,4,1,14
+Randy Travis,A,7,1987,2009,9,1,14
+Skrillex,A,7,2011,2019,52,1,14
+The Chemical Brothers,A,7,1997,2019,90,1,14
+Toni Braxton,A,7,1993,2014,3,1,14
+Amy Winehouse,A,6,2007,2015,19,1,15
+Anita Baker,A,6,1986,1995,2,1,15
+Ariana Grande,A,6,2018,2019,21,1,15
+Barbra Streisand,B,6,1963,1977,3,1,15
+Beck,A,6,1996,2018,2,1,15
+Beyoncé,B,6,2003,2019,6,1,15
+Coldplay,A,6,2001,2008,23,1,15
+Daft Punk,A,6,2008,2013,11,1,15
+Dr. John,A,6,1989,2012,8,1,15
+"Earth, Wind & Fire",A,6,1975,1982,14,1,15
+Glen Campbell,A,6,1967,1981,13,1,15
+Jay-Z,B,6,2003,2014,3,1,15
+John Coltrane,C,6,1999,2019,14,1,15
+John Mayer,A,6,2002,2008,69,1,15
+Kanye West,B,6,2004,2012,12,1,15
+Linda Ronstadt,C,6,1977,1989,1,1,15
+Luther Vandross,A,6,1990,2003,1,1,15
+Muddy Waters,A,6,1971,1979,1,1,15
+Pat Metheny,A,6,1982,2011,4,1,15
+Paul McCartney,A,6,1966,2013,4,1,15
+Philadelphia Orchestra,B,6,1961,2019,1,1,15
+Pierre Boulez,C,6,1970,1993,1,1,15
+The Black Eyed Peas,A,6,2004,2009,14,1,15
+Tina Turner,A,6,1984,1988,8,1,15
+Tito Puente & His Latin Ensemble,A,6,1978,2000,2,1,15
+Whitney Houston,A,6,1985,1999,1,1,15
+Yo-Yo Ma,A,6,1998,2016,11,1,15
+Alanis Morissette,A,5,1995,1998,4,1,16
+Alan Menken,A,5,1990,2011,113,1,16
+Alicia Keys,B,5,2001,2010,9,1,16
+André Previn,A,5,1958,2002,1,1,16
+Billie Eilish,A,5,2019,2019,70,1,16
+Bon Iver,A,5,2011,2019,7,1,16
+Bruce Springsteen,B,5,1994,2008,6,1,16
+Celine Dion,A,5,1992,1998,1,1,16
+Christina Aguilera,A,5,1999,2014,10,1,16
+Dionne Warwick,A,5,1968,1986,2,1,16
+Donna Summer,A,5,1978,1997,12,1,16
+Eagles,A,5,1975,2008,27,1,16
+Faith Hill,A,5,2000,2005,14,1,16
+H.E.R. Featuring Bryson Tiller,A,5,2018,2019,3,1,16
+James Taylor,A,5,1971,2003,16,1,16
+Keb' Mo',A,5,1996,2019,4,1,16
+Lady Antebellum,A,5,2009,2011,2,1,16
+Ladysmith Black Mambazo,A,5,1987,2017,3,1,16
+London Symphony Orchestra,B,5,1971,2004,58,1,16
+Metropolitan Opera Orchestra,B,5,1983,1996,1,1,16
+Michael Bublé,A,5,2007,2019,70,1,16
+Miles Davis,A,5,1970,2019,2,1,16
+Paul McCartney,C,5,1973,2013,4,1,16
+"Peter, Paul And Mary",A,5,1962,1969,6,1,16
+Pharrell Williams,A,5,2013,2014,32,1,16
+Prince,A,5,1984,2007,1,1,16
+Ray Charles & Various Artists,C,5,1986,2012,23,1,16
+Richard Pryor,A,5,1974,1982,2,1,16
+Simon And Garfunkel,A,5,1968,1970,5,1,16
+The Oak Ridge Boys,A,5,1970,1981,1,1,16
+The Police,A,5,1980,1983,8,1,16
+Willie Nelson,B,5,1980,1985,6,1,16
+Aerosmith,A,4,1990,1998,17,1,17
+Alejandro Sanz,A,4,2003,2019,42,1,17
+Angelique Kidjo,A,4,2007,2019,1,1,17
+Babyface,C,4,1992,1997,2,1,17
+Billy Joel,A,4,1978,1980,51,1,17
+Bob Dylan,C,4,1969,2016,17,1,17
+Boyz II Men,A,4,1991,1994,11,1,17
+Chicago,C,4,1976,1984,22,1,17
+Childish Gambino,A,4,2017,2018,1,1,17
+Chris Stapleton,A,4,2015,2017,1,1,17
+David Bowie,C,4,1989,2016,1,1,17
+Deniece Williams,A,4,1986,1998,3,1,17
+Drake,B,4,2016,2019,50,1,17
+Edgar Meyer,A,4,2000,2014,5,1,17
+Ed Sheeran,A,4,2015,2019,91,1,17
+Gary Burton,A,4,1979,2008,1,1,17
+Gary Clark Jr.,A,4,2013,2019,2,1,17
+Green Day,A,4,1994,2009,24,1,17
+Jacob Collier,C,4,2016,2019,1,1,17
+Janet Jackson,A,4,1989,2001,2,1,17
+Joan Sebastian,A,4,2002,2008,35,1,17
+John Lee Hooker,A,4,1989,1997,1,1,17
+Kacey Musgraves,A,4,2013,2018,62,1,17
+Keith Urban,A,4,2005,2010,5,1,17
+Lenny Kravitz,A,4,1998,2001,10,1,17
+Leonard Bernstein,A,4,1961,1963,3,1,17
+Lil Wayne,A,4,2008,2016,14,1,17
+Little Big Town,A,4,2012,2019,8,1,17
+Loretta Lynn,A,4,1971,2004,10,1,17
+Los Angeles Philharmonic,B,4,1996,2019,4,1,17
+Lyle Lovett,A,4,1989,1996,1,1,17
+Mariah Carey,A,4,1990,2005,2,1,17
+Michael Jackson,C,4,1983,1992,18,1,17
+Natalie Cole,C,4,1991,2008,3,1,17
+Nat King Cole,A,4,1959,1996,116,1,17
+Olivia Newton-John,A,4,1973,1982,6,1,17
+Paul Simon,A,4,1975,1987,16,1,17
+Reba McEntire & Linda Davis,A,4,1986,2019,8,1,17
+Roberta Flack,A,4,1972,1973,2,1,17
+Roger Miller,B,4,1964,1968,1,1,17
+Roy Orbison,A,4,1980,1990,19,1,17
+Sade,A,4,1985,2010,11,1,17
+Stan Getz,A,4,1962,1964,9,1,17
+Steely Dan,C,4,1977,2000,23,1,17
+Steve Martin,A,4,1977,2009,12,1,17
+Stevie Ray Vaughan & Double Trouble,A,4,1984,1992,4,1,17
+Stevie Wonder,B,4,1973,1995,238,1,17
+The Beatles,C,4,1967,2010,280,1,17
+The Black Keys,A,4,2010,2012,45,1,17
+The Civil Wars,A,4,2011,2013,20,1,17
+The Temptations,A,4,1968,2000,45,1,17
+The White Stripes,A,4,2003,2007,29,1,17
+TobyMac,A,4,2008,2019,6,1,17
+TOTO,C,4,1982,1982,1,1,17
+Weird Al Yankovic,A,4,1984,2014,15,1,17
+Yo-Yo Ma,C,4,2003,2014,11,1,17
+Aaron Neville & Trisha Yearwood,A,3,1994,1997,3,1,18
+Alabama Shakes,A,3,2015,2017,2,1,18
+"Al Bunetta, Dan Einstein & Hank Neuberger, producers; (Arlo Guthrie, John Hartford, Richie Havens, Bonnie Koloc, Nitty Gritty Dirt Band, John Prine and Others)",A,3,1967,1986,4,1,18
+Ali Farka Touré & Toumani Diabaté,A,3,1994,2010,12,1,18
+Anderson .Paak,A,3,2018,2019,55,1,18
+Anita Kerr Singers,A,3,1965,1966,5,1,18
+Annie Lennox,A,3,1992,2004,58,1,18
+Arturo Sandoval,A,3,1994,2012,1,1,18
+Barbra Streisand,C,3,1964,1986,3,1,18
+Bette Midler,A,3,1973,1989,1,1,18
+Bill Evans,A,3,1963,1980,6,1,18
+Bill Evans Trio,A,3,1968,1971,1,1,18
+Brad Paisley,A,3,2007,2008,3,1,18
+Brandi Carlile,A,3,2018,2019,35,1,18
+Bruno Mars,B,3,2015,2017,85,1,18
+Bunny Wailer,A,3,1990,1996,2,1,18
+Calle 13,A,3,2007,2014,27,1,18
+Carrie Underwood,B,3,2006,2012,16,1,18
+Cécile McLorin Salvant,A,3,2015,2018,2,1,18
+Celia Cruz,A,3,1989,2003,16,1,18
+Chance the Rapper,A,3,2016,2016,1,1,18
+Charlie Haden,A,3,1997,2004,2,1,18
+Christopher Cross,A,3,1980,1980,4,1,18
+Count Basie,C,3,1963,1984,2,1,18
+Damian Marley,A,3,2001,2005,4,1,18
+David Bowie,A,3,1984,2016,1,1,18
+David Foster,C,3,1984,1993,1,1,18
+David Seville,A,3,1958,1960,12,1,18
+Diana Krall,C,3,1999,2009,10,1,18
+Diplo,A,3,2015,2018,44,1,18
+Dr. Dre,A,3,1993,2009,16,1,18
+Duke Ellington,B,3,1959,1966,9,1,18
+Earl Scruggs,A,3,1998,2004,4,1,18
+Ella Fitzgerald,C,3,1960,1994,262,1,18
+Elton John,A,3,1986,1997,54,1,18
+Elvis Presley,A,3,1967,1974,175,1,18
+Eric Clapton,C,3,1988,2005,14,1,18
+Eric Clapton,B,3,1992,1996,14,1,18
+Etta James,A,3,1994,2004,20,1,18
+George Benson,C,3,1976,1980,16,1,18
+Giancarlo Guerrero,B,3,2015,2017,1,1,18
+Gladys Knight,A,3,1986,2004,2,1,18
+Gladys Knight & The Pips,A,3,1973,1988,2,1,18
+Gloria Estefan,A,3,1993,2000,2,1,18
+Hank Williams,C,3,1998,2014,243,1,18
+Intocable,A,3,2004,2019,1,1,18
+Isaac Hayes,C,3,1971,1972,5,1,18
+James Ingram,A,3,1981,1987,1,1,18
+John Barry & Bob Wilber,B,3,1969,1991,1,1,18
+John Williams,C,3,1982,2019,7,1,18
+June Carter Cash,A,3,1999,2003,1,1,18
+Kelly Clarkson,A,3,2005,2012,1,1,18
+Kendrick Lamar,B,3,2014,2017,9,1,18
+Kenny Rogers,A,3,1977,1987,17,1,18
+Kirk Franklin,B,3,2006,2011,2,1,18
+Lady Gaga,B,3,2018,2019,67,1,18
+Lalo Schifrin,B,3,1964,1967,1,1,18
+Lil Nas X,A,3,2019,2019,11,1,18
+Lil Nas X Featuring Billy Ray Cyrus,A,3,2019,2019,4,1,18
+Louis Armstrong,C,3,1994,2009,59,1,18
+Lou Rawls,A,3,1967,1977,10,1,18
+Lucky Daye,A,3,2019,2019,17,1,18
+Lupe Fiasco Featuring Jill Scott,A,3,2004,2007,2,1,18
+Macklemore,A,3,2013,2013,23,1,18
+Marc Anthony,A,3,1998,2019,36,1,18
+Mark O'Connor,A,3,1991,2016,4,1,18
+Mark Ronson Featuring Bruno Mars,A,3,2015,2018,3,1,18
+Maroon 5,A,3,2004,2007,3,1,18
+Michael W. Smith,A,3,1984,2003,38,1,18
+Michel Legrand,B,3,1971,1975,6,1,18
+Missy Elliott,A,3,2002,2005,24,1,18
+Nancy Wilson,A,3,1964,2006,4,1,18
+"Nelly, P. Diddy & Murphy Lee",A,3,2002,2003,1,1,18
+Nitty Gritty Dirt Band & Bruce Hornsby,A,3,1986,1993,1,1,18
+Pittsburgh Symphony Orchestra,C,3,2017,2019,1,1,18
+Pittsburgh Symphony Orchestra,B,3,1992,2019,1,1,18
+Radiohead,A,3,1997,2008,20,1,18
+Radiohead,C,3,2001,2008,20,1,18
+Randy Newman,B,3,1984,2010,61,1,18
+Randy Newman,A,3,2000,2006,61,1,18
+Red Hot Chili Peppers,A,3,1992,2006,158,1,18
+R.E.M,A,3,1991,1991,21,1,18
+Sam Smith,A,3,2014,2014,63,1,18
+Seal,A,3,1995,2010,15,1,18
+Shakira,A,3,2000,2017,19,1,18
+Shania Twain,A,3,1995,1999,14,1,18
+Steely Dan,A,3,2000,2000,23,1,18
+Stephen Marley,A,3,2007,2011,2,1,18
+Steve Earle,A,3,2004,2009,10,1,18
+Stevie Wonder,C,3,1973,2006,238,1,18
+Taj Mahal,A,3,1997,2017,5,1,18
+Taylor Swift,B,3,2009,2019,19,1,18
+The Beatles,B,3,1966,1970,280,1,18
+The Brian Setzer Orchestra,A,3,1998,2000,4,1,18
+Thelonious Monk,C,3,1968,1987,1,1,18
+The Rolling Stones,A,3,1994,2017,62,1,18
+The Roots,A,3,1999,2010,1,1,18
+The Weeknd,A,3,2015,2017,75,1,18
+T.I,A,3,2006,2008,3,1,18
+Tim McGraw,A,3,2000,2005,10,1,18
+Tony Bennett,C,3,1962,2011,17,1,18
+TOOL,A,3,1997,2019,10,1,18
+Tracy Chapman,A,3,1988,1988,7,1,18
+Vampire Weekend,A,3,2013,2019,1,1,18
+Vicente Fernández,A,3,2009,2016,2,1,18
+Vince Gill,B,3,1992,2019,5,1,18
+Vladimir Horowitz,C,3,1965,2019,2,1,18
+Academy of St. Martin in the Fields,B,2,1977,2002,29,1,19
+Adele,B,2,2011,2016,75,1,19
+Alanis Morissette,B,2,1995,1998,4,1,19
+Alan Jackson,B,2,2002,2003,4,1,19
+Alexandre Desplat,B,2,2011,2014,20,1,19
+Angela Lansbury,B,2,1966,1979,9,1,19
+Anita Baker,B,2,1986,1988,2,1,19
+Aretha Franklin & George Michael,C,2,1986,1992,15,1,19
+Babyface,A,2,1994,2014,2,1,19
+Barbara Cook,B,2,1958,1963,2,1,19
+Barry White,A,2,1999,1999,17,1,19
+Bebe,A,2,2010,2010,4,1,19
+Beck,C,2,2014,2018,2,1,19
+Bee Gees,A,2,1977,1978,43,1,19
+Bee Gees,C,2,1978,1978,43,1,19
+Béla Fleck,B,2,1998,2011,7,1,19
+Benny Goodman,C,2,1984,1984,1,1,19
+Bette Midler,B,2,1989,1990,1,1,19
+Billie Eilish,C,2,2019,2019,70,1,19
+Bill Withers,B,2,1971,1981,8,1,19
+Billy Preston,A,2,1972,1972,4,1,19
+BJ The Chicago Kid,A,2,2019,2019,2,1,19
+Black Sabbath,A,2,1999,2013,17,1,19
+Bobby Darin,A,2,1959,1959,19,1,19
+Boyz II Men,B,2,1992,1994,11,1,19
+Bradley Cooper,A,2,2018,2019,1,1,19
+Bradley Cooper,B,2,2018,2019,1,1,19
+Brandy,A,2,1998,2019,7,1,19
+Brian Eno,C,2,1992,2009,18,1,19
+Brooks & Dunn,A,2,1993,1996,1,1,19
+Burning Spear,A,2,1999,2008,3,1,19
+Burt Bacharach,A,2,1998,2005,4,1,19
+Cage The Elephant,A,2,2016,2019,34,1,19
+Cardi B,A,2,2018,2019,29,1,19
+Carlos Vives,A,2,2001,2014,4,1,19
+Chaka Khan & The Funk Brothers,C,2,1983,1990,17,1,19
+Charlie Rich,B,2,1973,1974,5,1,19
+Chris Stapleton,B,2,2017,2019,1,1,19
+Chris Thile,A,2,2012,2014,7,1,19
+Chris Tomlin,A,2,2011,2019,127,1,19
+Coldplay,B,2,2006,2008,23,1,19
+Daniel Caesar,A,2,2018,2019,5,1,19
+Dan + Shay,A,2,2018,2019,38,1,19
+David Seville,C,2,1958,1959,12,1,19
+Diana Krall,A,2,1999,2002,10,1,19
+Dire Straits,A,2,1985,1986,1,1,19
+Dire Straits,C,2,1985,2005,1,1,19
+Disciples,A,2,1975,1978,24,1,19
+Dolly Parton,B,2,1981,2019,17,1,19
+Don Henley,A,2,1985,1989,11,1,19
+Drake,A,2,2012,2016,50,1,19
+Dua Lipa,A,2,2018,2018,95,1,19
+Duke Ellington,C,2,1963,1999,9,1,19
+Duran Duran,A,2,1983,1983,24,1,19
+Elvis Costello,A,2,1998,2019,19,1,19
+English Chamber Orchestra,B,2,1984,1998,8,1,19
+Erich Leinsdorf,C,2,1963,1966,1,1,19
+Erich Leinsdorf,B,2,1963,1965,1,1,19
+Evanescence,A,2,2003,2003,24,1,19
+Fantastic Negrito,A,2,2016,2018,1,1,19
+Flume,A,2,2016,2019,2,1,19
+Foo Fighters,B,2,2011,2017,35,1,19
+for KING & COUNTRY,A,2,2014,2019,44,1,19
+Frank Ocean,A,2,2012,2012,23,1,19
+George Harrison,A,2,1972,2003,3,1,19
+George Jones,A,2,1980,1999,332,1,19
+Gilberto Gil,A,2,1998,2005,29,1,19
+Gladys Knight,B,2,1986,2005,2,1,19
+Gloria Gaynor,A,2,1979,2019,5,1,19
+Gnarls Barkley,A,2,2006,2006,1,1,19
+Gregory Porter,A,2,2013,2016,23,1,19
+Gwen Stefani,A,2,2001,2016,6,1,19
+Hans Zimmer,B,2,1995,2008,153,1,19
+Herbie Hancock,B,2,1996,1997,2,1,19
+H.E.R. Featuring Bryson Tiller,B,2,2019,2019,3,1,19
+Hootie & The Blowfish,A,2,1995,1995,2,1,19
+Howard Ashman,A,2,1990,1992,10,1,19
+I Prevail,A,2,2019,2019,39,1,19
+Jack Jones,A,2,1961,1963,8,1,19
+Jack White,A,2,2004,2014,8,1,19
+James Blake,A,2,2018,2019,8,1,19
+James Brown,A,2,1965,1986,34,1,19
+"James Horner, Barry Mann & Cynthia Weil, songwriters (Linda Ronstadt & James Ingram)",A,2,1987,1998,1,1,19
+James Taylor,C,2,1997,2002,16,1,19
+Jason Mraz,A,2,2009,2009,56,1,19
+J. Cole,A,2,2019,2019,4,1,19
+Jennifer Warnes & Bill Medley,A,2,1982,1987,1,1,19
+Jerry Douglas,A,2,2001,2004,8,1,19
+Jimmy Cliff,A,2,1985,2012,2,1,19
+João Gilberto,A,2,1964,2000,32,1,19
+Joel Grey,B,2,1967,1997,3,1,19
+John Legend & The Roots,B,2,2010,2014,45,1,19
+John Lennon,A,2,1981,2000,3,1,19
+Johnny Cash,B,2,1969,1985,2,1,19
+Johnny Cash,C,2,1968,2005,2,1,19
+John Scofield,A,2,2015,2016,2,1,19
+John Williams,A,2,1977,2001,7,1,19
+Joshua Bell,C,2,2001,2001,1,1,19
+Joy Williams,A,2,2012,2019,2,1,19
+Juanes,A,2,2008,2012,51,1,19
+Juan Luis Guerra 4.40,A,2,1991,2019,5,1,19
+Judy Garland,A,2,1961,1961,1,1,19
+Judy Garland,C,2,1961,1961,1,1,19
+Julie Andrews,A,2,1964,2010,13,1,19
+Kacey Musgraves,B,2,2013,2018,62,1,19
+Kenny Rogers,B,2,1978,1979,17,1,19
+Korn,A,2,1999,2002,13,1,19
+Lady Antebellum,B,2,2010,2010,2,1,19
+Lana Del Rey,B,2,2013,2019,29,1,19
+Laurindo Almeida,C,2,1958,1960,1,1,19
+LeAnn Rimes,A,2,1996,1996,1,1,19
+Lena Horne,B,2,1962,1981,1,1,19
+Lena Horne,A,2,1981,1995,1,1,19
+Len Cariou,B,2,1973,1979,1,1,19
+Leonard Bernstein,C,2,1991,2017,3,1,19
+Linkin Park,A,2,2001,2005,253,1,19
+Lionel Richie,A,2,1982,1984,21,1,19
+Living Colour,A,2,1989,1990,5,1,19
+LL COOL J,A,2,1991,1996,3,1,19
+London Philharmonic Orchestra,B,2,1976,1977,37,1,19
+London Symphony Chorus,B,2,1971,1974,1,1,19
+Ludacris,A,2,2004,2006,6,1,19
+Luther Vandross,B,2,1991,2003,1,1,19
+Madonna,C,2,1998,2000,4,1,19
+Madonna,B,2,2010,2019,4,1,19
+Maren Morris,A,2,2016,2019,30,1,19
+Marvin Gaye,A,2,1982,1982,38,1,19
+Maxwell,A,2,2009,2009,1,1,19
+McCoy Tyner,A,2,1988,2004,1,1,19
+Mel Tormé,A,2,1982,1983,9,1,19
+Merle Haggard,A,2,1984,1998,2,1,19
+Merle Watson,A,2,1974,1979,2,1,19
+Michael Bolton,A,2,1989,1991,1,1,19
+Miranda Lambert,A,2,2010,2014,1,1,19
+New Philharmonia Orchestra,B,2,1968,1968,29,1,19
+New York City Opera Orchestra,B,2,1978,1986,2,1,19
+Ne-Yo,A,2,2007,2008,11,1,19
+Nile Rodgers,A,2,2013,2013,9,1,19
+Nine Inch Nails,A,2,1992,1995,25,1,19
+No Doubt,A,2,2002,2003,23,1,19
+No Doubt,B,2,2002,2004,23,1,19
+Old Crow Medicine Show,A,2,2012,2014,23,1,19
+Otis Redding,C,2,1986,2017,35,1,19
+Paavo Järvi,C,2,2006,2008,1,1,19
+Patti LaBelle,A,2,1991,1998,4,1,19
+Peter Kater,A,2,2017,2019,10,1,19
+Petula Clark,A,2,1964,1965,1,1,19
+Pharrell Williams,C,2,2013,2018,32,1,19
+Plácido Domingo,A,2,1984,1999,23,1,19
+Post Malone,A,2,2019,2019,23,1,19
+Puff Daddy,A,2,1997,1997,2,1,19
+Queen Latifah,C,2,2007,2011,6,1,19
+Rage Against The Machine,A,2,1996,2000,7,1,19
+Ralph Stanley,A,2,2001,2002,12,1,19
+Ray Price,A,2,1970,2007,63,1,19
+Red Hot Chili Peppers,B,2,1999,2006,158,1,19
+Ricky Martin,A,2,1998,2015,3,1,19
+Rihanna,B,2,2009,2011,10,1,19
+Rita Coolidge,A,2,1973,1975,3,1,19
+R. Kelly,A,2,1997,1997,1,1,19
+Roberta Flack,B,2,1972,1973,2,1,19
+Robert Palmer,A,2,1986,1988,10,1,19
+Rob Thomas,A,2,1999,1999,2,1,19
+Roddy Ricch,A,2,2019,2019,3,1,19
+ROSALÍA,A,2,2019,2019,11,1,19
+RÜFÜS DU SOL,A,2,2019,2019,8,1,19
+Sarah Jarosz,A,2,2016,2016,14,1,19
+Shabba Ranks,A,2,1991,1992,1,1,19
+Shaggy,A,2,1995,2018,23,1,19
+Shania Twain,B,2,1998,1999,14,1,19
+Sheena Easton,A,2,1981,1984,1,1,19
+Simon And Garfunkel,B,2,1968,1970,5,1,19
+Simon And Garfunkel,C,2,1970,1970,5,1,19
+Slayer,A,2,2006,2007,25,1,19
+Soul II Soul,A,2,1989,1989,4,1,19
+Soundgarden,A,2,1994,1994,29,1,19
+Steel Pulse,A,2,1986,2019,13,1,19
+Stephanie Mills,B,2,1975,1980,2,1,19
+Steve Vai,A,2,1993,2008,6,1,19
+Steve Winwood,C,2,1986,1988,8,1,19
+Steve Winwood,A,2,1986,1986,8,1,19
+Sting,C,2,1993,2005,12,1,19
+Supertramp,C,2,1979,1979,10,1,19
+Swae Lee,A,2,2019,2019,26,1,19
+Talking Heads,C,2,1983,2004,17,1,19
+Tammy Wynette,A,2,1967,1969,36,1,19
+Terence Blanchard,A,2,2004,2007,4,1,19
+The Clark Sisters,A,2,2007,2007,1,1,19
+The Del McCoury Band,A,2,2005,2013,6,1,19
+The Doobie Brothers,A,2,1979,1979,10,1,19
+The Flaming Lips,A,2,2002,2006,1,1,19
+The Pointer Sisters,A,2,1974,1984,1,1,19
+The Rolling Stones,C,2,1981,2013,62,1,19
+The Smashing Pumpkins,A,2,1996,1997,28,1,19
+Thom Yorke,A,2,2019,2019,5,1,19
+Tim McGraw,B,2,2004,2016,10,1,19
+TOTO,A,2,1982,1982,1,1,19
+Toumani Diabaté,A,2,2005,2010,8,1,19
+Travis Tritt,A,2,1992,1998,7,1,19
+Van Morrison,A,2,1995,1997,5,1,19
+Waylon Jennings & The Kimberlys,A,2,1969,1978,2,1,19
+Wes Montgomery,A,2,1966,1969,5,1,19
+Will Smith,A,2,1997,1998,1,1,19
+Yo-Yo Ma,B,2,2004,2006,11,1,19
+112,A,1,1997,1997,1,1,20
+21 Savage,A,1,2019,2019,4,1,20
+21 Savage,B,1,2019,2019,4,1,20
+2 Chainz,A,1,2016,2016,1,1,20
+50 Cent,A,1,2009,2009,6,1,20
+Aaron Neville & Trisha Yearwood,C,1,2019,2019,3,1,20
+Academy of Ancient Music,B,1,1995,1995,3,1,20
+AC/DC,A,1,2009,2009,31,1,20
+A Flock Of Seagulls,A,1,1982,1982,7,1,20
+A Great Big World,A,1,2014,2014,24,1,20
+Aimee Mann,A,1,2017,2017,1,1,20
+Aimee Mann,C,1,2005,2005,1,1,20
+Alabama Shakes,C,1,2015,2015,2,1,20
+Alabama Shakes,B,1,2015,2015,2,1,20
+Alan Gilbert,B,1,2012,2012,1,1,20
+Alan Gilbert,C,1,2008,2008,1,1,20
+Alan Jackson,A,1,2010,2010,4,1,20
+Albert Collins,A,1,1986,1986,2,1,20
+"Al Bunetta, Dan Einstein & Hank Neuberger, producers; (Arlo Guthrie, John Hartford, Richie Havens, Bonnie Koloc, Nitty Gritty Dirt Band, John Prine and Others)",B,1,1967,1967,4,1,20
+Alessia Cara,A,1,2017,2017,64,1,20
+Al Hirt,A,1,1963,1963,1,1,20
+Alison Brown,A,1,2000,2000,6,1,20
+Alison Krauss & Union Station,B,1,2001,2001,34,1,20
+Alison Krauss & Union Station,C,1,2011,2011,34,1,20
+Allman Brothers Band,A,1,1995,1995,17,1,20
+America,A,1,1972,1972,6,1,20
+Amy Winehouse,B,1,2007,2007,19,1,20
+André 3000,A,1,2019,2019,1,1,20
+Andrea Bocelli,A,1,2019,2019,86,1,20
+Andreas Vollenweider,A,1,1986,1986,12,1,20
+André Previn,C,1,1972,1972,1,1,20
+Andrew Bird,A,1,2019,2019,18,1,20
+Andris Nelsons,C,1,2018,2018,3,1,20
+Andy Griffith,A,1,1996,1996,1,1,20
+Angela Lansbury,C,1,1979,1979,9,1,20
+Anne-Sophie Mutter,C,1,2019,2019,2,1,20
+Ann Reinking,B,1,1997,1997,2,1,20
+Anthony Hamilton,A,1,2008,2008,4,1,20
+Aphex Twin,A,1,2014,2014,15,1,20
+Apparat,A,1,2019,2019,11,1,20
+Aretha Franklin & George Michael,B,1,1985,1985,15,1,20
+Arnold Schoenberg Chor,B,1,2001,2001,2,1,20
+A.R. Rahman,A,1,2009,2009,106,1,20
+Arthur Fiedler,B,1,1964,1964,21,1,20
+Ashanti,A,1,2002,2002,2,1,20
+Ashley McBryde,B,1,2019,2019,7,1,20
+Ashley McBryde,A,1,2019,2019,7,1,20
+Astrud Gilberto,A,1,1964,1964,11,1,20
+Australian Chamber Orchestra,C,1,2013,2013,2,1,20
+Bacilos,A,1,2002,2002,1,1,20
+Bad Bunny,A,1,2019,2019,412,1,20
+Barry Gibb,A,1,1980,1980,1,1,20
+Barry Manilow,A,1,1978,1978,4,1,20
+Barry Manilow,B,1,1976,1976,4,1,20
+B.B. King,C,1,1970,1970,27,1,20
+Bebe Neuwirth,B,1,1997,1997,5,1,20
+Beenie Man,A,1,2000,2000,53,1,20
+Béla Fleck,C,1,2001,2001,7,1,20
+Benny Benassi,B,1,2011,2011,7,1,20
+Benny Carter,B,1,1992,1992,4,1,20
+Berliner Philharmoniker,C,1,2019,2019,63,1,20
+Bernadette Peters,B,1,2003,2003,6,1,20
+Beyoncé,C,1,2014,2014,6,1,20
+Big Daddy Kane,A,1,1990,1990,6,1,20
+Big Star,C,1,2010,2010,5,1,20
+Bill Evans,C,1,1983,1983,6,1,20
+Bill Frisell,A,1,2004,2004,1,1,20
+Billie Eilish,B,1,2019,2019,70,1,20
+Bill Monroe,A,1,1988,1988,2,1,20
+Bill Withers,C,1,2013,2013,8,1,20
+Billy Joel,B,1,1978,1978,51,1,20
+Billy Ocean,A,1,1984,1984,3,1,20
+Billy Porter,B,1,2013,2013,5,1,20
+Björk,C,1,2012,2012,1,1,20
+Black Pumas,A,1,2019,2019,1,1,20
+Blackstreet,A,1,1997,1997,10,1,20
+Black Uhuru,A,1,1984,1984,9,1,20
+Blake Shelton,A,1,2019,2019,24,1,20
+Bobby Brown,A,1,1989,1989,1,1,20
+Bob Dylan,B,1,1967,1967,17,1,20
+Bob Moses,B,1,2016,2016,7,1,20
+Bob Seger,C,1,1980,1980,13,1,20
+Bob Seger,A,1,1980,1980,13,1,20
+Bone Thugs-N-Harmony,A,1,1996,1996,1,1,20
+Bon Iver,C,1,2019,2019,7,1,20
+Bon Jovi,A,1,2006,2006,37,1,20
+Bonnie Raitt,C,1,1994,1994,3,1,20
+Bonobo,A,1,2019,2019,77,1,20
+Boston Symphony Orchestra,C,1,2018,2018,12,1,20
+Boys Noize,A,1,2019,2019,2,1,20
+Boz Scaggs,B,1,1976,1976,4,1,20
+Brad Mehldau,A,1,2019,2019,2,1,20
+Brandi Carlile,B,1,2018,2018,35,1,20
+Bring Me The Horizon,A,1,2019,2019,78,1,20
+Britney Spears,A,1,2004,2004,10,1,20
+Brook Benton,C,1,1986,1986,3,1,20
+Brooks,A,1,2019,2019,13,1,20
+Bruce Springsteen,C,1,2011,2011,6,1,20
+Bruno Mars,C,1,2017,2017,85,1,20
+Bryan Adams,A,1,1991,1991,167,1,20
+Bryan Sutton,A,1,2006,2006,4,1,20
+Bryn Terfel,A,1,2006,2006,5,1,20
+Bryson Tiller,A,1,2019,2019,2,1,20
+Bryson Tiller,B,1,2019,2019,2,1,20
+Buju Banton,A,1,2010,2010,3,1,20
+Burna Boy,A,1,2019,2019,203,1,20
+Burt Bacharach,B,1,1969,1969,4,1,20
+Burt Bacharach,C,1,1967,1967,4,1,20
+Caetano Veloso,A,1,1999,1999,17,1,20
+Calvin Harris,A,1,2012,2012,86,1,20
+Camila Cabello,A,1,2019,2019,42,1,20
+Candlemass,A,1,2019,2019,2,1,20
+Captain & Tennille,A,1,1975,1975,5,1,20
+Carl Jackson & John Starling (With The Nash Ramblers),A,1,1991,1991,1,1,20
+Carlo Maria Giulini,C,1,1964,1964,3,1,20
+Carl Perkins,A,1,1986,1986,2,1,20
+Carmen Twillie,C,1,1994,1994,3,1,20
+Carolina Chocolate Drops,A,1,2010,2010,4,1,20
+Caron Wheeler,A,1,1989,1989,4,1,20
+Caspar Babypants,A,1,2019,2019,4,1,20
+Casting Crowns,A,1,2005,2005,4,1,20
+Celine Dion,B,1,1998,1998,1,1,20
+Celine Dion,C,1,1993,1993,1,1,20
+Cesária Evora,A,1,2003,2003,16,1,20
+Chaka Khan & The Funk Brothers,B,1,1984,1984,17,1,20
+Chamillionaire Featuring Krayzie Bone,A,1,2006,2006,1,1,20
+Chance the Rapper,B,1,2019,2019,1,1,20
+Charles Braswell,B,1,1966,1966,1,1,20
+Charlie Rich,A,1,1973,1973,5,1,20
+Chicago,A,1,1976,1976,22,1,20
+Chicago Symphony Orchestra,C,1,2008,2008,6,1,20
+Childish Gambino,B,1,2018,2018,1,1,20
+Chorus,A,1,1969,1969,3,1,20
+Chorus,C,1,2014,2014,3,1,20
+Chris Botti,C,1,2005,2005,7,1,20
+Chris Botti,A,1,2012,2012,7,1,20
+Chris Brown,B,1,2019,2019,48,1,20
+Chris Brown,A,1,2011,2011,48,1,20
+Chris Cornell,A,1,2018,2018,12,1,20
+Chris Cornell,C,1,2019,2019,12,1,20
+Chrisette Michele,A,1,2008,2008,1,1,20
+Chris Thile,C,1,2012,2012,7,1,20
+Christine Brewer,B,1,2005,2005,5,1,20
+Christopher Cross,C,1,1980,1980,4,1,20
+Christopher Cross,B,1,1980,1980,4,1,20
+Christoph Eschenbach,B,1,2013,2013,4,1,20
+Chubby Checker,A,1,1961,1961,6,1,20
+Chuck Berry,C,1,1989,1989,190,1,20
+City Of Birmingham Symphony Orchestra,B,1,2019,2019,2,1,20
+Clannad,A,1,1998,1998,19,1,20
+Clean Bandit,A,1,2014,2014,129,1,20
+Clifford Brown,C,1,1990,1990,1,1,20
+"Clint Black, Joe Diffie, Merle Haggard, Emmylou Harris, Alison Krauss, Patty Loveless, Earl Scruggs, Ricky Skaggs, Marty Stuart, Pam Tillis, Randy Travis, Travis Tritt & Dwight Yoakam",A,1,1998,1998,2,1,20
+Colbie Caillat,A,1,2009,2009,2,1,20
+Commodores,A,1,1985,1985,12,1,20
+Concerto Köln,B,1,2004,2004,8,1,20
+Coolio,A,1,1995,1995,4,1,20
+Corinne Bailey Rae,A,1,2011,2011,12,1,20
+Creed,B,1,2000,2000,29,1,20
+Cristin Milioti,B,1,2012,2012,1,1,20
+"Crosby, Stills & Nash",A,1,1969,1969,9,1,20
+Culture Club,A,1,1983,1983,21,1,20
+Curtis Mayfield,B,1,2005,2005,6,1,20
+Cyndi Lauper,A,1,1984,1984,12,1,20
+Cyndi Lauper,C,1,1984,1984,12,1,20
+DaBaby,A,1,2019,2019,22,1,20
+DaBaby,B,1,2019,2019,22,1,20
+Daft Punk,C,1,2013,2013,11,1,20
+Dan Auerbach,C,1,2012,2012,6,1,20
+Danny Gokey,A,1,2019,2019,1,1,20
+Dan + Shay,B,1,2019,2019,38,1,20
+"Dan Tyminski, Harley Allen & Pat Enright (The Soggy Bottom Boys)",A,1,2001,2001,8,1,20
+Darius Rucker,A,1,2013,2013,5,1,20
+Dave Matthews Band,A,1,1996,1996,1,1,20
+David Arkenstone,A,1,2019,2019,8,1,20
+David Arnold,B,1,1996,1996,8,1,20
+David Bowie,B,1,2016,2016,1,1,20
+David Byrne,B,1,1988,1988,1,1,20
+David Byrne,C,1,2009,2009,1,1,20
+David Guetta,B,1,2009,2009,241,1,20
+Dawn Upshaw,C,1,2013,2013,1,1,20
+Daya,A,1,2016,2016,24,1,20
+Dean Jones,B,1,1970,1970,3,1,20
+Death Angel,A,1,2019,2019,2,1,20
+Deep Forest,A,1,1995,1995,2,1,20
+Deftones,A,1,2000,2000,17,1,20
+De La Soul,A,1,2005,2005,3,1,20
+Derek & The Dominos,C,1,2011,2011,28,1,20
+"Diane Warren, songwriter (Celine Dion)",A,1,1996,1996,6,1,20
+Dick Van Dyke,A,1,1964,1964,2,1,20
+Dick Van Dyke,B,1,1964,1964,2,1,20
+Dido,B,1,2001,2001,2,1,20
+Dinah Washington,A,1,1959,1959,14,1,20
+Dionne Warwick,B,1,1986,1986,2,1,20
+DJ Khaled Featuring Nipsey Hussle & John Legend,A,1,2019,2019,1,1,20
+Donna Summer,B,1,1978,1978,12,1,20
+Donny Hathaway,A,1,1972,1972,13,1,20
+Doyle Lawson & Quicksilver,A,1,2019,2019,3,1,20
+Draco Rosa,A,1,2013,2013,1,1,20
+Dr. Dre,C,1,2000,2000,16,1,20
+Dream,A,1,2012,2012,1,1,20
+Duffy,A,1,2008,2008,6,1,20
+Eagles,C,1,1977,1977,27,1,20
+Earl Klugh,A,1,1980,1980,3,1,20
+"Earth, Wind & Fire",C,1,1978,1978,14,1,20
+"Earth, Wind & Fire",B,1,1979,1979,14,1,20
+Edgar Meyer,C,1,2012,2012,5,1,20
+Edie Brickell,B,1,2013,2013,3,1,20
+Édith Piaf,C,1,2016,2016,1,1,20
+Ed Sheeran,B,1,2015,2015,91,1,20
+Eliane Elias,A,1,2015,2015,2,1,20
+Elton John,B,1,1986,1986,54,1,20
+Elvis Crespo,A,1,1999,1999,1,1,20
+Emerson String Quartet,C,1,2005,2005,1,1,20
+Eminem,B,1,2003,2003,32,1,20
+Enrique Iglesias,A,1,1996,1996,27,1,20
+Eric Church,A,1,2019,2019,6,1,20
+Eric Church,B,1,2019,2019,6,1,20
+Eric Johnson,A,1,1991,1991,4,1,20
+Eric Tingstad,A,1,2002,2002,2,1,20
+Erroll Garner,C,1,1981,1981,1,1,20
+Estelle,A,1,2008,2008,1,1,20
+Eurythmics,A,1,1986,1986,18,1,20
+Eve,A,1,2001,2001,30,1,20
+Faith Evans,A,1,1997,1997,6,1,20
+Fatboy Slim,A,1,2001,2001,2,1,20
+Fergie,B,1,2011,2011,3,1,20
+Fergie,A,1,2011,2011,3,1,20
+Fiona Apple,A,1,1997,1997,5,1,20
+FKA twigs,A,1,2019,2019,80,1,20
+Flatt & Scruggs,A,1,1968,1968,13,1,20
+Fleetwood Mac,A,1,1977,1977,7,1,20
+Foxes,A,1,2013,2013,13,1,20
+Frank Zappa,C,1,1995,1995,7,1,20
+Frank Zappa,A,1,1987,1987,7,1,20
+Fred Hammond,A,1,2007,2007,1,1,20
+fun,A,1,2012,2012,1,1,20
+fun,B,1,2012,2012,1,1,20
+Future,A,1,2018,2018,25,1,20
+Gabriel Yared,B,1,1997,1997,2,1,20
+Gary Burton,B,1,2012,2012,1,1,20
+Gary Clark Jr.,B,1,2019,2019,2,1,20
+George Benson,B,1,1982,1982,16,1,20
+George Coe,B,1,1970,1970,1,1,20
+George Strait,A,1,2008,2008,17,1,20
+George Winston,A,1,1995,1995,45,1,20
+Ghost,A,1,2015,2015,67,1,20
+Giancarlo Guerrero,C,1,2010,2010,1,1,20
+Gilberto Santa Rosa,A,1,2006,2006,39,1,20
+Giorgio Moroder,A,1,1997,1997,2,1,20
+Glen Campbell,B,1,2014,2014,13,1,20
+Glen Campbell,C,1,1968,1968,13,1,20
+Glenn Gould,C,1,1973,1973,1,1,20
+Glenn Miller,B,1,2019,2019,1,1,20
+Glynis Johns,B,1,1973,1973,1,1,20
+Goodboys,A,1,2019,2019,39,1,20
+Gorillaz,A,1,2005,2005,12,1,20
+Gregory Alan Isakov,A,1,2019,2019,4,1,20
+Greta Van Fleet,A,1,2018,2018,11,1,20
+"Grover Washington, Jr.",A,1,1981,1981,8,1,20
+Grupo Fantasma,A,1,2010,2010,3,1,20
+Gucci Mane,A,1,2019,2019,7,1,20
+Gulzar,A,1,2009,2009,17,1,20
+Gunna,A,1,2019,2019,24,1,20
+Gustavo Dudamel,B,1,2019,2019,4,1,20
+Gwen Verdon,B,1,1959,1959,1,1,20
+HAIM,B,1,2018,2018,1,1,20
+Halestorm,A,1,2012,2012,21,1,20
+Hank Azaria,B,1,2005,2005,2,1,20
+Hank Williams,A,1,1989,1989,243,1,20
+Harold Faltermeyer,A,1,1986,1986,10,1,20
+Harvey Fierstein,B,1,2002,2002,2,1,20
+Herbie Hancock,C,1,1998,1998,2,1,20
+Hillary Scott & The Scott Family,A,1,2016,2016,1,1,20
+Hit-Boy,A,1,2019,2019,4,1,20
+Hit-Boy,B,1,2019,2019,4,1,20
+Hugh Jackman,A,1,2018,2018,5,1,20
+ICE-T,A,1,1990,1990,6,1,20
+Idina Menzel,B,1,2004,2004,40,1,20
+Ike & Tina Turner,A,1,1971,1971,5,1,20
+Il Giardino Armonico,B,1,2000,2000,2,1,20
+Imagine Dragons,C,1,2019,2019,38,1,20
+Imagine Dragons,A,1,2013,2013,38,1,20
+I'm With Her,A,1,2019,2019,4,1,20
+I'm With Her,B,1,2019,2019,4,1,20
+Inner Circle,A,1,1993,1993,2,1,20
+Irene Cara,A,1,1983,1983,4,1,20
+Irma Thomas,A,1,2006,2006,3,1,20
+Iron Maiden,A,1,2010,2010,24,1,20
+Isaac Hayes,B,1,1971,1971,5,1,20
+Itzhak Perlman,B,1,2006,2006,1,1,20
+James Brown,C,1,1991,1991,34,1,20
+James Conlon,C,1,2016,2016,1,1,20
+"James Horner, Barry Mann & Cynthia Weil, songwriters (Linda Ronstadt & James Ingram)",B,1,1990,1990,1,1,20
+James Ingram,B,1,1987,1987,1,1,20
+James Levine,C,1,1982,1982,4,1,20
+James Newton Howard,B,1,2008,2008,4,1,20
+Jamie Foxx,A,1,2009,2009,1,1,20
+Janelle Monáe,B,1,2012,2012,16,1,20
+Janet Jackson,B,1,1993,1993,2,1,20
+J Balvin,A,1,2019,2019,505,1,20
+J. Cole,B,1,2019,2019,4,1,20
+Jennifer Nettles,A,1,2006,2006,1,1,20
+Jerry Lee Lewis,A,1,1986,1986,10,1,20
+Jerry Orbach,B,1,1969,1969,6,1,20
+Jesse & Joy,A,1,2016,2016,8,1,20
+Jess Glynne,A,1,2014,2014,35,1,20
+Jessie Reyez,A,1,2019,2019,5,1,20
+Jethro Tull,A,1,1988,1988,6,1,20
+Jimi Hendrix,A,1,1999,1999,32,1,20
+Jimmy Buffett,B,1,2003,2003,13,1,20
+Jimmy Fallon,A,1,2012,2012,3,1,20
+João Gilberto,C,1,1964,1964,32,1,20
+Joe Cocker,A,1,1982,1982,6,1,20
+Joe Jackson,A,1,2000,2000,14,1,20
+Joe Pass,A,1,1974,1974,2,1,20
+John Barry & Bob Wilber,A,1,1985,1985,1,1,20
+John Denver,A,1,1997,1997,18,1,20
+John Mayer,B,1,2004,2004,69,1,20
+John Mayer,C,1,2010,2010,69,1,20
+John Michael Montgomery,B,1,1994,1994,2,1,20
+John Scofield,C,1,2010,2010,2,1,20
+JoJo,B,1,2019,2019,1,1,20
+Jonas Brothers,A,1,2019,2019,22,1,20
+Jonathan Groff,B,1,2007,2007,16,1,20
+Jorge Calandrelli,A,1,1998,1998,1,1,20
+Jorja Smith,B,1,2019,2019,7,1,20
+José Carreras,B,1,1985,1985,7,1,20
+Josefina Scaglione,B,1,2009,2009,1,1,20
+Joshua Bell,A,1,2001,2001,1,1,20
+Joss Favela,A,1,2019,2019,2,1,20
+Joss Stone,A,1,2006,2006,9,1,20
+Juan Luis Guerra,A,1,2007,2007,1,1,20
+Judas Priest,A,1,2009,2009,8,1,20
+Judy Kuhn,A,1,1995,1995,8,1,20
+Juice Newton,A,1,1982,1982,2,1,20
+Jules Buckley,C,1,2019,2019,4,1,20
+Julie Andrews,B,1,1964,1964,13,1,20
+Julieta Venegas,A,1,2006,2006,9,1,20
+Julio Iglesias,A,1,1987,1987,5,1,20
+Justice,A,1,2018,2018,1,1,20
+Justin Bieber,A,1,2015,2015,169,1,20
+Justin Timberlake,B,1,2013,2013,11,1,20
+Karl Böhm,A,1,1976,1976,6,1,20
+Keely Smith,A,1,1958,1958,5,1,20
+Kelly Rowland,A,1,2002,2002,2,1,20
+Kelly Rowland,B,1,2009,2009,2,1,20
+Kenny G,B,1,1993,1993,5,1,20
+Kenny Loggins,A,1,1980,1980,1,1,20
+Khalid,A,1,2019,2019,31,1,20
+Kid Cudi,A,1,2011,2011,3,1,20
+Kid Cudi,B,1,2011,2011,3,1,20
+Killswitch Engage,A,1,2019,2019,12,1,20
+Kim Carnes,A,1,1981,1981,4,1,20
+Kim Carnes,B,1,1981,1981,4,1,20
+Kiri Te Kanawa,B,1,1985,1985,7,1,20
+Kitaro,A,1,2000,2000,1,1,20
+Koffee,A,1,2019,2019,21,1,20
+Kraftwerk,A,1,2017,2017,2,1,20
+Kremerata Baltica,B,1,2019,2019,2,1,20
+Kris Bowers,C,1,2019,2019,7,1,20
+Kristen Anderson-Lopez,A,1,2014,2014,17,1,20
+Kristin Chenoweth,B,1,2004,2004,19,1,20
+Kronos Quartet,C,1,2019,2019,5,1,20
+Kylie Minogue,A,1,2003,2003,10,1,20
+La Ley,A,1,2000,2000,9,1,20
+Lambert,A,1,1961,1961,4,1,20
+Lana Del Rey,A,1,2019,2019,29,1,20
+La Quinta Estación,A,1,2009,2009,11,1,20
+La Roux,A,1,2010,2010,14,1,20
+Laura Pausini,A,1,2005,2005,11,1,20
+Laura Story,B,1,2011,2011,7,1,20
+Laura Sullivan,A,1,2013,2013,23,1,20
+Lauren Daigle,A,1,2018,2018,9,1,20
+Laurindo Almeida,A,1,1964,1964,1,1,20
+Laurindo Almeida,B,1,1962,1962,1,1,20
+LCD Soundsystem,A,1,2017,2017,14,1,20
+Lea Michele,B,1,2007,2007,3,1,20
+LeAnn Rimes,B,1,1996,1996,1,1,20
+Lecrae,A,1,2012,2012,5,1,20
+Led Zeppelin,A,1,2013,2013,25,1,20
+"Lee ""Scratch"" Perry",A,1,2002,2002,2,1,20
+Len Cariou,C,1,1979,1979,1,1,20
+Leonard Cohen,A,1,2017,2017,5,1,20
+Leon Bridges,A,1,2018,2018,16,1,20
+Leo Sayer,B,1,1977,1977,10,1,20
+Lester Young,C,1,1978,1978,1,1,20
+Lewis Capaldi,B,1,2019,2019,1,1,20
+Lil Baby & Gunna,A,1,2019,2019,26,1,20
+Lil Jon,A,1,2004,2004,15,1,20
+Lil' Kim,A,1,2001,2001,7,1,20
+Lil Wayne,B,1,2008,2008,14,1,20
+Linda Ronstadt,B,1,1987,1987,1,1,20
+Lin-Manuel Miranda,A,1,2017,2017,38,1,20
+Lin-Manuel Miranda,B,1,2008,2008,38,1,20
+Lionel Richie,C,1,1984,1984,21,1,20
+Little Big Town,B,1,2015,2015,8,1,20
+Little Walter,C,1,2009,2009,1,1,20
+Lizzo Featuring Gucci Mane,B,1,2019,2019,48,1,20
+London Symphony Orchestra,C,1,1973,1973,58,1,20
+Los Fabulosos Cadillacs,A,1,1997,1997,39,1,20
+Los Van Van,A,1,1999,1999,1,1,20
+Louis Armstrong,A,1,1964,1964,59,1,20
+Louis Armstrong,B,1,1964,1964,59,1,20
+Louis Prima,A,1,1958,1958,13,1,20
+Lou Reed,A,1,1998,1998,3,1,20
+Lucky Daye,B,1,2019,2019,17,1,20
+Ludacris,B,1,2006,2006,6,1,20
+Luis Enrique,A,1,2009,2009,5,1,20
+Luis Fonsi,A,1,2019,2019,34,1,20
+Luke Combs,A,1,2019,2019,3,1,20
+Lupillo Rivera,A,1,2009,2009,6,1,20
+Macklemore,B,1,2013,2013,23,1,20
+Macy Gray,A,1,2000,2000,1,1,20
+Madison Cunningham,A,1,2019,2019,3,1,20
+Maggie Rogers,A,1,2019,2019,4,1,20
+Maluma,A,1,2019,2019,75,1,20
+Mandy Patinkin,B,1,1984,1984,7,1,20
+Maranatha! Kids,A,1,1991,1991,6,1,20
+Mariah Carey,B,1,2005,2005,2,1,20
+Mark Ronson Featuring Bruno Mars,B,1,2015,2015,3,1,20
+Mark Ronson Featuring Bruno Mars,C,1,2007,2007,3,1,20
+Mary J. Blige,B,1,2006,2006,10,1,20
+Mastodon,A,1,2017,2017,21,1,20
+Matt Cavenaugh,B,1,2009,2009,1,1,20
+Matt Redman,A,1,2012,2012,29,1,20
+Matt Redman,B,1,2012,2012,29,1,20
+Maxwell,B,1,2016,2016,1,1,20
+MEDUZA,A,1,2019,2019,61,1,20
+Megadeth,A,1,2016,2016,43,1,20
+Meghan Trainor,A,1,2015,2015,8,1,20
+Mel Brooks (Various Artists Including Nathan Lane & Matthew Broderick),B,1,2001,2001,4,1,20
+Mel Brooks (Various Artists Including Nathan Lane & Matthew Broderick),A,1,2001,2001,4,1,20
+Mel Tormé,C,1,1995,1995,9,1,20
+Metallica,C,1,2008,2008,51,1,20
+Method Man,A,1,1995,1995,8,1,20
+MGMT,B,1,2008,2008,11,1,20
+Michael Cleveland,A,1,2019,2019,3,1,20
+Michael Jackson,B,1,1983,1983,18,1,20
+Michael Stern,C,1,2010,2010,1,1,20
+Michel Legrand,A,1,1975,1975,6,1,20
+Mike Oldfield,B,1,1974,1974,19,1,20
+Miles Davis,B,1,1960,1960,2,1,20
+Miley Cyrus,B,1,2019,2019,4,1,20
+Milton Nascimento,A,1,1997,1997,11,1,20
+Miranda Lambert,B,1,2019,2019,1,1,20
+Missy Raines,A,1,2019,2019,3,1,20
+Monica,A,1,1998,1998,1,1,20
+Motörhead,A,1,2004,2004,2,1,20
+Mumford & Sons,A,1,2012,2012,4,1,20
+Mustard,A,1,2019,2019,6,1,20
+Mýa,A,1,2001,2001,2,1,20
+Nancy Rumbel,A,1,2002,2002,3,1,20
+NAO,A,1,2019,2019,1,1,20
+Natalia Lafourcade,A,1,2015,2015,3,1,20
+Natalie Cole,B,1,1991,1991,3,1,20
+Nathan Lane,B,1,2001,2001,16,1,20
+National Philharmonic Orchestra,B,1,1983,1983,18,1,20
+Nat King Cole,B,1,1991,1991,116,1,20
+Nat King Cole,C,1,1996,1996,116,1,20
+Nat King Cole Trio,C,1,1992,1992,14,1,20
+Naughty By Nature,A,1,1995,1995,1,1,20
+Neil Diamond,C,1,1972,1972,3,1,20
+Neil Diamond,B,1,1973,1973,3,1,20
+Neil Young,B,1,2010,2010,4,1,20
+Neil Young,C,1,2009,2009,4,1,20
+Nelly Furtado,A,1,2001,2001,20,1,20
+NERO,B,1,2012,2012,22,1,20
+New York Philharmonic,C,1,2019,2019,2,1,20
+Ne-Yo,B,1,2008,2008,11,1,20
+Nickel Creek,A,1,2002,2002,26,1,20
+Nicola Benedetti,B,1,2019,2019,2,1,20
+Nirvana,A,1,1995,1995,85,1,20
+Norah Jones,B,1,2002,2002,151,1,20
+Norah Jones,C,1,2002,2002,151,1,20
+Offset,A,1,2019,2019,6,1,20
+Omar Akram,A,1,2012,2012,4,1,20
+Orchestra,C,1,2016,2016,3,1,20
+Orchestre Philharmonique de Radio France,B,1,2012,2012,1,1,20
+Oscar Peterson,A,1,1974,1974,4,1,20
+Otis Redding,A,1,1968,1968,35,1,20
+Otis Redding,B,1,1968,1968,35,1,20
+Ozzy Osbourne,A,1,1993,1993,19,1,20
+Paramore,B,1,2014,2014,39,1,20
+Pat Carroll,A,1,1980,1980,3,1,20
+Pat Metheny,B,1,1990,1990,4,1,20
+Patti Austin,A,1,2007,2007,1,1,20
+Patton Oswalt,A,1,2016,2016,25,1,20
+Paul McCartney,B,1,2013,2013,4,1,20
+Pearl Jam,C,1,2014,2014,32,1,20
+Pearl Jam,A,1,1995,1995,32,1,20
+Peggy Lee,C,1,1960,1960,84,1,20
+Peggy Lee,A,1,1969,1969,84,1,20
+Perry Como,A,1,1958,1958,4,1,20
+Peter Frampton,A,1,2006,2006,11,1,20
+Peter Tosh,A,1,1987,1987,3,1,20
+Philharmonia Orchestra,B,1,2009,2009,10,1,20
+Pink Floyd,A,1,1994,1994,89,1,20
+Pink Floyd,C,1,1980,1980,89,1,20
+Pitbull,A,1,2015,2015,18,1,20
+Prince,B,1,1984,1984,1,1,20
+Public Enemy,B,1,2007,2007,5,1,20
+Punch Brothers,A,1,2018,2018,14,1,20
+Q-Tip,A,1,2005,2005,1,1,20
+Queen Latifah,A,1,1994,1994,6,1,20
+Rage,A,1,2017,2017,2,1,20
+Randy Newman,C,1,2017,2017,61,1,20
+Randy Travis,B,1,1987,1987,9,1,20
+Rascal Flatts,B,1,2005,2005,7,1,20
+Ray Barretto,A,1,1989,1989,4,1,20
+Ray LaMontagne,A,1,2010,2010,12,1,20
+Ray Parker Jr,A,1,1984,1984,3,1,20
+Rebecca St. James,A,1,1999,1999,1,1,20
+Reckless Kelly,C,1,2013,2013,1,1,20
+Red Hot Chili Peppers,C,1,2006,2006,158,1,20
+Renée Fleming,C,1,2014,2014,7,1,20
+Ricardo Montaner,A,1,2019,2019,1,1,20
+Richard Pryor,C,1,2001,2001,2,1,20
+Rick Ross,B,1,2019,2019,6,1,20
+Rita Moreno & Bill Cosby,A,1,1972,1972,1,1,20
+R. Kelly,B,1,1997,1997,1,1,20
+Roberta Flack,C,1,1986,1986,2,1,20
+Robert Guillaume,A,1,1994,1994,1,1,20
+Robert Lopez,A,1,2014,2014,16,1,20
+Roberto Blades,A,1,2001,2001,2,1,20
+Roberto Carlos,A,1,1988,1988,18,1,20
+Robert Preston,B,1,1958,1958,3,1,20
+Rob Thomas,B,1,1999,1999,2,1,20
+Roddy Ricch,B,1,2019,2019,3,1,20
+Rodrigo y Gabriela,A,1,2019,2019,1,1,20
+Rod Stewart,A,1,2004,2004,29,1,20
+Royal Philharmonic Orchestra,A,1,2010,2010,35,1,20
+Royal Philharmonic Orchestra,C,1,2010,2010,35,1,20
+Ryuichi Sakamoto,B,1,1988,1988,25,1,20
+Saint Sinner,A,1,2019,2019,2,1,20
+Sam & Dave,A,1,1967,1967,4,1,20
+Sam Smith,B,1,2014,2014,63,1,20
+Santana & Michelle Branch,B,1,1999,1999,8,1,20
+Sara Bareilles,A,1,2019,2019,9,1,20
+Sarah Vaughan,A,1,1982,1982,2,1,20
+Sarah Vaughan,C,1,1972,1972,2,1,20
+Sara Ramirez,B,1,2005,2005,4,1,20
+Seal,B,1,1995,1995,15,1,20
+Sean Paul,A,1,2003,2003,127,1,20
+Sebastian Plano,A,1,2019,2019,6,1,20
+Sebastian Yatra,A,1,2019,2019,143,1,20
+Secret Agent 23 Skidoo,A,1,2016,2016,11,1,20
+Selena,A,1,1993,1993,6,1,20
+Sérgio Mendes,A,1,1992,1992,2,1,20
+Shadowfax,A,1,1988,1988,2,1,20
+Shawn Mendes,A,1,2019,2019,37,1,20
+Sheryl Crow,C,1,1998,1998,25,1,20
+"Siedah Garrett & Henry Krieger, songwriters (Jennifer Hudson)",A,1,2007,2007,1,1,20
+"Siedah Garrett & Henry Krieger, songwriters (Jennifer Hudson)",C,1,1990,1990,1,1,20
+Silk City & Dua Lipa Featuring Diplo & Mark Ronson,A,1,2018,2018,1,1,20
+Simply Red,B,1,1989,1989,16,1,20
+Sinéad O'Connor,A,1,1990,1990,2,1,20
+Sirah,A,1,2012,2012,3,1,20
+Slipknot,A,1,2005,2005,33,1,20
+Sly And Robbie,A,1,1998,1998,2,1,20
+Sly & Robbie & Roots Radics,A,1,2019,2019,1,1,20
+Smokey Robinson,A,1,1987,1987,2,1,20
+Social House,A,1,2019,2019,1,1,20
+Solomon Burke,A,1,2002,2002,23,1,20
+Soul Asylum,B,1,1993,1993,2,1,20
+Stan Getz,C,1,1964,1964,9,1,20
+Stark Sands,B,1,2013,2013,1,1,20
+Steep Canyon Rangers,A,1,2012,2012,15,1,20
+Stephanie Mills,A,1,1980,1980,2,1,20
+Steve Kazee,B,1,2012,2012,3,1,20
+Steve Martin,B,1,2013,2013,12,1,20
+Steve Stevens,A,1,1986,1986,2,1,20
+Sting,B,1,1991,1991,12,1,20
+Stone Temple Pilots,A,1,1993,1993,20,1,20
+Stuart Duncan,A,1,2012,2012,7,1,20
+Stuart Duncan,C,1,2012,2012,7,1,20
+Sturgill Simpson,A,1,2016,2016,24,1,20
+St. Vincent,C,1,2018,2018,4,1,20
+St. Vincent,A,1,2014,2014,4,1,20
+St. Vincent,B,1,2018,2018,4,1,20
+Sugarland,A,1,2008,2008,1,1,20
+Sugarland,B,1,2008,2008,1,1,20
+Survivor,A,1,1982,1982,4,1,20
+Swizz Beatz,A,1,2010,2010,1,1,20
+System Of A Down,A,1,2005,2005,17,1,20
+Tanvi Shah,A,1,2009,2009,12,1,20
+T-Bone Walker,A,1,1970,1970,1,1,20
+Tenacious D,A,1,2014,2014,5,1,20
+Tennessee Ernie Ford,A,1,1964,1964,6,1,20
+Terence Blanchard,B,1,2018,2018,4,1,20
+Thalma De Freitas,A,1,2019,2019,1,1,20
+The 1975,B,1,2019,2019,42,1,20
+The Art Of Noise Featuring Duane Eddy,A,1,1986,1986,5,1,20
+The Band,C,1,2015,2015,10,1,20
+The Band Perry,A,1,2014,2014,1,1,20
+The Beach Boys,C,1,2012,2012,175,1,20
+The Black Keys,B,1,2012,2012,45,1,20
+The Black Keys,C,1,2010,2010,45,1,20
+The Chainsmokers Featuring Daya,A,1,2016,2016,109,1,20
+The Champs,A,1,1958,1958,6,1,20
+The Clark Sisters,B,1,2007,2007,1,1,20
+The Clash,A,1,2002,2002,6,1,20
+The Coasters,C,1,1986,1986,4,1,20
+The Cranberries,A,1,2019,2019,18,1,20
+The Doobie Brothers,C,1,1979,1979,10,1,20
+The Doobie Brothers,B,1,1979,1979,10,1,20
+The Doors,A,1,2010,2010,31,1,20
+The Drifters,C,1,1986,1986,40,1,20
+The Emotions,A,1,1977,1977,7,1,20
+The Flaming Lips,C,1,2006,2006,1,1,20
+The Imposters,A,1,2019,2019,2,1,20
+The Infamous Stringdusters,A,1,2017,2017,27,1,20
+The Isley Brothers,A,1,1969,1969,4,1,20
+The Jordanaires,A,1,2002,2002,7,1,20
+Thelma Houston,A,1,1977,1977,2,1,20
+The Mamas & The Papas,A,1,1966,1966,12,1,20
+The Manhattans,A,1,1980,1980,1,1,20
+The National,A,1,2017,2017,1,1,20
+The Pointer Sisters,C,1,1984,1984,1,1,20
+The Police,B,1,1983,1983,8,1,20
+The Po’ Ramblin’ Boys,A,1,2019,2019,7,1,20
+The Raconteurs,C,1,2008,2008,5,1,20
+The Range,A,1,1986,1986,1,1,20
+The Roots,B,1,2010,2010,1,1,20
+The Steeldrivers,A,1,2015,2015,22,1,20
+The Temptations,B,1,1972,1972,45,1,20
+The Travelin' McCourys,A,1,2018,2018,7,1,20
+The Wallflowers,A,1,1997,1997,7,1,20
+The Wallflowers,B,1,1997,1997,7,1,20
+The White Stripes,C,1,2010,2010,29,1,20
+The White Stripes,B,1,2003,2003,29,1,20
+Third World,A,1,2019,2019,1,1,20
+Thomas Rhett,A,1,2019,2019,12,1,20
+Thom Yorke,B,1,2019,2019,5,1,20
+Thom Yorke,C,1,2019,2019,5,1,20
+Thundercat,A,1,2015,2015,1,1,20
+Timbaland,A,1,2006,2006,5,1,20
+Tim Curry,B,1,2005,2005,2,1,20
+Tim O'Brien,A,1,2005,2005,3,1,20
+Tinariwen,A,1,2011,2011,19,1,20
+Tina Turner,B,1,1984,1984,8,1,20
+Tom Jones,A,1,1965,1965,7,1,20
+Tom Petty,A,1,1995,1995,30,1,20
+Tom Petty,C,1,1995,1995,30,1,20
+Tom Petty and the Heartbreakers,A,1,2008,2008,59,1,20
+Tom Wopat,B,1,1999,1999,4,1,20
+Tony Bennett,B,1,1965,1965,17,1,20
+TOOL,C,1,2006,2006,10,1,20
+TOOL,B,1,2019,2019,10,1,20
+Toots & The Maytals,A,1,2004,2004,2,1,20
+Tori Kelly,A,1,2018,2018,13,1,20
+Tove Lo,A,1,2019,2019,133,1,20
+T-Pain,A,1,2009,2009,32,1,20
+T-Pain,B,1,2007,2007,32,1,20
+Tracy Chapman,B,1,1996,1996,7,1,20
+Train,A,1,2010,2010,1,1,20
+Train,B,1,2001,2001,1,1,20
+Train,C,1,2001,2001,1,1,20
+Traveling Wilburys,A,1,1989,1989,1,1,20
+Travis Scott,A,1,2019,2019,31,1,20
+Twenty One Pilots,A,1,2016,2016,8,1,20
+Tycho,A,1,2019,2019,3,1,20
+Ty Dolla $ign,A,1,2019,2019,77,1,20
+Tyler Childers,A,1,2019,2019,4,1,20
+"Tyler, The Creator",A,1,2019,2019,1,1,20
+Vampire Weekend,B,1,2019,2019,1,1,20
+Van Halen,A,1,1991,1991,15,1,20
+Vassar Clements,A,1,2004,2004,1,1,20
+Velvet Revolver,A,1,2004,2004,3,1,20
+Vicente García,A,1,2019,2019,2,1,20
+Vijay Prakash,A,1,2009,2009,8,1,20
+Vince Guaraldi Trio,B,1,1962,1962,31,1,20
+Waylon Jennings & The Kimberlys,B,1,1985,1985,2,1,20
+Weezer,A,1,2008,2008,120,1,20
+Weird Al Yankovic,C,1,2018,2018,15,1,20
+Whitney Houston,B,1,1996,1996,1,1,20
+Will Ackerman,A,1,2004,2004,20,1,20
+will.i.am,A,1,2008,2008,1,1,20
+William Orbit,A,1,1999,1999,4,1,20
+Willy Chirino,A,1,2005,2005,1,1,20
+Wolfmother,A,1,2006,2006,26,1,20
+Wyatt Cenac,A,1,2010,2010,8,1,20
+Yoko Ono,A,1,1981,1981,2,1,20
+Young Thug,A,1,2019,2019,26,1,20
+Zakir Hussain,A,1,2008,2008,1,1,20
+Zedd Featuring Foxes,A,1,2013,2013,129,1,20
+Zoé,A,1,2018,2018,25,1,20
+Zooey Deschanel,A,1,2016,2016,2,1,20
+Zubin Mehta,C,1,1981,1981,19,1,20

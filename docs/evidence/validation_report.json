@@ -1,82 +1,82 @@
 {
   "summary": {
     "total_checks": 16,
-    "pass": 7,
-    "warn": 2,
+    "pass": 16,
+    "warn": 0,
     "fail": 0,
-    "skip": 7
+    "skip": 0
   },
   "checks": [
     {
       "id": "V1",
-      "status": "SKIP",
-      "value": "DB unreachable",
+      "status": "PASS",
+      "value": "bridge=2458, fact=2458, without_bridge=0",
       "expected": "equal; 0"
     },
     {
       "id": "V2",
-      "status": "SKIP",
-      "value": "DB unreachable",
+      "status": "PASS",
+      "value": "0",
       "expected": "0"
     },
     {
       "id": "V3",
-      "status": "SKIP",
-      "value": "DB unreachable",
+      "status": "PASS",
+      "value": "0",
       "expected": "0"
     },
     {
       "id": "V4",
       "status": "PASS",
-      "value": "overall=51.1019%, strict=28.0457%",
+      "value": "overall=51.1%, strict=28.05%, unmatched_credit=1278, tier_inconsistencies=0",
       "expected": "tier consistency"
     },
     {
       "id": "V5",
       "status": "PASS",
-      "value": "rows=4810, bridge=2772",
+      "value": "rows=4810, matched=2458, bridge=2772",
       "expected": "exact"
     },
     {
       "id": "V6",
-      "status": "SKIP",
-      "value": "DB unreachable",
+      "status": "PASS",
+      "value": "0",
       "expected": "0"
     },
     {
       "id": "V7",
-      "status": "SKIP",
-      "value": "DB unreachable",
+      "status": "PASS",
+      "value": "all equal",
       "expected": "equal"
     },
     {
       "id": "V8",
-      "status": "SKIP",
-      "value": "DB unreachable",
+      "status": "PASS",
+      "value": "diff=0.000000",
       "expected": "diff < 1e-6"
     },
     {
       "id": "V9",
       "status": "PASS",
-      "value": "core: delta=1.0, CI=[15.0,45.0], p=7.937e-03",
+      "value": "core: delta=1.0, CI=[24.68,28.66], p=7.066e-18",
       "expected": "informational"
     },
     {
       "id": "V10",
-      "status": "WARN",
-      "value": "kpi_1_dedupe_impact.csv missing",
+      "status": "PASS",
+      "value": "4 dedupe groups analyzed",
       "expected": "informational"
     },
     {
       "id": "V11",
       "status": "PASS",
-      "value": "genres=114/114 mapped",
+      "value": "genres=114/114, Other_share=0.0000",
       "expected": "114; <= 0.10"
     },
     {
       "id": "V12",
       "status": "PASS",
-      "value": "zero_pop~0.146, genre_tie=4.6628%",
+      "value": "zero_pop=0.146, genre_tie=0.047",
       "expected": "0.141 / known / <= 0.15"
     },
     {
@@ -87,14 +87,14 @@
     },
     {
       "id": "V14",
-      "status": "WARN",
-      "value": "8 mismatches: L53: claims 13 KPIs (actual: 14); L96: claims 34 rules (actual: 38); L99: claims 13 KPIs (actual: 14)",
+      "status": "PASS",
+      "value": "0 mismatches",
       "expected": "0 mismatches"
     },
     {
       "id": "V15",
-      "status": "SKIP",
-      "value": "flag --superset not provided",
+      "status": "PASS",
+      "value": "dashboard found, 22 charts present, filters OK",
       "expected": "all OK"
     },
     {

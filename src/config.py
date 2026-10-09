@@ -29,6 +29,7 @@ DATA_DIR = _env_path("MUSIC_DATA_DIR", _default_data_dir())
 RAW_DIR = DATA_DIR / "raw"
 WORK_DIR = DATA_DIR / "work"
 OUTPUT_DIR = DATA_DIR / "output"
+DATA_PROCESSED_DIR = OUTPUT_DIR
 BAD_DIR = DATA_DIR / "bad"
 
 GX_DIR = _env_path(

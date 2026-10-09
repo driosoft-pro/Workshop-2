@@ -42,10 +42,10 @@ repair of source values (rule **T5** — never modify data to make a check pass)
 
 | Requirement | KPI query (`sql/kpi_queries.sql`) | Output artifact | DW elements |
 | --- | --- | --- | --- |
-| R1 | `kpi_1_popularity_by_grammy_recognition`, `kpi_1_genre_split`, `kpi_0_integration_coverage` | `docs/evidence/kpis/*.csv`, chart `ar1_popularity_by_genre.png` | `fact_track_artist`, `dim_artist`, `dim_genre` |
-| R2 | `kpi_2_awards_by_dominant_genre` | `kpi_2_awards_by_dominant_genre.csv`, `ar2_awards_by_dominant_genre.png` | `fact_grammy_award`, `dim_artist`, `dim_genre` |
-| R3 | `kpi_3_awards_and_profile_by_decade`, `kpi_3_awards_per_year` | `kpi_3_*.csv`, `ar3_awards_and_profile_by_decade.png` | `fact_grammy_award`, `fact_track_artist`, `dim_year` |
-| R4 | `kpi_4_top_awarded_artists_on_spotify` | `kpi_4_top_awarded_artists_on_spotify.csv`, `ar4_top_awarded_artists.png` | `fact_grammy_award`, `dim_artist` |
+| R1 | `kpi_1_popularity_by_grammy_recognition`, `kpi_1_artist_level`, `kpi_1_within_genre_diff`, `kpi_0_integration_coverage`, `kpi_0_coverage_by_tier` | `docs/evidence/kpis/kpi_1_*.csv`, `kpi_1_stats.csv`, `kpi_1_dedupe_impact.csv`, `ar1_popularity_by_genre.png` | `fact_track_artist`, `dim_artist`, `dim_genre`, `bridge_award_artist` |
+| R2 | `kpi_2_awards_by_dominant_genre`, `kpi_2_heatmap` | `kpi_2_awards_by_dominant_genre.csv`, `kpi_2_heatmap.csv`, `ar2_awards_by_dominant_genre.png` | `fact_grammy_award`, `dim_artist`, `dim_genre`, `bridge_award_artist` |
+| R3 | `kpi_3_awards_and_profile_by_decade`, `kpi_3_awards_per_year`, `kpi_3_awards_by_family_decade` | `kpi_3_*.csv`, `ar3_awards_and_profile_by_decade.png` | `fact_grammy_award`, `fact_track_artist`, `dim_year`, `bridge_award_artist` |
+| R4 | `kpi_4_top_awarded_artists_on_spotify`, `kpi_4_top_awarded_all` | `kpi_4_*.csv`, `ar4_top_awarded_artists.png` | `fact_grammy_award`, `dim_artist`, `bridge_award_artist` |
 
 ## Traceability
 

@@ -265,8 +265,8 @@ def get_last_committed_match_rate(engine=None) -> float | None:
     """Read the last committed batch match rate from etl_batch_log."""
     if engine is None:
         try:
-            from src.load import get_engine
-            engine = get_engine()
+            from sqlalchemy import create_engine
+            engine = create_engine(config.DW_DB_URL)
         except Exception:
             return None
     try:

@@ -1,66 +1,66 @@
 decade,category_family,awards
-1950,Classical,21
+1950,Classical,19
 1950,Visual Media & Theater,7
-1950,Pop,7
 1950,General Field,7
+1950,Pop,7
+1950,Production & Technical,6
 1950,Spoken & Comedy,6
 1950,Jazz,4
-1950,Production & Technical,4
 1950,Country & Folk,3
-1950,R&B & Rap,2
 1950,Dance & Electronic,2
-1960,Classical,158
+1950,R&B & Rap,2
+1960,Classical,140
 1960,Pop,59
 1960,Country & Folk,44
 1960,General Field,39
+1960,Production & Technical,36
 1960,Spoken & Comedy,30
 1960,R&B & Rap,27
 1960,Jazz,21
 1960,Visual Media & Theater,21
-1960,Production & Technical,18
 1960,Gospel & Christian,12
 1960,Rock & Metal,4
-1970,Classical,143
+1970,Classical,120
 1970,R&B & Rap,61
 1970,Country & Folk,60
+1970,Production & Technical,48
 1970,General Field,41
 1970,Pop,40
 1970,Jazz,34
 1970,Spoken & Comedy,30
-1970,Production & Technical,25
 1970,Gospel & Christian,23
 1970,Visual Media & Theater,20
 1970,Latin,5
 1970,Rock & Metal,4
 1970,Dance & Electronic,1
-1980,Classical,170
+1980,Classical,144
 1980,R&B & Rap,79
 1980,Jazz,77
 1980,Country & Folk,69
+1980,Production & Technical,56
 1980,Visual Media & Theater,45
 1980,Rock & Metal,42
 1980,Pop,40
 1980,General Field,39
 1980,Gospel & Christian,33
-1980,Production & Technical,30
 1980,Latin,25
 1980,Spoken & Comedy,23
 1980,Reggae & World,12
-1990,Classical,190
+1990,Classical,170
 1990,Country & Folk,103
 1990,R&B & Rap,95
 1990,Rock & Metal,93
 1990,Jazz,77
 1990,Pop,71
+1990,Production & Technical,56
 1990,Visual Media & Theater,55
 1990,General Field,40
 1990,Latin,37
-1990,Production & Technical,36
 1990,Reggae & World,29
 1990,Spoken & Comedy,23
 1990,Gospel & Christian,14
 1990,Dance & Electronic,3
-2000,Classical,200
+2000,Classical,180
 2000,R&B & Rap,144
 2000,Country & Folk,111
 2000,Rock & Metal,90
@@ -68,19 +68,19 @@ decade,category_family,awards
 2000,Jazz,80
 2000,Latin,71
 2000,Visual Media & Theater,70
+2000,Production & Technical,67
 2000,Reggae & World,55
-2000,Production & Technical,47
 2000,General Field,40
 2000,Spoken & Comedy,31
 2000,Gospel & Christian,22
 2000,Dance & Electronic,16
-2010,Classical,244
+2010,Classical,216
 2010,Country & Folk,138
 2010,R&B & Rap,133
+2010,Production & Technical,100
 2010,Jazz,93
 2010,Visual Media & Theater,85
 2010,Rock & Metal,73
-2010,Production & Technical,72
 2010,Gospel & Christian,69
 2010,General Field,68
 2010,Pop,64

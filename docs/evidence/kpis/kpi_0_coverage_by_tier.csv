@@ -1,0 +1,9 @@
+recognition_tier,match_method,award_rows,share_pct
+A,exact,1348,28.02
+A,split,343,7.13
+A,nominee,42,0.87
+B,workers,429,8.92
+C,workers,275,5.72
+C,nominee,20,0.42
+C,exact,1,0.02
+none,none,2352,48.9

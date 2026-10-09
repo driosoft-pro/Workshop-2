@@ -14,9 +14,9 @@ conformed `dim_artist` (and `dim_year` for the temporal context).
 
 | Fact | Grain (one row = …) | Rows in this batch | Key measures |
 | --- | --- | --- | --- |
-| `fact_track_artist` | one Spotify **track listing** (`track_id` × `track_genre`) **× one performing artist** | **157,530** | `popularity`, `duration_ms`/`duration_ms→duration_min`, `explicit`, `danceability`, `energy`, `valence`, `acousticness`, `speechiness`, `liveness`, `loudness`, `tempo`, `artist_position`, `artist_total`, `is_grammy_artist`, `artist_grammy_awards` (degenerate/repeated measures, not additive across artists — see §6) |
-| `fact_grammy_award` | one **Grammy award record** (`year` × `category` × `nominee` × `artist`) | **4,810** | `winner`, `winner_flag`, `is_matched_spotify`, `is_matched_strict`, `is_song_confirmed`, `artist_source`, `match_method`, `credit_artist_count`, `spotify_track_count`, `award_count` |
-| `bridge_award_artist` | one **matched artist of a Grammy credit** (`award_bk` × `artist_key`) | **2,757** | `artist_position`, `match_method` (T12 collaborative credits) |
+| `fact_track_artist` | one Spotify **track listing** (`track_id` × `track_genre`) **× one performing artist** | **157,530** | `popularity`, `duration_ms`/`duration_ms→duration_min`, `explicit`, `danceability`, `energy`, `valence`, `acousticness`, `speechiness`, `liveness`, `loudness`, `tempo`, `artist_position`, `artist_total`, `is_grammy_artist`, `is_grammy_artist_strict`, `artist_grammy_awards` (degenerate/repeated measures, not additive across artists — see §6) |
+| `fact_grammy_award` | one **Grammy award record** (`year` × `category` × `nominee` × `artist`) | **4,810** | `winner`, `winner_flag`, `is_matched_spotify`, `is_matched_strict`, `is_song_confirmed`, `artist_source`, `match_method`, `credit_artist_count`, `spotify_track_count`, `award_count`, `recognition_tier`, `is_aggregate_credit` |
+| `bridge_award_artist` | one **matched artist of a Grammy credit** (`grammy_award_sk` × `artist_sk`) | **2,772** | `artist_position`, `match_method`, `recognition_tier` (T12 collaborative credits, T18 recognition tiers) |
 
 Grain justification: a Spotify track may be attributed to several genres *and*
 several artists; the finest level at which all R1-R4 measures are consistent is
@@ -27,7 +27,7 @@ has 0 duplicates).
 
 | Dimension | Grain / business key | Surrogate key | Columns | Attributes used by |
 | --- | --- | --- | --- | --- |
-| `dim_artist` | **`artist_bk`** = normalized `artist_key` (TEXT, UNIQUE) | `artist_sk` BIGSERIAL (1-based, rebuilt each load) | `artist_display_name`, `from_spotify`, `from_grammy`, `grammy_award_count`, `spotify_track_count`, **`dominant_genre`, `dominant_genre_family`, `n_genres`, `genre_tie`** (T16, primary-song rows only) | R1 (recognition flag), R2 (dominant genre family), R4 (award rank + catalogue coverage) |
+| `dim_artist` | **`artist_bk`** = normalized `artist_key` (TEXT, UNIQUE) | `artist_sk` BIGSERIAL (1-based, rebuilt each load) | `artist_display_name`, `from_spotify`, `from_grammy`, `grammy_award_count`, `grammy_award_count_core`, `spotify_track_count`, **`dominant_genre`, `dominant_genre_family`, `n_genres`, `genre_tie`** (T16, primary-song rows only) | R1 (recognition flag), R2 (dominant genre family), R4 (award rank + catalogue coverage) |
 | `dim_genre` | `genre` = Spotify `track_genre` (114 values, UNIQUE) | `genre_sk` BIGSERIAL | **`genre_family`** (T14, 12 families) | R2 (genre split), R1 per-genre view |
 | `dim_year` | `year` (natural key = `year_sk`, INTEGER) | *none needed* — year is already a stable integer key | `decade` (derived `year/10*10`) | R3 (decade + per-year series) |
 | `dim_award_category` | `category` (638 values, UNIQUE) | `category_sk` BIGSERIAL | **`category_clean`** (T13: parentheses removed, 8 Producer variants merged into 2), **`category_family`** (T13) | R4 award analysis, drill-down |

@@ -33,8 +33,8 @@ GOLDEN_COUNTS_PATH = Path("tests/golden_match_counts.json")
 def get_db_connection():
     """Attempt to get an active database connection."""
     try:
-        from src.load import get_engine
-        engine = get_engine()
+        from sqlalchemy import create_engine
+        engine = create_engine(config.DW_DB_URL, isolation_level="AUTOCOMMIT")
         conn = engine.connect()
         return engine, conn
     except Exception:
@@ -126,7 +126,7 @@ def check_v4(conn) -> tuple[str, str, str]:
                 COUNT(*) AS total,
                 COUNT(*) FILTER (WHERE is_matched_spotify = 1) AS matched,
                 COUNT(*) FILTER (WHERE is_matched_strict = 1) AS strict,
-                COUNT(*) FILTER (WHERE artist IS NOT NULL AND artist != '' AND is_matched_spotify = 0) AS unmatched_credit,
+                COUNT(*) FILTER (WHERE artist_credit IS NOT NULL AND artist_credit != '' AND is_matched_spotify = 0) AS unmatched_credit,
                 COUNT(*) FILTER (WHERE match_method = 'none' AND recognition_tier != 'none') AS inconsistent_tier
             FROM fact_grammy_award
         """)).fetchone()
@@ -179,12 +179,12 @@ def check_v6(conn) -> tuple[str, str, str]:
         row = conn.execute(text("""
             SELECT COUNT(*) FROM (
                 SELECT a.artist_sk, a.grammy_award_count,
-                       COUNT(DISTINCT (w.year_sk, w.category_sk)) AS bridge_count
+                       COUNT(DISTINCT CASE WHEN b.artist_sk IS NOT NULL THEN (w.year_sk, w.category_sk) END) AS bridge_count
                 FROM dim_artist a
                 LEFT JOIN bridge_award_artist b ON b.artist_sk = a.artist_sk
                 LEFT JOIN fact_grammy_award w ON w.grammy_award_sk = b.grammy_award_sk
                 GROUP BY a.artist_sk, a.grammy_award_count
-                HAVING a.grammy_award_count != COUNT(DISTINCT (w.year_sk, w.category_sk))
+                HAVING a.grammy_award_count != COUNT(DISTINCT CASE WHEN b.artist_sk IS NOT NULL THEN (w.year_sk, w.category_sk) END)
             ) sub
         """)).fetchone()
         val = str(row[0])
@@ -300,7 +300,7 @@ def check_v11(conn) -> tuple[str, str, str]:
         row = conn.execute(text("""
             SELECT
                 (SELECT COUNT(*) FROM dim_genre WHERE genre_family IS NOT NULL AND genre_family != 'Other'),
-                (SELECT COUNT(*) FILTER (WHERE category_family = 'Other')::float / COUNT(*) FROM fact_grammy_award)
+                (SELECT COUNT(*) FILTER (WHERE c.category_family = 'Other')::float / COUNT(*) FROM fact_grammy_award w JOIN dim_award_category c ON c.category_sk = w.category_sk)
         """)).fetchone()
         genres_mapped, other_share = row[0], float(row[1]) if row[1] is not None else 0.0
         val = f"genres={genres_mapped}/114, Other_share={other_share:.4f}"
@@ -385,16 +385,24 @@ def check_v15(superset_flag: bool) -> tuple[str, str, str]:
         from scripts.superset_bootstrap import SupersetClient, BASE_URL, DASHBOARD_TITLE, CHART_SPECS
         client = SupersetClient(BASE_URL)
         client.login()
-        res = client.call("GET", f"/api/v1/dashboard/?q=(filters:!((col:dashboard_title,opr:eq,value:'{DASHBOARD_TITLE}')))")
-        if not res.get("result"):
+        dashboards = client.list("/api/v1/dashboard/", "dashboard_title")
+        if DASHBOARD_TITLE not in dashboards:
             return "FAIL", f"Dashboard '{DASHBOARD_TITLE}' not found", "all OK"
-        dash = res["result"][0]
+        dash_id = dashboards[DASHBOARD_TITLE]["id"]
+        status, dash_detail = client.call("GET", f"/api/v1/dashboard/{dash_id}")
+        if status != 200:
+            return "FAIL", f"Failed to get dashboard detail: {status}", "all OK"
+        dash = dash_detail.get("result", {})
         meta = json.loads(dash.get("json_metadata") or "{}")
         filters = meta.get("native_filter_configuration", [])
         filter_names = {f.get("name") for f in filters}
         if "recognition" not in filter_names or "basis" not in filter_names:
-            return "FAIL", "native filters 'recognition' or 'basis' missing", "all OK"
-        return "PASS", f"dashboard found, {len(CHART_SPECS)} charts, filters OK", "all OK"
+            return "FAIL", f"native filters missing (found: {filter_names})", "all OK"
+        charts = client.list("/api/v1/chart/", "slice_name")
+        missing = [spec["slice_name"] for spec in CHART_SPECS if spec["slice_name"] not in charts]
+        if missing:
+            return "FAIL", f"missing {len(missing)} charts: {missing[:2]}", "all OK"
+        return "PASS", f"dashboard found, {len(CHART_SPECS)} charts present, filters OK", "all OK"
     except Exception as e:
         return "FAIL", f"Superset API error: {str(e)[:40]}", "all OK"
 

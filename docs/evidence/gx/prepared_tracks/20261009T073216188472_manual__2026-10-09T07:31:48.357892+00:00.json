@@ -1,0 +1,230 @@
+{
+  "stage": "prepared_tracks",
+  "generated_at": "2026-10-09T07:32:16.188356+00:00",
+  "run_context": {
+    "dag_id": "reliable_music_pipeline",
+    "task_id": "validate_prepared",
+    "run_id": "manual__2026-10-09T07:31:48.357892+00:00",
+    "try_number": 1,
+    "logical_date": "",
+    "stage": "prepared_tracks"
+  },
+  "checkpoint": "prepared_tracks_checkpoint",
+  "suite": "prepared_tracks_suite",
+  "success": true,
+  "max_failure_severity": null,
+  "statistics": {
+    "evaluated_expectations": 10,
+    "successful_expectations": 10,
+    "unsuccessful_expectations": 0,
+    "success_percent": 100.0
+  },
+  "failed_critical_rules": [],
+  "failed_warning_rules": [],
+  "expectations": [
+    {
+      "rule_id": "DQ-P1",
+      "quality_dimension": "Uniqueness",
+      "requirement": "R1",
+      "expectation": "expect_column_values_to_not_be_null",
+      "column": "track_id",
+      "thresholds": {},
+      "severity": "critical",
+      "success": true,
+      "result": {
+        "element_count": 157530,
+        "unexpected_count": 0,
+        "unexpected_percent": 0.0,
+        "partial_unexpected_list": []
+      }
+    },
+    {
+      "rule_id": "DQ-P2",
+      "quality_dimension": "Completeness",
+      "requirement": "R1,R2",
+      "expectation": "expect_column_values_to_not_be_null",
+      "column": "artist_key",
+      "thresholds": {},
+      "severity": "critical",
+      "success": true,
+      "result": {
+        "element_count": 157530,
+        "unexpected_count": 0,
+        "unexpected_percent": 0.0,
+        "partial_unexpected_list": []
+      }
+    },
+    {
+      "rule_id": "DQ-P3",
+      "quality_dimension": "Validity",
+      "requirement": "R1",
+      "expectation": "expect_column_values_to_be_between",
+      "column": "popularity",
+      "thresholds": {
+        "min_value": 0.0,
+        "max_value": 100.0
+      },
+      "severity": "critical",
+      "success": true,
+      "result": {
+        "element_count": 157530,
+        "unexpected_count": 0,
+        "unexpected_percent": 0.0,
+        "partial_unexpected_list": [],
+        "missing_count": 0,
+        "missing_percent": 0.0
+      }
+    },
+    {
+      "rule_id": "DQ-P4",
+      "quality_dimension": "Validity",
+      "requirement": "R3",
+      "expectation": "expect_column_values_to_be_between",
+      "column": "danceability",
+      "thresholds": {
+        "min_value": 0.0,
+        "max_value": 1.0
+      },
+      "severity": "critical",
+      "success": true,
+      "result": {
+        "element_count": 157530,
+        "unexpected_count": 0,
+        "unexpected_percent": 0.0,
+        "partial_unexpected_list": [],
+        "missing_count": 0,
+        "missing_percent": 0.0
+      }
+    },
+    {
+      "rule_id": "DQ-P4",
+      "quality_dimension": "Validity",
+      "requirement": "R3",
+      "expectation": "expect_column_values_to_be_between",
+      "column": "energy",
+      "thresholds": {
+        "min_value": 0.0,
+        "max_value": 1.0
+      },
+      "severity": "critical",
+      "success": true,
+      "result": {
+        "element_count": 157530,
+        "unexpected_count": 0,
+        "unexpected_percent": 0.0,
+        "partial_unexpected_list": [],
+        "missing_count": 0,
+        "missing_percent": 0.0
+      }
+    },
+    {
+      "rule_id": "DQ-P4",
+      "quality_dimension": "Validity",
+      "requirement": "R3",
+      "expectation": "expect_column_values_to_be_between",
+      "column": "valence",
+      "thresholds": {
+        "min_value": 0.0,
+        "max_value": 1.0
+      },
+      "severity": "critical",
+      "success": true,
+      "result": {
+        "element_count": 157530,
+        "unexpected_count": 0,
+        "unexpected_percent": 0.0,
+        "partial_unexpected_list": [],
+        "missing_count": 0,
+        "missing_percent": 0.0
+      }
+    },
+    {
+      "rule_id": "DQ-P5",
+      "quality_dimension": "Validity",
+      "requirement": "R1,R2",
+      "expectation": "expect_column_values_to_be_in_set",
+      "column": "is_grammy_artist",
+      "thresholds": {
+        "value_set": [
+          0,
+          1
+        ]
+      },
+      "severity": "critical",
+      "success": true,
+      "result": {
+        "element_count": 157530,
+        "unexpected_count": 0,
+        "unexpected_percent": 0.0,
+        "partial_unexpected_list": [],
+        "missing_count": 0,
+        "missing_percent": 0.0
+      }
+    },
+    {
+      "rule_id": "DQ-G8",
+      "quality_dimension": "Completeness",
+      "requirement": "R2",
+      "expectation": "expect_column_values_to_be_in_set",
+      "column": "genre_family",
+      "thresholds": {
+        "value_set": [
+          "Classical & Instrumental",
+          "Country & Folk",
+          "Electronic",
+          "Hip-Hop & R&B",
+          "Jazz Blues Soul",
+          "Latin",
+          "Metal",
+          "Mood & Media",
+          "Pop",
+          "Reggae & Caribbean",
+          "Rock",
+          "World"
+        ]
+      },
+      "severity": "critical",
+      "success": true,
+      "result": {
+        "element_count": 157530,
+        "unexpected_count": 0,
+        "unexpected_percent": 0.0,
+        "partial_unexpected_list": [],
+        "missing_count": 0,
+        "missing_percent": 0.0
+      }
+    },
+    {
+      "rule_id": "DQ-P13",
+      "quality_dimension": "Validity",
+      "requirement": "R1",
+      "expectation": "expect_column_mean_to_be_between",
+      "column": "is_zero_popularity",
+      "thresholds": {
+        "min_value": 0.0,
+        "max_value": 0.2
+      },
+      "severity": "warning",
+      "success": true,
+      "result": {}
+    },
+    {
+      "rule_id": "DQ-G10",
+      "quality_dimension": "Uniqueness",
+      "requirement": "R1",
+      "expectation": "expect_compound_columns_to_be_unique",
+      "column": null,
+      "thresholds": {},
+      "severity": "critical",
+      "success": true,
+      "result": {
+        "element_count": 111206,
+        "unexpected_count": 0,
+        "unexpected_percent": 0.0,
+        "partial_unexpected_list": [],
+        "missing_count": 0,
+        "missing_percent": 0.0
+      }
+    }
+  ]
+}

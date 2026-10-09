@@ -533,7 +533,7 @@ class SupersetClient:
         self.csrf = out.get("result") if status == 200 else None
 
     def list(self, path: str, name_field: str) -> dict[str, dict]:
-        status, out = self.call("GET", f"{path}?page_size=500")
+        status, out = self.call("GET", f"{path}?q=(page_size:500)")
         if status != 200:
             raise SystemExit(f"[superset-bootstrap] list {path} failed: {status} {out}")
         return {item[name_field]: item for item in out.get("result", [])}
@@ -829,11 +829,17 @@ def main() -> int:
         ],
     }
 
-    client.call(
+    status_get, dash_detail = client.call("GET", f"/api/v1/dashboard/{dashboard['id']}")
+    existing_meta = json.loads(dash_detail.get("result", {}).get("json_metadata") or "{}") if status_get == 200 else {}
+    existing_meta.update(dashboard_metadata)
+
+    status_put, resp_put = client.call(
         "PUT",
         f"/api/v1/dashboard/{dashboard['id']}",
-        {"json_metadata": json.dumps(dashboard_metadata)},
+        {"json_metadata": json.dumps(existing_meta)},
     )
+    if status_put != 200:
+        print(f"[superset-bootstrap] WARNING: failed to update dashboard json_metadata: {status_put} {resp_put}")
 
     print(f"[superset-bootstrap] total datasets: {len(used_datasets)}, total charts: {len(CHART_SPECS)}")
     print(f"[superset-bootstrap] dashboard ready: {BASE_URL}/superset/dashboard/{dashboard['id']}/")

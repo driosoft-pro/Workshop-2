@@ -41,8 +41,8 @@ def sample_matches(output_path: Path = AUDIT_CSV, sample_per_method: int = 40, s
     df: pd.DataFrame | None = None
     # 1. Try querying Data Warehouse
     try:
-        from src.load import get_engine
-        engine = get_engine()
+        from sqlalchemy import create_engine
+        engine = create_engine(config.DW_DB_URL)
         with engine.connect() as conn:
             query = text("""
                 SELECT
@@ -50,7 +50,7 @@ def sample_matches(output_path: Path = AUDIT_CSV, sample_per_method: int = 40, s
                     y.year,
                     c.category,
                     COALESCE(w.nominee, '') AS nominee,
-                    COALESCE(w.artist, '') AS artist_credit,
+                    COALESCE(w.artist_credit, '') AS artist_credit,
                     COALESCE(w.workers, '') AS workers,
                     a.artist_display_name AS matched_artist,
                     b.match_method,

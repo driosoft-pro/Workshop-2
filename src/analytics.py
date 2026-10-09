@@ -276,8 +276,8 @@ def compute_dedupe_impact(engine=None) -> pd.DataFrame:
     queried = False
     if engine is None:
         try:
-            from src.load import get_engine
-            engine = get_engine()
+            from sqlalchemy import create_engine
+            engine = create_engine(config.DW_DB_URL)
         except Exception:
             engine = None
 

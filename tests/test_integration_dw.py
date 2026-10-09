@@ -48,11 +48,11 @@ def test_documented_row_counts_after_a_full_load(engine):
     expected = {
         "fact_track_artist": 157_530,
         "fact_grammy_award": 4_810,
-        "dim_artist": 30_989,
+        "dim_artist": 30_984,
         "dim_genre": 114,
         "dim_year": 62,
         "dim_award_category": 638,
-        "bridge_award_artist": 2_841,
+        "bridge_award_artist": 2_772,
     }
     actual = {table: _count(engine, table) for table in expected}
     if any(count == 0 for count in actual.values()):

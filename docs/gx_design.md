@@ -26,11 +26,11 @@ run — a run never rewrites the rule catalogue.
 | raw Spotify | `spotify_raw_suite` (9) | `spotify_raw_validation` | `raw_spotify_checkpoint` | `validate_spotify_raw` | `data/work/spotify_raw.csv` (22 contract columns) |
 | raw Grammys | `grammy_raw_suite` (6) | `grammy_raw_validation` | `raw_grammy_checkpoint` | `validate_grammys_raw` | `data/work/grammys_raw.csv` |
 | prepared tracks | `prepared_tracks_suite` (10) | `prepared_tracks_validation` | `prepared_tracks_checkpoint` | `validate_prepared` | `data/work/prepared_tracks.csv` (157,530 rows) |
-| prepared Grammys | `prepared_grammys_suite` (8) | `prepared_grammys_validation` | `prepared_grammy_checkpoint` | `validate_prepared` | `data/work/prepared_grammys.csv` (4,810 rows) |
-| prepared metrics | `prepared_metrics_suite` (6) | `prepared_metrics_validation` | `prepared_metrics_checkpoint` | `validate_prepared` | `data/work/prepared_metrics.csv` (integration summary) |
-| prepared bridge | `prepared_bridge_suite` (1) | `prepared_bridge_validation` | `prepared_bridge_checkpoint` | `validate_prepared` | `data/work/bridge_award_artist.csv` (bridge) |
+| prepared Grammys | `prepared_grammys_suite` (11) | `prepared_grammys_validation` | `prepared_grammy_checkpoint` | `validate_prepared` | `data/work/prepared_grammys.csv` (4,810 rows) |
+| prepared metrics | `prepared_metrics_suite` (7) | `prepared_metrics_validation` | `prepared_metrics_checkpoint` | `validate_prepared` | `data/work/prepared_metrics.csv` (integration summary) |
+| prepared bridge | `prepared_bridge_suite` (2) | `prepared_bridge_validation` | `prepared_bridge_checkpoint` | `validate_prepared` | `data/work/bridge_award_artist.csv` (bridge) |
 
-Total: **34 rule IDs → 40 expectations** across 6 checkpoints.
+Total: **38 rule IDs → 45 expectations** across 6 checkpoints.
 
 ## 3. Rule ID ↔ Expectation mapping
 

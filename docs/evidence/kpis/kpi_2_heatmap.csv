@@ -1,137 +1,135 @@
 dominant_genre_family,category_family,awards
 Country & Folk,Country & Folk,254
 Jazz Blues Soul,R&B & Rap,217
-Classical & Instrumental,Classical,157
+Classical & Instrumental,Classical,149
 Rock,Rock & Metal,106
 Jazz Blues Soul,Pop,90
+Jazz Blues Soul,Production & Technical,80
 Jazz Blues Soul,Jazz,74
-Jazz Blues Soul,Classical,66
-Electronic,R&B & Rap,64
+Electronic,R&B & Rap,63
 Jazz Blues Soul,General Field,61
 Latin,Latin,56
-Rock,Classical,55
-Jazz Blues Soul,Production & Technical,53
 Country & Folk,Pop,50
-Country & Folk,Rock & Metal,46
 Hip-Hop & R&B,R&B & Rap,46
-Electronic,Visual Media & Theater,43
+Country & Folk,Rock & Metal,46
 Jazz Blues Soul,Rock & Metal,43
+Rock,Classical,42
+Jazz Blues Soul,Classical,39
 Country & Folk,General Field,36
-Classical & Instrumental,Visual Media & Theater,32
+Country & Folk,Production & Technical,33
 Reggae & Caribbean,Reggae & World,32
-Electronic,Pop,32
-Country & Folk,Classical,31
+Classical & Instrumental,Visual Media & Theater,32
 Electronic,Dance & Electronic,30
+Electronic,Pop,29
 Pop,Pop,28
+Rock,Production & Technical,28
 Rock,Pop,26
-Country & Folk,Production & Technical,23
+Classical & Instrumental,Production & Technical,23
 Metal,R&B & Rap,23
-Electronic,General Field,23
 Rock,Visual Media & Theater,21
+Country & Folk,Classical,21
+Electronic,General Field,20
+Electronic,Visual Media & Theater,19
+Country & Folk,Visual Media & Theater,19
 Jazz Blues Soul,Visual Media & Theater,19
 World,Pop,19
-Country & Folk,Visual Media & Theater,19
-Electronic,Classical,19
-Rock,General Field,18
 World,Classical,18
+Rock,General Field,18
 World,General Field,17
+Electronic,Classical,17
 Mood & Media,Visual Media & Theater,17
 Mood & Media,Spoken & Comedy,17
-Jazz Blues Soul,Country & Folk,16
-World,R&B & Rap,16
 World,Gospel & Christian,16
-Country & Folk,Jazz,16
+World,R&B & Rap,16
+Jazz Blues Soul,Country & Folk,16
 Classical & Instrumental,Pop,16
+Country & Folk,Jazz,16
 Rock,Country & Folk,15
-Electronic,Country & Folk,15
-Rock,Production & Technical,15
-Classical & Instrumental,Production & Technical,15
 Classical & Instrumental,Jazz,14
 Classical & Instrumental,General Field,14
-Pop,Visual Media & Theater,13
 Rock,R&B & Rap,13
+Pop,Visual Media & Theater,13
 Pop,General Field,13
-Latin,Classical,12
-Metal,Rock & Metal,12
-Electronic,Reggae & World,12
 Rock,Jazz,12
+Metal,Rock & Metal,12
 World,Visual Media & Theater,11
-Pop,Classical,11
 Reggae & Caribbean,R&B & Rap,10
 Jazz Blues Soul,Gospel & Christian,10
-Electronic,Spoken & Comedy,10
-Mood & Media,Classical,9
-Pop,Rock & Metal,9
+Latin,Production & Technical,9
 Classical & Instrumental,Spoken & Comedy,9
-Mood & Media,R&B & Rap,8
+Latin,Classical,9
+Pop,Classical,9
+Pop,Rock & Metal,9
 Pop,Jazz,8
+Mood & Media,R&B & Rap,8
+Mood & Media,Pop,7
 Country & Folk,Gospel & Christian,7
 Rock,Gospel & Christian,7
-Pop,R&B & Rap,7
-Mood & Media,Pop,7
+Electronic,Production & Technical,7
 Electronic,Rock & Metal,7
-Classical & Instrumental,R&B & Rap,6
+Pop,R&B & Rap,7
 Latin,Reggae & World,6
-Latin,Production & Technical,6
-Latin,Jazz,6
+Mood & Media,Classical,6
 Rock,Latin,6
+Mood & Media,Production & Technical,6
 Classical & Instrumental,Latin,6
+Latin,Jazz,6
+Classical & Instrumental,R&B & Rap,6
 Latin,R&B & Rap,6
-Hip-Hop & R&B,Latin,5
-Country & Folk,Spoken & Comedy,5
 Latin,Pop,5
-Classical & Instrumental,Country & Folk,5
-Pop,Country & Folk,5
-Latin,General Field,5
-Electronic,Production & Technical,5
+Country & Folk,Spoken & Comedy,5
 Hip-Hop & R&B,Visual Media & Theater,5
-Country & Folk,Latin,4
-Hip-Hop & R&B,General Field,4
-Mood & Media,Country & Folk,4
+Latin,General Field,5
+Pop,Country & Folk,5
+Hip-Hop & R&B,Latin,5
+Classical & Instrumental,Country & Folk,5
 World,Reggae & World,4
-World,Production & Technical,4
+Mood & Media,Country & Folk,4
+Hip-Hop & R&B,General Field,4
+Country & Folk,Latin,4
 World,Latin,4
-Jazz Blues Soul,Dance & Electronic,4
+World,Production & Technical,4
 Classical & Instrumental,Dance & Electronic,4
-Mood & Media,Jazz,3
-Mood & Media,Production & Technical,3
-Rock,Reggae & World,3
+Jazz Blues Soul,Dance & Electronic,4
 Pop,Dance & Electronic,3
 Mood & Media,Dance & Electronic,3
+Electronic,Reggae & World,3
+Mood & Media,Jazz,3
+Pop,Production & Technical,3
+Rock,Reggae & World,3
 Country & Folk,R&B & Rap,3
-Electronic,Gospel & Christian,2
-Country & Folk,Reggae & World,2
-Hip-Hop & R&B,Country & Folk,2
-World,Jazz,2
-Latin,Visual Media & Theater,2
-Classical & Instrumental,Reggae & World,2
-World,Rock & Metal,2
-Classical & Instrumental,Rock & Metal,2
-Jazz Blues Soul,Spoken & Comedy,2
 Metal,General Field,2
+Metal,Visual Media & Theater,2
+Hip-Hop & R&B,Country & Folk,2
 Reggae & Caribbean,Dance & Electronic,2
 Reggae & Caribbean,Latin,2
-Metal,Visual Media & Theater,2
+Electronic,Country & Folk,2
+Country & Folk,Reggae & World,2
+Jazz Blues Soul,Spoken & Comedy,2
+Latin,Visual Media & Theater,2
+Classical & Instrumental,Rock & Metal,2
+Classical & Instrumental,Reggae & World,2
+World,Jazz,2
 Mood & Media,General Field,2
-Reggae & Caribbean,General Field,1
-Hip-Hop & R&B,Rock & Metal,1
+World,Rock & Metal,2
 Hip-Hop & R&B,Production & Technical,1
-Latin,Dance & Electronic,1
-Latin,Gospel & Christian,1
-Hip-Hop & R&B,Pop,1
-Metal,Country & Folk,1
+Hip-Hop & R&B,Rock & Metal,1
 Metal,Dance & Electronic,1
-Metal,Pop,1
-Metal,Production & Technical,1
+Metal,Country & Folk,1
 Hip-Hop & R&B,Jazz,1
-Mood & Media,Rock & Metal,1
-Hip-Hop & R&B,Dance & Electronic,1
-Hip-Hop & R&B,Classical,1
-Pop,Production & Technical,1
 Pop,Reggae & World,1
-Reggae & Caribbean,Classical,1
+Hip-Hop & R&B,Pop,1
+Latin,Dance & Electronic,1
+Hip-Hop & R&B,Dance & Electronic,1
+Mood & Media,Rock & Metal,1
 Reggae & Caribbean,Country & Folk,1
-Reggae & Caribbean,Visual Media & Theater,1
-Electronic,Latin,1
-Rock,Dance & Electronic,1
 World,Country & Folk,1
+Reggae & Caribbean,General Field,1
+Latin,Gospel & Christian,1
+Hip-Hop & R&B,Classical,1
+Metal,Production & Technical,1
+Reggae & Caribbean,Visual Media & Theater,1
+Reggae & Caribbean,Classical,1
+Metal,Pop,1
+Rock,Dance & Electronic,1
+Electronic,Latin,1

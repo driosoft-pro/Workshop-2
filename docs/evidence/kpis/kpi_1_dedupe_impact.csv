@@ -1,0 +1,5 @@
+dedupe_status,artist_group,is_grammy_artist,n_tracks,mean_popularity
+without_dedupe,Grammy-recognized,1,15587,30.82
+without_dedupe,Not Grammy-recognized,0,141943,33.73
+with_dedupe,Grammy-recognized,1,7658,40.55
+with_dedupe,Not Grammy-recognized,0,103548,35.2

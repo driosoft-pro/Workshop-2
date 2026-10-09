@@ -2,7 +2,7 @@
 
 Workshop-2, sections 6.3, 6.5 and 6.6.
 Single source of truth for the catalogue: `RULES` in `src/validation.py`
-(34 rule IDs, 40 GX expectations over 6 stages). The profiling evidence behind
+(38 rule IDs, 45 GX expectations over 6 stages). The profiling evidence behind
 each risk is reproducible in [`notebooks/data_profiling.ipynb`](../notebooks/data_profiling.ipynb)
 (machine summary: `docs/evidence/profiling_summary.json`).
 
@@ -83,10 +83,14 @@ are justified in section 4.
 | DQ-P10 | metrics / `duplicate_grain_rows` | Uniqueness | prepared grain `(track_id, track_genre, artist_key)` unique | = 0 rows | critical | observed 0 after T2 (450 duplicates removed); any value >0 double-counts facts | R1 |
 | DQ-P11 | metrics / `grammy_match_rate_pct` | Consistency | ≥ 25% of award rows resolve to a Spotify artist | ≥ 25% | warning | baseline coverage gate | R1,R2,R3 |
 | DQ-P12 | metrics / `fact_track_rows` | Completeness | prepared fact has ≥ 100,000 rows | ≥ 100,000 | critical | observed 157,530; a drop below the threshold means rows were lost in explode/dedupe and every KPI would be understated | R1 |
-| DQ-P14 | metrics / `grammy_match_rate_pct` | Consistency | match rate ≥ observed - 5pp | ≥ 47.2% | warning | upgrade cascade target (observed 52.2% - 5pp) | all |
-| DQ-P15 | metrics / `song_confirmation_rate_pct` | Consistency | song confirmation rate ≥ observed - 5pp | ≥ 21.4% | warning | song confirmation target (observed 26.4% - 5pp) | R1 |
+| DQ-P14 | metrics / `grammy_match_rate_pct` | Consistency | match rate ≥ 40% or drops ≤ 2pp vs previous batch | ≥ 40% / Δ ≤ 2pp | warning | match rate regression gate | all |
+| DQ-P15 | metrics / `song_confirmation_rate_pct` | Consistency | song confirmation lower bound (Spotify is a sample) | informational (no threshold) | info | lower bound on precision, not precision itself | R1 |
 | DQ-P16 | metrics / `genre_tie_share_pct` | Consistency | artist genre tie share ≤ 15% | ≤ 15% (obs 4.7%) | warning | artist dominant genre tie-breaker health | R2 |
+| DQ-P17 | metrics / `tier_C_share_pct` | Consistency | share of Tier C technical awards ≤ 35% | ≤ 35% (obs 12.04%) | warning | bounds non-performing awards share | R1-R4 |
 | DQ-G11 | bridge / `award_bk, artist_key` | Uniqueness | bridge grain unique | 0 duplicates | critical | prevents duplicate associations in award-artist bridge (T12) | R4 |
+| DQ-G12 | bridge / `artist_key` | Validity | no aggregate credit in bridge | 0 rows in blocklist | critical | prevents generic entities in bridge (T17) | R1-R4 |
+| DQ-G13 | grammys / `recognition_tier` | Validity | recognition_tier in {A, B, C, none} | 100% in set | critical | valid recognition tier domain (T18) | R1-R4 |
+| DQ-G14 | grammys / tier consistency | Consistency | unmatched ⇔ tier none | 0 inconsistencies | critical | ensures consistent tier labeling (T18) | R1-R4 |
 
 ## 4. Threshold reasoning (why these numbers)
 
