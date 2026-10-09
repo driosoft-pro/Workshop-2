@@ -525,6 +525,13 @@ Para evitar filtraciones de seguridad y exposición de credenciales sensibles:
 ./run.sh ports [--yes]         # valida contenedores/puertos activos y detiene los ajenos (--yes omite confirmación)
 ./run.sh down                  # baja TODOS los servicios del proyecto (volúmenes intactos)
 ./run.sh stop                  # alias de down
+./run.sh fresh [--yes]         # limpieza TOTAL y arranque desde cero (clean-all + up)
+./run.sh clean-all [--yes]     # limpieza TOTAL (contenedores, BDs, logs de Airflow y datos temporales)
+./run.sh clean-airflow         # limpia solo los logs de Airflow (logs/)
+./run.sh clean-db [--yes]      # detiene contenedores y borra volúmenes de bases de datos (PostgreSQL/Superset)
+./run.sh clean-data            # limpia datos intermedios y de salida (data/work, output, bad, gx)
+./run.sh clean [--yes]         # alias de clean-all
+./run.sh reset [--yes]         # alias de clean-all
 ./run.sh trigger               # DAG Test A (8/8 success)
 ./run.sh trigger-bad           # crea data/bad/spotify_bad.csv y dispara el Test B (bloqueo controlado)
 ./run.sh trigger-fuzzy         # ejecuta pipeline con enable_fuzzy=true
@@ -534,7 +541,6 @@ Para evitar filtraciones de seguridad y exposición de credenciales sensibles:
 ./run.sh status                # contenedores y URLs
 ./run.sh superset              # re-ejecuta el bootstrap de Superset (idempotente)
 ./run.sh logs                  # logs del scheduler
-./run.sh reset [--yes]         # down + borra volúmenes (reset total, --yes omite confirmación)
 ./run.sh smoke                 # pipeline local sin Airflow
 ```
 

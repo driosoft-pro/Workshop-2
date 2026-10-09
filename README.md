@@ -521,6 +521,13 @@ To avoid security leaks and sensitive credential exposure:
 ./run.sh ports [--yes]         # checks active containers/ports and stops foreign ones (--yes skips prompt)
 ./run.sh down                  # stops ALL project services (volumes intact)
 ./run.sh stop                  # alias of down
+./run.sh fresh [--yes]         # full cleanup and restart from scratch (clean-all + up)
+./run.sh clean-all [--yes]     # full cleanup (containers, DBs, Airflow logs, temporary data)
+./run.sh clean-airflow         # cleans only Airflow logs (logs/)
+./run.sh clean-db [--yes]      # stops containers and drops database volumes (PostgreSQL/Superset)
+./run.sh clean-data            # cleans intermediate pipeline data (data/work, output, bad, gx)
+./run.sh clean [--yes]         # alias of clean-all
+./run.sh reset [--yes]         # alias of clean-all
 ./run.sh trigger               # DAG Test A (8/8 success)
 ./run.sh trigger-bad           # creates data/bad/spotify_bad.csv and runs Test B (controlled block)
 ./run.sh trigger-fuzzy         # runs pipeline with enable_fuzzy=true
@@ -530,7 +537,6 @@ To avoid security leaks and sensitive credential exposure:
 ./run.sh status                # containers and URLs
 ./run.sh superset              # rerun the Superset bootstrap (idempotent)
 ./run.sh logs                  # scheduler logs
-./run.sh reset [--yes]         # down + drops volumes (full reset, --yes skips prompt)
 ./run.sh smoke                 # local pipeline without Airflow
 ```
 

@@ -32,6 +32,12 @@ if "%1"=="help" goto :usage
 if "%1"=="up" goto :up
 if "%1"=="down" goto :down
 if "%1"=="stop" goto :down
+if "%1"=="fresh" goto :fresh
+if "%1"=="clean" goto :cleanall
+if "%1"=="clean-all" goto :cleanall
+if "%1"=="clean-airflow" goto :cleanairflow
+if "%1"=="clean-db" goto :cleandb
+if "%1"=="clean-data" goto :cleandata
 if "%1"=="reset" goto :reset
 if "%1"=="ports" goto :ports
 if "%1"=="check-ports" goto :ports
@@ -95,10 +101,59 @@ goto :eof
 echo [run] servicios del proyecto detenidos (volumenes conservados)
 goto :eof
 
-:reset
-%COMPOSE% -f docker-compose.yaml down -v
-echo [run] volumenes eliminados (estado del DW borrado)
+:cleanairflow
+echo [run] limpiando logs de Airflow ...
+if exist logs (
+  del /f /q /s logs\* >nul 2>nul
+  for /d %%p in (logs\*) do rmdir /s /q "%%p" 2>nul
+)
+if not exist logs mkdir logs
+echo [run] logs de Airflow eliminados
 goto :eof
+
+:cleandata
+echo [run] limpiando datos intermedios y de salida ...
+if exist data\work (
+  del /f /q /s data\work\* >nul 2>nul
+  for /d %%p in (data\work\*) do rmdir /s /q "%%p" 2>nul
+)
+if exist data\output (
+  del /f /q /s data\output\* >nul 2>nul
+  for /d %%p in (data\output\*) do rmdir /s /q "%%p" 2>nul
+)
+if exist data\bad (
+  del /f /q /s data\bad\* >nul 2>nul
+  for /d %%p in (data\bad\*) do rmdir /s /q "%%p" 2>nul
+)
+if exist gx\uncommitted (
+  del /f /q /s gx\uncommitted\* >nul 2>nul
+  for /d %%p in (gx\uncommitted\*) do rmdir /s /q "%%p" 2>nul
+)
+if not exist data\work mkdir data\work
+if not exist data\output mkdir data\output
+if not exist data\bad mkdir data\bad
+echo [run] datos intermedios y de salida eliminados
+goto :eof
+
+:cleandb
+%COMPOSE% -f docker-compose.yaml down -v --remove-orphans
+echo [run] bases de datos y contenedores eliminados
+goto :eof
+
+:cleanall
+%COMPOSE% -f docker-compose.yaml down -v --remove-orphans
+call :cleanairflow
+call :cleandata
+echo [run] entorno completamente limpio desde cero
+goto :eof
+
+:fresh
+call :cleanall
+call :up
+goto :eof
+
+:reset
+goto :cleanall
 
 :status
 %COMPOSE% -f docker-compose.yaml ps
@@ -169,7 +224,13 @@ echo Uso: run.bat ^<comando^>
 echo(
 echo   up                  .env + libera puertos + compose up -d --build + source prep + superset bootstrap
 echo   down ^| stop         para TODOS los servicios del proyecto (volumenes intactos)
-echo   reset               para el stack y borra los volumenes
+echo   fresh               limpieza TOTAL y arranque desde cero (clean-all + up)
+echo   clean-all           limpieza TOTAL (contenedores, BDs, logs de Airflow y datos temporales)
+echo   clean-airflow       limpia solo los logs de Airflow (logs\)
+echo   clean-db            para contenedores y borra volumenes de bases de datos
+echo   clean-data          limpia datos de trabajo y salida (data\work, output, bad, gx)
+echo   clean               alias de clean-all
+echo   reset               alias de clean-all
 echo   ports               valida contenedores/puertos activos y detiene los ajenos
 echo   status              estado de contenedores y URLs
 echo   source              re-importa el CSV de Grammy a music_source

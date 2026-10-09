@@ -170,19 +170,64 @@ cmd_up() {
 }
 
 cmd_down()     { compose down; echo "[run] servicios del proyecto detenidos (volumenes conservados)"; }
-cmd_reset()    {
+
+cmd_clean_airflow() {
+  echo "[run] limpiando logs de Airflow ..."
+  rm -rf logs/* 2>/dev/null || true
+  mkdir -p logs
+  echo "[run] logs de Airflow eliminados"
+}
+
+cmd_clean_data() {
+  echo "[run] limpiando datos intermedios y de salida (work, output, bad, gx) ..."
+  rm -rf data/work/* data/output/* data/bad/* gx/uncommitted/* 2>/dev/null || true
+  mkdir -p data/work data/output data/bad
+  echo "[run] datos intermedios y de salida eliminados"
+}
+
+cmd_clean_db() {
   for arg in "$@"; do
     case "$arg" in --yes|-y) export ASSUME_YES=1 ;; esac
   done
   if [ "${ASSUME_YES:-0}" != "1" ]; then
-    read -r -p "[run] ¿Eliminar todos los volumenes y borrar estado del DW? [y/N] " resp
+    read -r -p "[run] ¿Eliminar todos los contenedores y volumenes de base de datos? [y/N] " resp
     case "$resp" in
       [yY][eE][sS]|[yY]) ;;
       *) echo "[run] cancelado por el usuario" >&2; return 1 ;;
     esac
   fi
-  compose down -v
-  echo "[run] volumenes eliminados (estado del DW borrado)"
+  echo "[run] deteniendo contenedores y eliminando volumenes de base de datos ..."
+  compose down -v --remove-orphans
+  echo "[run] bases de datos y contenedores eliminados"
+}
+
+cmd_clean_all() {
+  for arg in "$@"; do
+    case "$arg" in --yes|-y) export ASSUME_YES=1 ;; esac
+  done
+  if [ "${ASSUME_YES:-0}" != "1" ]; then
+    read -r -p "[run] ¿Limpieza TOTAL (contenedores, bases de datos, logs de Airflow y datos temporales)? [y/N] " resp
+    case "$resp" in
+      [yY][eE][sS]|[yY]) ;;
+      *) echo "[run] cancelado por el usuario" >&2; return 1 ;;
+    esac
+  fi
+  echo "[run] deteniendo contenedores y eliminando volumenes ..."
+  compose down -v --remove-orphans
+  echo "[run] limpiando logs de Airflow y datos intermedios ..."
+  rm -rf logs/* data/work/* data/output/* data/bad/* gx/uncommitted/* 2>/dev/null || true
+  mkdir -p logs data/work data/output data/bad
+  echo "[run] entorno completamente limpio desde cero"
+}
+
+cmd_fresh() {
+  echo "[run] reiniciando todo el entorno desde cero ..."
+  cmd_clean_all --yes
+  cmd_up
+}
+
+cmd_reset() {
+  cmd_clean_all "$@"
 }
 cmd_logs()     { compose logs -f "${1:-airflow-scheduler}"; }
 cmd_status()   { compose ps; echo; cmd_urls; }
@@ -241,7 +286,13 @@ Uso: ./run.sh <comando>
 
   up                  .env + valida/libera puertos + compose up -d --build + fuente + superset
   down | stop         baja TODOS los servicios del proyecto (volumenes intactos)
-  reset [--yes]       baja el stack y borra los volumenes (reset total)
+  fresh [--yes]       limpieza TOTAL y arranque desde cero (clean-all + up)
+  clean-all [--yes]   limpieza TOTAL (contenedores, BDs, logs de Airflow y datos temporales)
+  clean-airflow       limpia solo los logs de Airflow (logs/)
+  clean-db [--yes]    baja contenedores y borra volumenes de bases de datos
+  clean-data          limpia datos de trabajo y salida (data/work, output, bad, gx)
+  clean [--yes]       alias de clean-all
+  reset [--yes]       alias de clean-all
   ports [--yes]       valida contenedores/puertos activos y detiene los ajenos (conflictos)
   status              estado de contenedores y URLs
   urls                URLs de acceso
@@ -264,6 +315,12 @@ EOF
 case "${1:-help}" in
   up)           cmd_up ;;
   down|stop)    cmd_down ;;
+  fresh)        cmd_fresh ;;
+  clean-all)    shift; cmd_clean_all "$@" ;;
+  clean-airflow) cmd_clean_airflow ;;
+  clean-db)     shift; cmd_clean_db "$@" ;;
+  clean-data)   cmd_clean_data ;;
+  clean)        shift; cmd_clean_all "$@" ;;
   reset)        shift; cmd_reset "$@" ;;
   ports|check-ports) shift; cmd_ports "$@" ;;
   status)       cmd_status ;;
