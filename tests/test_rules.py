@@ -12,11 +12,11 @@ from src.validation import RULES, STAGES, ValidationGateError, enforce_policy
 
 REQUIREMENTS = {"R1", "R2", "R3", "R4"}
 DIMENSIONS = {"Completeness", "Validity", "Uniqueness", "Consistency"}
-SEVERITIES = {"critical", "warning"}
+SEVERITIES = {"critical", "warning", "info"}
 
 
-def test_rule_catalog_has_34_rules():
-    assert len(RULES) == 34
+def test_rule_catalog_has_38_rules():
+    assert len(RULES) == 38
 
 
 def test_rule_ids_match_documented_pattern():

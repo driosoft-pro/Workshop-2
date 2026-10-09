@@ -13,10 +13,10 @@
       "name": "music_pipeline"
     }
   },
-  "id": "d21ffb93-6113-4f58-8ef3-a7419f89482d",
+  "id": "6e9dd6cf-11b3-4ae4-a42a-f1b20cf01ab3",
   "name": "prepared_metrics_validation",
   "suite": {
-    "id": "cac55fd5-61ae-46b0-8e9b-5c13cbed0019",
+    "id": "0d1fead3-e87e-48f1-aa40-5817959fed82",
     "name": "prepared_metrics_suite"
   }
 }

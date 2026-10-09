@@ -1,7 +1,7 @@
 {
   "expectations": [
     {
-      "id": "770fb663-7494-44dc-9c4c-d2dbd0a08a3b",
+      "id": "71264702-de97-4a3c-8f2b-53c29a544f9a",
       "kwargs": {
         "column": "year",
         "max_value": 2026.0,
@@ -17,7 +17,7 @@
       "type": "expect_column_values_to_be_between"
     },
     {
-      "id": "23785e24-dfa4-4870-9043-6c230019adc9",
+      "id": "7d9a8a38-154b-4fae-8500-8f1cad9efb54",
       "kwargs": {
         "column": "category"
       },
@@ -31,7 +31,7 @@
       "type": "expect_column_values_to_not_be_null"
     },
     {
-      "id": "fd6c885c-11ab-46ce-bfbc-2052d7c76dc0",
+      "id": "20f84273-d7d7-4f3f-912f-f220a40a2118",
       "kwargs": {
         "column": "winner_flag",
         "value_set": [
@@ -49,7 +49,7 @@
       "type": "expect_column_values_to_be_in_set"
     },
     {
-      "id": "3eaaccc3-27fd-497d-8141-cae3fb483c7a",
+      "id": "5b415681-71ee-49dd-8eb5-ae87266a6298",
       "kwargs": {
         "column": "artist_key",
         "mostly": 0.6
@@ -64,7 +64,7 @@
       "type": "expect_column_values_to_not_be_null"
     },
     {
-      "id": "b3a1fc40-6ab5-4c29-b999-e7adaa48aa57",
+      "id": "a16b7073-3c62-40e4-b5be-5972e242db7e",
       "kwargs": {
         "column": "match_method",
         "value_set": [
@@ -86,7 +86,7 @@
       "type": "expect_column_values_to_be_in_set"
     },
     {
-      "id": "b271278c-c06a-4d9c-842f-8e607e0e2b3d",
+      "id": "25728daa-9389-448c-881c-393728d9cdc1",
       "kwargs": {
         "column": "artist_source",
         "value_set": [
@@ -106,7 +106,7 @@
       "type": "expect_column_values_to_be_in_set"
     },
     {
-      "id": "cc2174c3-e023-4a8d-95a3-494a151b07c2",
+      "id": "6570bfee-bb79-4439-9fd1-f7aee34ece7d",
       "kwargs": {
         "column": "category_family"
       },
@@ -120,7 +120,7 @@
       "type": "expect_column_values_to_not_be_null"
     },
     {
-      "id": "0db8e845-eaac-418b-a13f-06259f155bd7",
+      "id": "127101d6-27c7-41f0-a45e-47076cacfcda",
       "kwargs": {
         "column": "category_family",
         "mostly": 0.9,
@@ -149,9 +149,73 @@
       },
       "severity": "critical",
       "type": "expect_column_values_to_be_in_set"
+    },
+    {
+      "id": "ef007e89-9a20-4b98-9cb8-e3a848803056",
+      "kwargs": {
+        "column": "recognition_tier",
+        "value_set": [
+          "A",
+          "B",
+          "C",
+          "none"
+        ]
+      },
+      "meta": {
+        "quality_dimension": "Validity",
+        "requirement": "R1,R2,R3,R4",
+        "rule_id": "DQ-G13",
+        "severity": "critical"
+      },
+      "severity": "critical",
+      "type": "expect_column_values_to_be_in_set"
+    },
+    {
+      "id": "87dfb2ca-8659-4745-85c6-384aa2f2ecb6",
+      "kwargs": {
+        "column": "recognition_tier",
+        "condition_parser": "pandas",
+        "row_condition": {
+          "pass_through_filter": "match_method == 'none'",
+          "type": "pass_through"
+        },
+        "value_set": [
+          "none"
+        ]
+      },
+      "meta": {
+        "quality_dimension": "Consistency",
+        "requirement": "R1,R2,R3,R4",
+        "rule_id": "DQ-G14",
+        "severity": "critical"
+      },
+      "severity": "critical",
+      "type": "expect_column_values_to_be_in_set"
+    },
+    {
+      "id": "ed145509-6e34-42f5-8c32-8ac8ca821815",
+      "kwargs": {
+        "column": "recognition_tier",
+        "condition_parser": "pandas",
+        "row_condition": {
+          "pass_through_filter": "match_method != 'none'",
+          "type": "pass_through"
+        },
+        "value_set": [
+          "none"
+        ]
+      },
+      "meta": {
+        "quality_dimension": "Consistency",
+        "requirement": "R1,R2,R3,R4",
+        "rule_id": "DQ-G14",
+        "severity": "critical"
+      },
+      "severity": "critical",
+      "type": "expect_column_values_to_not_be_in_set"
     }
   ],
-  "id": "a719e890-341e-46d8-b350-c7d300ef874a",
+  "id": "ef2a4563-84a9-40a8-9f42-efc89daf6dc6",
   "meta": {
     "great_expectations_version": "1.23.1"
   },

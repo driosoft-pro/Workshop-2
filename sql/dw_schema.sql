@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS dim_artist (
     from_spotify         BOOLEAN      NOT NULL DEFAULT FALSE,
     from_grammy          BOOLEAN      NOT NULL DEFAULT FALSE,
     grammy_award_count   INTEGER      NOT NULL DEFAULT 0,
+    grammy_award_count_core INTEGER   NOT NULL DEFAULT 0,
     spotify_track_count  INTEGER      NOT NULL DEFAULT 0,
     dominant_genre       TEXT,
     dominant_genre_family TEXT,
@@ -76,6 +77,7 @@ CREATE TABLE IF NOT EXISTS fact_track_artist (
     artist_position      INTEGER      NOT NULL,
     artist_total         INTEGER      NOT NULL,
     is_grammy_artist     SMALLINT     NOT NULL CHECK (is_grammy_artist IN (0, 1)),
+    is_grammy_artist_strict SMALLINT  NOT NULL DEFAULT 0 CHECK (is_grammy_artist_strict IN (0, 1)),
     artist_grammy_awards INTEGER      NOT NULL DEFAULT 0,
     song_key             TEXT,
     is_zero_popularity   SMALLINT     NOT NULL DEFAULT 0 CHECK (is_zero_popularity IN (0, 1)),
@@ -110,6 +112,8 @@ CREATE TABLE IF NOT EXISTS fact_grammy_award (
     is_song_confirmed  SMALLINT     NOT NULL DEFAULT 0 CHECK (is_song_confirmed IN (0, 1)),
     artist_source      TEXT,
     match_method       TEXT,
+    recognition_tier   TEXT         NOT NULL DEFAULT 'none',
+    is_aggregate_credit SMALLINT    NOT NULL DEFAULT 0 CHECK (is_aggregate_credit IN (0, 1)),
     credit_artist_count INTEGER     NOT NULL DEFAULT 0,
     spotify_track_count INTEGER      NOT NULL DEFAULT 0,
     award_count        SMALLINT     NOT NULL DEFAULT 1,
@@ -125,9 +129,10 @@ CREATE TABLE IF NOT EXISTS bridge_award_artist (
     artist_sk        BIGINT  NOT NULL REFERENCES dim_artist (artist_sk),
     artist_position  INTEGER NOT NULL,
     match_method     TEXT    NOT NULL,
+    recognition_tier TEXT    NOT NULL DEFAULT 'none',
     batch_id         TEXT    NOT NULL DEFAULT '',
     loaded_at        TIMESTAMPTZ NOT NULL DEFAULT now(),
-    UNIQUE (grammy_award_sk, artist_sk)
+    PRIMARY KEY (grammy_award_sk, artist_sk)
 );
 
 CREATE INDEX IF NOT EXISTS idx_bridge_artist      ON bridge_award_artist (artist_sk);
@@ -175,3 +180,9 @@ ALTER TABLE fact_grammy_award   ADD COLUMN IF NOT EXISTS match_method          T
 ALTER TABLE fact_grammy_award   ADD COLUMN IF NOT EXISTS credit_artist_count   INTEGER DEFAULT 0;
 ALTER TABLE fact_grammy_award   ADD COLUMN IF NOT EXISTS is_matched_strict     SMALLINT DEFAULT 0;
 ALTER TABLE fact_grammy_award   ADD COLUMN IF NOT EXISTS is_song_confirmed     SMALLINT DEFAULT 0;
+ALTER TABLE dim_artist          ADD COLUMN IF NOT EXISTS grammy_award_count_core INTEGER DEFAULT 0;
+ALTER TABLE fact_track_artist   ADD COLUMN IF NOT EXISTS is_grammy_artist_strict SMALLINT DEFAULT 0;
+ALTER TABLE fact_grammy_award   ADD COLUMN IF NOT EXISTS recognition_tier     TEXT DEFAULT 'none';
+ALTER TABLE fact_grammy_award   ADD COLUMN IF NOT EXISTS is_aggregate_credit   SMALLINT DEFAULT 0;
+ALTER TABLE bridge_award_artist ADD COLUMN IF NOT EXISTS recognition_tier     TEXT DEFAULT 'none';
+

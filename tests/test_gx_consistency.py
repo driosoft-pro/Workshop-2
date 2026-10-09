@@ -24,9 +24,10 @@ def test_six_suite_files_exist():
     assert names == {spec["suite"] for spec in STAGE_SPEC.values()}
 
 
-def test_forty_expectations_total():
+def test_forty_five_expectations_total():
     total = sum(len(_suite_expectations(path)[1]) for path in SUITE_FILES)
-    assert total == 40
+    assert total == 45
+
 
 
 def test_every_expectation_carries_rule_meta():

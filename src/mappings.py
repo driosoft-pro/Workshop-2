@@ -25,9 +25,27 @@ import unicodedata
 import pandas as pd
 
 # ---------------------------------------------------------------------------
-# T12 - shared key normalizer
+# T12 - shared key normalizer & aggregate credit blocklist
 # ---------------------------------------------------------------------------
 _WORD_RE = re.compile(r"[\W_]+", re.UNICODE)
+
+AGGREGATE_CREDITS: set[str] = {
+    "various artists",
+    "original cast",
+    "original broadway cast",
+    "soundtrack",
+    "various",
+    "cast",
+    "unknown",
+    "traditional",
+    "anonymous",
+}
+
+
+def is_aggregate_credit(value) -> bool:
+    """Return True if normalized key is in AGGREGATE_CREDITS."""
+    k = norm_key(value)
+    return bool(k and k in AGGREGATE_CREDITS)
 
 
 QUOTE_CHARS = "\"'`."
@@ -139,7 +157,7 @@ CATEGORY_FAMILY_RULES: list[tuple[str, str]] = [
     ("Gospel & Christian", r"gospel|christian"),
     ("Dance & Electronic", r"dance|electronic|remix"),
     ("Reggae & World", r"reggae|world|polka|zydeco|hawaiian|native"),
-    ("Production & Technical", r"engineer|producer|package|notes|liner|art direction|surround|mastering"),
+    ("Production & Technical", r"engineer|producer|package|notes|liner|art direction|surround|mastering|historical|arrang"),
     ("Visual Media & Theater", r"musical|soundtrack|motion picture|television|visual media|film"),
     ("Spoken & Comedy", r"spoken|comedy|children"),
 ]
@@ -184,6 +202,42 @@ def category_family(value) -> str:
         if pattern.search(text):
             return name
     return "Other"
+
+
+# ---------------------------------------------------------------------------
+# F1b - recognition tier derivation
+# ---------------------------------------------------------------------------
+TIER_C_CATEGORY_RE = re.compile(
+    r"notes|liner|historical|engineer|package|mastering|arrang|producer of the year|art direction",
+    re.IGNORECASE,
+)
+
+
+def derive_recognition_tier(
+    *,
+    match_method: str,
+    artist_source: str,
+    category: str | None,
+    category_family_val: str | None,
+) -> str:
+    """Derive recognition tier (F1b).
+
+    C: category_family == 'Production & Technical' OR category matches
+       notes|liner|historical|engineer|package|mastering|arrang|producer of the year|art direction
+    B: not C and artist_source == 'workers'
+    A: not C and artist_source in ('credit', 'nominee')
+    none: unmatched
+    """
+    if match_method == "none" or artist_source == "none":
+        return "none"
+    cat_str = str(category or "")
+    if category_family_val == "Production & Technical" or bool(TIER_C_CATEGORY_RE.search(cat_str)):
+        return "C"
+    if artist_source == "workers":
+        return "B"
+    if artist_source in ("credit", "nominee"):
+        return "A"
+    return "none"
 
 
 # ---------------------------------------------------------------------------

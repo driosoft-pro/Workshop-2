@@ -24,7 +24,7 @@ from dataclasses import dataclass, field
 
 import pandas as pd
 
-from src.mappings import norm_key, normalize_artist_name
+from src.mappings import AGGREGATE_CREDITS, is_aggregate_credit, norm_key, normalize_artist_name
 
 SPLIT_RE = re.compile(
     r"\s*(?:&|,|/|\band\b|\bfeaturing\b|\bfeat\.?|\bwith\b| x )\s*", re.IGNORECASE
@@ -104,7 +104,11 @@ def last_workers_parenthetical(workers):
     if not candidate:
         return None
     lowered = norm_key(candidate) or ""
-    if _SINGLE_TOKEN_RE.match(lowered) or lowered in GENERIC_WORKERS_MARKERS:
+    if (
+        _SINGLE_TOKEN_RE.match(lowered)
+        or lowered in GENERIC_WORKERS_MARKERS
+        or lowered in AGGREGATE_CREDITS
+    ):
         return None
     return candidate
 
@@ -118,21 +122,22 @@ class SpotifyArtistIndex:
         for key in sorted(set(spotify_keys)):
             if not key:
                 continue
-            self.keys[key] = key
             normalized = norm_key(key)
-            if normalized is None:
+            if normalized is None or normalized in AGGREGATE_CREDITS:
                 continue
+            self.keys[key] = key
             self.norm_to_key.setdefault(normalized, key)
 
     def lookup(self, candidate) -> str | None:
         normalized = norm_key(candidate)
-        if normalized is None:
+        if normalized is None or normalized in AGGREGATE_CREDITS:
             return None
         return self.norm_to_key.get(normalized)
 
     def fuzzy_lookup(self, candidate, threshold: float = 95.0):
         """Optional (T12 step 5) fuzzy match; rapidfuzz is imported lazily."""
-        if candidate is None or not self.norm_to_key:
+        norm_cand = norm_key(candidate)
+        if norm_cand is None or norm_cand in AGGREGATE_CREDITS or not self.norm_to_key:
             return None
         try:
             from rapidfuzz import fuzz
@@ -140,7 +145,7 @@ class SpotifyArtistIndex:
             return None
         best_key, best_score = None, threshold
         for norm, key in self.norm_to_key.items():
-            score = fuzz.token_sort_ratio(norm_key(candidate) or "", norm)
+            score = fuzz.token_sort_ratio(norm_cand, norm)
             if score >= best_score:
                 best_key, best_score = key, score
         return best_key
@@ -156,6 +161,7 @@ class AwardMatch:
     artist_source: str = "none"
     credit_artist_count: int = 0
     fuzzy_score: float | None = None
+    is_aggregate_credit: int = 0
 
     @property
     def is_matched(self) -> bool:
@@ -169,6 +175,8 @@ class AwardMatch:
 def _match_parts(parts: list[str], index: SpotifyArtistIndex) -> list[str]:
     matched: list[str] = []
     for part in parts:
+        if norm_key(part) in AGGREGATE_CREDITS:
+            continue
         key = index.lookup(part)
         if key and key not in matched:
             matched.append(key)
@@ -206,6 +214,32 @@ def match_award(
     source = "none"
     count = 0
     artist_present = not is_blank(artist)
+
+    # F1a: Aggregate-credit blocklist - such credits never match, never enter the bridge
+    is_agg = 0
+    if artist_present and norm_key(artist) in AGGREGATE_CREDITS:
+        is_agg = 1
+    elif not artist_present:
+        p_raw = None
+        if not is_blank(workers):
+            m = WORKERS_PAREN_RE.search(str(workers).strip())
+            if m:
+                p_raw = strip_role_suffix(m.group(1).strip())
+        if p_raw and norm_key(p_raw) in AGGREGATE_CREDITS:
+            is_agg = 1
+        elif not is_blank(nominee) and norm_key(nominee) in AGGREGATE_CREDITS:
+            is_agg = 1
+
+    if is_agg:
+        source = "credit" if artist_present else ("workers" if not is_blank(workers) else "nominee")
+        return AwardMatch(
+            artist_key=None,
+            matched_keys=[],
+            match_method="none",
+            artist_source=source,
+            credit_artist_count=0,
+            is_aggregate_credit=1,
+        )
 
     if artist_present:
         candidate, matched, method, count = match_credit(artist, index)

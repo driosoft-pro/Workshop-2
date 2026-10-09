@@ -108,8 +108,27 @@ def build_dimensional_frames(
         artist_keys.sort_values("artist_key").groupby("artist_key")["display_name"].first()
     )
 
+    bridge = config.read_csv(config.BRIDGE_AWARD_ARTIST_PATH)
+    if bridge.empty:
+        bridge = pd.DataFrame(
+            columns=["award_bk", "artist_key", "artist_position", "match_method", "recognition_tier"]
+        )
+
+    bridge_award_info = bridge.merge(
+        awards[["award_bk", "year", "category"]], on="award_bk", how="left"
+    )
     award_counts = (
-        awards.dropna(subset=["artist_key"]).groupby("artist_key").size().rename("grammy_award_count")
+        bridge_award_info.drop_duplicates(subset=["artist_key", "year", "category"])
+        .groupby("artist_key")
+        .size()
+        .rename("grammy_award_count")
+    )
+    core_bridge_info = bridge_award_info[bridge_award_info["recognition_tier"].isin(["A", "B"])]
+    award_counts_core = (
+        core_bridge_info.drop_duplicates(subset=["artist_key", "year", "category"])
+        .groupby("artist_key")
+        .size()
+        .rename("grammy_award_count_core")
     )
     track_counts = tracks.groupby("artist_key").size().rename("spotify_track_count")
 
@@ -120,12 +139,15 @@ def build_dimensional_frames(
         .fillna(dim_artist["artist_key"].map(display_fallback))
         .fillna(dim_artist["artist_key"])
     )
-    dim_artist = dim_artist.merge(
-        award_counts, left_on="artist_key", right_index=True, how="left"
-    ).merge(track_counts, left_on="artist_key", right_index=True, how="left")
-    dim_artist["from_spotify"] = dim_artist["spotify_track_count"].notna()
-    dim_artist["from_grammy"] = dim_artist["grammy_award_count"].notna()
+    dim_artist = (
+        dim_artist.merge(award_counts, left_on="artist_key", right_index=True, how="left")
+        .merge(award_counts_core, left_on="artist_key", right_index=True, how="left")
+        .merge(track_counts, left_on="artist_key", right_index=True, how="left")
+    )
+    dim_artist["from_spotify"] = dim_artist["spotify_track_count"].fillna(0).gt(0)
+    dim_artist["from_grammy"] = dim_artist["grammy_award_count"].fillna(0).gt(0)
     dim_artist["grammy_award_count"] = dim_artist["grammy_award_count"].fillna(0).astype("int32")
+    dim_artist["grammy_award_count_core"] = dim_artist["grammy_award_count_core"].fillna(0).astype("int32")
     dim_artist["spotify_track_count"] = dim_artist["spotify_track_count"].fillna(0).astype("int32")
     dim_artist = dim_artist.rename(columns={"artist_key": "artist_bk"})
 
@@ -143,6 +165,7 @@ def build_dimensional_frames(
             "from_spotify",
             "from_grammy",
             "grammy_award_count",
+            "grammy_award_count_core",
             "spotify_track_count",
             "dominant_genre",
             "dominant_genre_family",
@@ -185,7 +208,8 @@ def build_dimensional_frames(
             "track_id", "track_genre", "artist_sk", "genre_sk", "track_name", "album_name",
             "popularity", "duration_ms", "duration_min", "explicit", "danceability", "energy",
             "valence", "acousticness", "speechiness", "liveness", "loudness", "tempo",
-            "artist_position", "artist_total", "is_grammy_artist", "artist_grammy_awards",
+            "artist_position", "artist_total", "is_grammy_artist", "is_grammy_artist_strict",
+            "artist_grammy_awards",
             "song_key", "is_zero_popularity", "is_outlier_duration", "is_outlier_loudness",
             "is_outlier_tempo", "is_primary_song",
         ]
@@ -194,8 +218,8 @@ def build_dimensional_frames(
     fact_track_artist["genre_sk"] = fact_track_artist["genre_sk"].astype("int64")
     fact_track_artist["explicit"] = fact_track_artist["explicit"].astype(bool)
     for column in (
-        "is_zero_popularity", "is_outlier_duration", "is_outlier_loudness",
-        "is_outlier_tempo", "is_primary_song",
+        "is_grammy_artist", "is_grammy_artist_strict", "is_zero_popularity",
+        "is_outlier_duration", "is_outlier_loudness", "is_outlier_tempo", "is_primary_song",
     ):
         fact_track_artist[column] = fact_track_artist[column].fillna(0).astype("int16")
     fact_track_artist["batch_id"] = batch_id
@@ -216,8 +240,8 @@ def build_dimensional_frames(
         [
             "award_bk", "artist_sk", "year_sk", "category_sk", "title", "nominee", "artist",
             "workers", "winner", "winner_flag", "is_matched_spotify", "is_matched_strict",
-            "is_song_confirmed", "artist_source", "match_method", "credit_artist_count",
-            "spotify_track_count",
+            "is_song_confirmed", "artist_source", "match_method", "recognition_tier",
+            "is_aggregate_credit", "credit_artist_count", "spotify_track_count",
         ]
     ].copy()
     fact_grammy_award = fact_grammy_award.rename(columns={"artist": "artist_credit"})
@@ -227,9 +251,9 @@ def build_dimensional_frames(
     fact_grammy_award["credit_artist_count"] = _sql_int(
         fact_grammy_award["credit_artist_count"]
     ).map(lambda value: 0 if value is None else int(value))
-    for column in ("is_matched_strict", "is_song_confirmed"):
+    for column in ("is_matched_strict", "is_song_confirmed", "is_aggregate_credit"):
         fact_grammy_award[column] = fact_grammy_award[column].fillna(0).astype("int16")
-    for column in ("artist_source", "match_method"):
+    for column in ("artist_source", "match_method", "recognition_tier"):
         fact_grammy_award[column] = _sql_object(fact_grammy_award[column])
     fact_grammy_award["award_count"] = pd.Series(
         1, index=fact_grammy_award.index, dtype="int16"
@@ -242,7 +266,7 @@ def build_dimensional_frames(
     bridge = config.read_csv(config.BRIDGE_AWARD_ARTIST_PATH)
     if bridge.empty:
         bridge = pd.DataFrame(
-            columns=["award_bk", "artist_key", "artist_position", "match_method"]
+            columns=["award_bk", "artist_key", "artist_position", "match_method", "recognition_tier"]
         )
     artist_sk_map = dim_artist.set_index("artist_bk")["artist_sk"]
     bridge = bridge.copy()
@@ -252,8 +276,11 @@ def build_dimensional_frames(
         raise RuntimeError(f"bridge_award_artist contains unresolved artist keys: {missing}")
     bridge["artist_position"] = bridge["artist_position"].astype("int32")
     bridge["match_method"] = bridge["match_method"].astype(str)
+    bridge["recognition_tier"] = bridge["recognition_tier"].fillna("none").astype(str)
     bridge["batch_id"] = batch_id
-    bridge = bridge[["award_bk", "artist_sk", "artist_position", "match_method", "batch_id"]]
+    bridge = bridge[
+        ["award_bk", "artist_sk", "artist_position", "match_method", "recognition_tier", "batch_id"]
+    ]
     if bridge.duplicated(subset=["award_bk", "artist_sk"]).any():
         raise RuntimeError("bridge_award_artist violates (award_bk, artist_key) uniqueness")
 
@@ -365,7 +392,7 @@ def load_dw(
         bridge[
             [
                 "grammy_award_sk", "artist_sk", "artist_position",
-                "match_method", "batch_id",
+                "match_method", "recognition_tier", "batch_id",
             ]
         ].to_sql("bridge_award_artist", connection, if_exists="append", index=False)
 
@@ -387,6 +414,15 @@ def load_dw(
         }
 
         finished_at = datetime.now(timezone.utc)
+        metrics_path = config.RUNS_EVIDENCE_DIR / "integration_metrics.json"
+        if metrics_path.exists():
+            try:
+                batch_notes = json.dumps(json.loads(metrics_path.read_text()))
+            except Exception:
+                batch_notes = json.dumps({"description": "controlled replace"})
+        else:
+            batch_notes = json.dumps({"description": "controlled replace"})
+
         connection.execute(
             text(
                 """
@@ -421,10 +457,7 @@ def load_dw(
                 "status": "success",
                 "started_at": started_at.isoformat(),
                 "finished_at": finished_at.isoformat(),
-                "notes": (
-                    "controlled replace: single transaction delete+insert; "
-                    "business-key unique constraints prevent duplicate rows on rerun"
-                ),
+                "notes": batch_notes,
             },
         )
 

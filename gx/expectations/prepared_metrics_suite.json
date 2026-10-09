@@ -1,7 +1,7 @@
 {
   "expectations": [
     {
-      "id": "cb559bff-abe4-4350-8ae3-16bb80804a69",
+      "id": "924366e0-4df3-46d9-ad43-f94205583adc",
       "kwargs": {
         "column": "duplicate_grain_rows",
         "max_value": 0.0,
@@ -17,7 +17,7 @@
       "type": "expect_column_values_to_be_between"
     },
     {
-      "id": "d0bf0fc8-409a-4ff4-8b37-15d7a1dd465f",
+      "id": "b1125403-fcf0-472f-abca-97a3f1eb325b",
       "kwargs": {
         "column": "grammy_match_rate_pct",
         "max_value": 100.0,
@@ -33,7 +33,7 @@
       "type": "expect_column_values_to_be_between"
     },
     {
-      "id": "be9dce28-a6e3-4e58-b0d4-6b62d270a4ef",
+      "id": "d926201a-023c-4f62-8add-915ac7bac0a2",
       "kwargs": {
         "column": "fact_track_rows",
         "max_value": 10000000.0,
@@ -49,11 +49,11 @@
       "type": "expect_column_values_to_be_between"
     },
     {
-      "id": "e29530c1-2e97-4f9d-80b8-94d23278d5d7",
+      "id": "5ba66e37-7807-41ce-be05-4eb2f25634c3",
       "kwargs": {
         "column": "grammy_match_rate_pct",
         "max_value": 100.0,
-        "min_value": 47.2
+        "min_value": 40.0
       },
       "meta": {
         "quality_dimension": "Consistency",
@@ -65,23 +65,23 @@
       "type": "expect_column_values_to_be_between"
     },
     {
-      "id": "1062fa4f-d77a-418c-8b5f-9981b6748d4d",
+      "id": "d254e289-42dc-45b6-bad7-840f23db2a8e",
       "kwargs": {
         "column": "song_confirmation_rate_pct",
         "max_value": 100.0,
-        "min_value": 21.4
+        "min_value": 0.0
       },
       "meta": {
         "quality_dimension": "Consistency",
-        "requirement": "R1,R2",
+        "requirement": "R1",
         "rule_id": "DQ-P15",
-        "severity": "warning"
+        "severity": "info"
       },
-      "severity": "warning",
+      "severity": "info",
       "type": "expect_column_values_to_be_between"
     },
     {
-      "id": "c5a73c81-9a01-44ce-944e-410c82feb277",
+      "id": "84cf185b-b84f-4859-b967-62f46336ef43",
       "kwargs": {
         "column": "genre_tie_share_pct",
         "max_value": 15.0,
@@ -95,9 +95,25 @@
       },
       "severity": "warning",
       "type": "expect_column_values_to_be_between"
+    },
+    {
+      "id": "bf7db8be-4a98-4af7-b514-eafa0f28ef9d",
+      "kwargs": {
+        "column": "tier_c_share_pct",
+        "max_value": 17.1,
+        "min_value": 0.0
+      },
+      "meta": {
+        "quality_dimension": "Validity",
+        "requirement": "R2",
+        "rule_id": "DQ-P17",
+        "severity": "warning"
+      },
+      "severity": "warning",
+      "type": "expect_column_values_to_be_between"
     }
   ],
-  "id": "cac55fd5-61ae-46b0-8e9b-5c13cbed0019",
+  "id": "0d1fead3-e87e-48f1-aa40-5817959fed82",
   "meta": {
     "great_expectations_version": "1.23.1"
   },

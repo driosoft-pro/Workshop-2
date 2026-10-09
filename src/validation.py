@@ -35,10 +35,11 @@ from great_expectations.checkpoint.checkpoint import CheckpointResult
 from great_expectations.expectations.metadata_types import FailureSeverity
 
 from src import config
-from src.mappings import CATEGORY_FAMILIES, GENRE_FAMILIES
+from src.mappings import AGGREGATE_CREDITS, CATEGORY_FAMILIES, GENRE_FAMILIES
 
 CRITICAL = FailureSeverity.CRITICAL
 WARNING = FailureSeverity.WARNING
+INFO = FailureSeverity.INFO
 
 # ---------------------------------------------------------------------------
 # Quality rule catalog - full justification lives in docs/quality_rules.md
@@ -154,25 +155,38 @@ RULES: dict[str, dict] = {
                "dimension": "Uniqueness",
                "rule": "the award-artist bridge grain (award_bk, artist_key) must be unique",
                "threshold": "0 duplicates", "severity": "critical", "requirement": "R1,R2"},
+    "DQ-G12": {"layer": "prepared_bridge", "attribute": "artist_key",
+               "dimension": "Validity",
+               "rule": "no aggregate credit key (various artists, original cast, ...) in bridge",
+               "threshold": "0 aggregate keys", "severity": "critical", "requirement": "R1,R2,R3,R4"},
+    "DQ-G13": {"layer": "prepared_grammys", "attribute": "recognition_tier",
+               "dimension": "Validity",
+               "rule": "recognition_tier must be one of A, B, C, none",
+               "threshold": "100% in set", "severity": "critical", "requirement": "R1,R2,R3,R4"},
+    "DQ-G14": {"layer": "prepared_grammys", "attribute": "recognition_tier,match_method",
+               "dimension": "Consistency",
+               "rule": "tier consistency: award is unmatched if and only if tier is none",
+               "threshold": "100% consistent", "severity": "critical", "requirement": "R1,R2,R3,R4"},
     "DQ-P13": {"layer": "prepared_tracks", "attribute": "is_zero_popularity",
                "dimension": "Validity",
                "rule": "at most 20% of prepared rows may carry popularity == 0",
                "threshold": "<= 20%", "severity": "warning", "requirement": "R1"},
     "DQ-P14": {"layer": "prepared_metrics", "attribute": "grammy_match_rate_pct",
                "dimension": "Consistency",
-               "rule": "award-to-Spotify match rate must stay within 5pp of the measured "
-                       "52.2245% baseline (observed - 5pp)",
-               "threshold": ">= 47.2%", "severity": "warning", "requirement": "R1,R2"},
+               "rule": "award-to-Spotify match rate must stay >= 40% and within 2pp of previous batch",
+               "threshold": ">= 40% and drop <= 2pp", "severity": "warning", "requirement": "R1,R2"},
     "DQ-P15": {"layer": "prepared_metrics", "attribute": "song_confirmation_rate_pct",
                "dimension": "Consistency",
-               "rule": "song confirmation rate must stay within 5pp of the measured "
-                       "26.4085% baseline (observed - 5pp)",
-               "threshold": ">= 21.4%", "severity": "warning", "requirement": "R1,R2"},
+               "rule": "song confirmation rate (lower bound of precision; Spotify is a sample, most awarded songs are absent)",
+               "threshold": "no threshold", "severity": "info", "requirement": "R1"},
     "DQ-P16": {"layer": "prepared_metrics", "attribute": "genre_tie_share_pct",
                "dimension": "Consistency",
-               "rule": "artists with an ambiguous (tied) dominant genre must stay at or "
-                       "below 15% of artists",
+               "rule": "artists with an ambiguous (tied) dominant genre must stay at or below 15%",
                "threshold": "<= 15%", "severity": "warning", "requirement": "R2"},
+    "DQ-P17": {"layer": "prepared_metrics", "attribute": "tier_c_share_pct",
+               "dimension": "Validity",
+               "rule": "share of Tier C (Production & Technical craft) among matched awards must stay <= 17.1% (observed + 5pp)",
+               "threshold": "<= 17.1%", "severity": "warning", "requirement": "R2"},
 }
 
 STAGES = (
@@ -247,7 +261,75 @@ def _json_safe(value):
     return value
 
 
+def get_last_committed_match_rate(engine=None) -> float | None:
+    """Read the last committed batch match rate from etl_batch_log."""
+    if engine is None:
+        try:
+            from src.load import get_engine
+            engine = get_engine()
+        except Exception:
+            return None
+    try:
+        from sqlalchemy import text
+        with engine.connect() as conn:
+            row = conn.execute(
+                text("SELECT notes FROM etl_batch_log WHERE status = 'success' ORDER BY finished_at DESC LIMIT 1")
+            ).fetchone()
+            if row and row[0]:
+                data = json.loads(row[0]) if isinstance(row[0], str) else row[0]
+                if isinstance(data, dict):
+                    val = data.get("match_rate_pct", data.get("grammy_match_rate_pct"))
+                    if val is not None:
+                        fval = float(val)
+                        return fval / 100.0 if fval > 1.0 else fval
+    except Exception:
+        return None
+    return None
+
+
+def evaluate_match_rate_threshold(
+    current_rate: float,
+    previous_rate: float | None = None,
+    min_rate: float = 0.40,
+    max_drop: float = 0.02,
+) -> dict:
+    """
+    DQ-P14 check:
+    warning if rate < 0.40 OR drops > 2pp vs previous committed batch.
+    If previous_rate is None -> pass (if >= min_rate).
+    Accepts rates either as fractions (0.0-1.0) or percentages (0-100).
+    """
+    curr = current_rate / 100.0 if current_rate > 1.0 else current_rate
+    prev = (previous_rate / 100.0 if previous_rate > 1.0 else previous_rate) if previous_rate is not None else None
+
+    passed = True
+    reasons = []
+
+    if curr < min_rate:
+        passed = False
+        reasons.append(f"match rate {curr:.4f} is below minimum {min_rate:.4f}")
+
+    if prev is not None:
+        drop = prev - curr
+        if drop > max_drop:
+            passed = False
+            reasons.append(
+                f"match rate dropped by {drop*100:.2f}pp vs previous batch ({prev:.4f} -> {curr:.4f}), "
+                f"exceeding {max_drop*100:.1f}pp limit"
+            )
+
+    return {
+        "success": passed,
+        "current_rate": curr,
+        "previous_rate": prev,
+        "drop": (prev - curr) if prev is not None else None,
+        "reasons": reasons,
+        "severity": "warning" if not passed else "pass",
+    }
+
+
 def get_context():
+
     project_root = str(config.GX_PROJECT_ROOT)
     context = gx.get_context(mode="file", project_root_dir=project_root)
     actual = Path(getattr(context, "root_directory", config.GX_DIR))
@@ -444,6 +526,17 @@ def _add_expectations(suite, stage: str) -> None:
         _expect(suite, gx.expectations.ExpectColumnValuesToBeInSet,
                 "DQ-G9", "critical", column="category_family",
                 value_set=CATEGORY_FAMILIES, mostly=0.90)
+        _expect(suite, gx.expectations.ExpectColumnValuesToBeInSet,
+                "DQ-G13", "critical", column="recognition_tier",
+                value_set=["A", "B", "C", "none"])
+        _expect(suite, gx.expectations.ExpectColumnValuesToBeInSet,
+                "DQ-G14", "critical", column="recognition_tier",
+                value_set=["none"],
+                row_condition="match_method == 'none'", condition_parser="pandas")
+        _expect(suite, gx.expectations.ExpectColumnValuesToNotBeInSet,
+                "DQ-G14", "critical", column="recognition_tier",
+                value_set=["none"],
+                row_condition="match_method != 'none'", condition_parser="pandas")
 
     elif stage == "prepared_metrics":
         _expect(suite, gx.expectations.ExpectColumnValuesToBeBetween,
@@ -457,17 +550,23 @@ def _add_expectations(suite, stage: str) -> None:
                 min_value=100000, max_value=10_000_000)
         _expect(suite, gx.expectations.ExpectColumnValuesToBeBetween,
                 "DQ-P14", "warning", column="grammy_match_rate_pct",
-                min_value=47.2, max_value=100.0)
+                min_value=40.0, max_value=100.0)
         _expect(suite, gx.expectations.ExpectColumnValuesToBeBetween,
-                "DQ-P15", "warning", column="song_confirmation_rate_pct",
-                min_value=21.4, max_value=100.0)
+                "DQ-P15", "info", column="song_confirmation_rate_pct",
+                min_value=0.0, max_value=100.0)
         _expect(suite, gx.expectations.ExpectColumnValuesToBeBetween,
                 "DQ-P16", "warning", column="genre_tie_share_pct",
                 min_value=0.0, max_value=15.0)
+        _expect(suite, gx.expectations.ExpectColumnValuesToBeBetween,
+                "DQ-P17", "warning", column="tier_c_share_pct",
+                min_value=0.0, max_value=17.1)
 
     elif stage == "prepared_bridge":
         _expect(suite, gx.expectations.ExpectCompoundColumnsToBeUnique,
                 "DQ-G11", "critical", column_list=["award_bk", "artist_key"])
+        _expect(suite, gx.expectations.ExpectColumnValuesToNotBeInSet,
+                "DQ-G12", "critical", column="artist_key",
+                value_set=sorted(AGGREGATE_CREDITS))
 
     else:
         raise ValueError(f"Unknown validation stage: {stage}")

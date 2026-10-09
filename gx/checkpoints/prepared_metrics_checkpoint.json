@@ -1,13 +1,13 @@
 {
   "actions": [],
-  "id": "3dd6586b-a4e3-410d-9f8e-02ab0ced1441",
+  "id": "fdf78427-0435-4cdd-98a8-a786657f8776",
   "name": "prepared_metrics_checkpoint",
   "result_format": {
     "result_format": "SUMMARY"
   },
   "validation_definitions": [
     {
-      "id": "d21ffb93-6113-4f58-8ef3-a7419f89482d",
+      "id": "6e9dd6cf-11b3-4ae4-a42a-f1b20cf01ab3",
       "name": "prepared_metrics_validation"
     }
   ]

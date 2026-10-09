@@ -68,6 +68,7 @@ from src.mappings import (
     QUOTE_CHARS,
     category_family,
     clean_category,
+    derive_recognition_tier,
     genre_family,
     norm_key,
     normalize_artist_name,
@@ -247,6 +248,16 @@ def transform_and_integrate(
     awards["credit_artist_count"] = [result.credit_artist_count for result in results]
     awards["is_matched_strict"] = [int(result.is_strict) for result in results]
     awards["is_matched_spotify"] = [int(result.is_matched) for result in results]
+    awards["is_aggregate_credit"] = [int(result.is_aggregate_credit) for result in results]
+    awards["recognition_tier"] = [
+        derive_recognition_tier(
+            match_method=result.match_method,
+            artist_source=result.artist_source,
+            category=cat,
+            category_family_val=fam,
+        )
+        for result, cat, fam in zip(results, awards["category"], awards["category_family"])
+    ]
     awards["is_song_confirmed"] = [
         int(
             result.is_matched
@@ -262,22 +273,27 @@ def transform_and_integrate(
             "artist_key": key,
             "artist_position": position,
             "match_method": result.match_method,
+            "recognition_tier": tier,
         }
-        for award_bk, result in zip(awards["award_bk"], results)
+        for award_bk, result, tier in zip(awards["award_bk"], results, awards["recognition_tier"])
         for position, key in enumerate(result.matched_keys, start=1)
     ]
     bridge = pd.DataFrame(
         bridge_rows,
-        columns=["award_bk", "artist_key", "artist_position", "match_method"],
+        columns=["award_bk", "artist_key", "artist_position", "match_method", "recognition_tier"],
     )
 
-    grammy_artist_keys = set(awards["artist_key"].dropna().unique())
+    core_bridge = bridge[bridge["recognition_tier"].isin(["A", "B"])]
+    strict_bridge = bridge[bridge["recognition_tier"] == "A"]
+    core_artist_keys = set(core_bridge["artist_key"].unique())
+    strict_artist_keys = set(strict_bridge["artist_key"].unique())
+
+    grammy_artist_keys = set(bridge["artist_key"].dropna().unique())
     matched_artist_keys = spotify_artist_keys & grammy_artist_keys
 
     grammy_awards_per_key = (
-        awards.dropna(subset=["artist_key"])
-        .groupby("artist_key")
-        .size()
+        core_bridge.groupby("artist_key")["award_bk"]
+        .nunique()
         .rename("artist_grammy_awards")
     )
     exploded = exploded.join(grammy_awards_per_key, on="artist_key")
@@ -285,7 +301,10 @@ def transform_and_integrate(
         exploded["artist_grammy_awards"].fillna(0).astype("int64")
     )
     exploded["is_grammy_artist"] = (
-        exploded["artist_key"].isin(grammy_artist_keys).astype("int64")
+        exploded["artist_key"].isin(core_artist_keys).astype("int16")
+    )
+    exploded["is_grammy_artist_strict"] = (
+        exploded["artist_key"].isin(strict_artist_keys).astype("int16")
     )
 
     spotify_track_count = (
@@ -394,6 +413,26 @@ def transform_and_integrate(
         else 0.0
     )
 
+    tier_counts = (
+        prepared_grammys["recognition_tier"].value_counts().reindex(
+            ["A", "B", "C", "none"], fill_value=0
+        )
+    )
+    tier_rates = {
+        tier: {
+            "rows": int(count),
+            "share_pct": round(100.0 * int(count) / total_awards, 4) if total_awards else 0.0,
+        }
+        for tier, count in tier_counts.items()
+    }
+    tier_c_count = int(tier_counts.get("C", 0))
+    tier_c_share_pct = (
+        round(100.0 * tier_c_count / grammy_rows_matched, 4)
+        if grammy_rows_matched
+        else 0.0
+    )
+    aggregate_excluded = int((prepared_grammys["is_aggregate_credit"] == 1).sum())
+
     integration_metrics = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "rows_grammy": total_awards,
@@ -401,7 +440,10 @@ def transform_and_integrate(
         "match_rate_pct": grammy_match_rate_pct,
         "match_rate_strict_pct": strict_match_rate_pct,
         "match_rate_by_method": method_rates,
+        "match_rate_by_tier": tier_rates,
         "match_rate_by_decade": by_decade,
+        "aggregate_excluded": aggregate_excluded,
+        "tier_c_share_pct": tier_c_share_pct,
         "song_confirmation_rate_pct": song_confirmation_rate_pct,
         "song_type_rows": int(len(song_rows)),
         "song_type_matched_rows": song_matched_rows,
@@ -443,6 +485,8 @@ def transform_and_integrate(
                 "song_confirmation_rate_pct": song_confirmation_rate_pct,
                 "primary_song_rows": integration_metrics["primary_song_rows"],
                 "genre_tie_share_pct": genre_tie_share,
+                "tier_c_share_pct": tier_c_share_pct,
+                "aggregate_excluded_rows": aggregate_excluded,
                 "zero_popularity_share_pct": round(
                     100.0 * float(prepared_tracks["is_zero_popularity"].mean()), 4
                 ),

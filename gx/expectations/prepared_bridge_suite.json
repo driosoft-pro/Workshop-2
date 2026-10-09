@@ -1,7 +1,7 @@
 {
   "expectations": [
     {
-      "id": "e23899e8-e1d6-4635-b409-dde691f73d0c",
+      "id": "317d46e1-0d5d-4f43-a03e-44bf5d437dc6",
       "kwargs": {
         "column_list": [
           "award_bk",
@@ -16,9 +16,34 @@
       },
       "severity": "critical",
       "type": "expect_compound_columns_to_be_unique"
+    },
+    {
+      "id": "9abaf500-09cf-46d5-8800-1a2d18281fc1",
+      "kwargs": {
+        "column": "artist_key",
+        "value_set": [
+          "anonymous",
+          "cast",
+          "original broadway cast",
+          "original cast",
+          "soundtrack",
+          "traditional",
+          "unknown",
+          "various",
+          "various artists"
+        ]
+      },
+      "meta": {
+        "quality_dimension": "Validity",
+        "requirement": "R1,R2,R3,R4",
+        "rule_id": "DQ-G12",
+        "severity": "critical"
+      },
+      "severity": "critical",
+      "type": "expect_column_values_to_not_be_in_set"
     }
   ],
-  "id": "b025ae79-71e5-490f-8e5e-266ceefa86bb",
+  "id": "674cc3f9-9290-400e-bda1-6d98abdf616a",
   "meta": {
     "great_expectations_version": "1.23.1"
   },
