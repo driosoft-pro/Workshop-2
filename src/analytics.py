@@ -20,7 +20,9 @@ import matplotlib
 matplotlib.use("Agg")
 
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
+import scipy.stats
 from sqlalchemy import create_engine, text
 
 from src import config
@@ -185,6 +187,155 @@ def _chart_top_artists(frame: pd.DataFrame, path: Path) -> None:
     plt.close()
 
 
+def r1_stats(artist_level_df: pd.DataFrame | None = None) -> pd.DataFrame:
+    """
+    R1 statistical hypothesis testing and effect size at artist level.
+    Evaluates each recognition tier (core, strict) x basis (all, excl_zero).
+    Computes Mann-Whitney U, Cliff's delta, and bootstrap 95% CI of median difference.
+    """
+    if artist_level_df is None:
+        csv_path = config.KPI_RESULTS_DIR / "kpi_1_artist_level.csv"
+        if csv_path.exists():
+            artist_level_df = pd.read_csv(csv_path)
+        else:
+            raise FileNotFoundError(f"Artist level dataframe or {csv_path} required")
+
+    df = _coerce_numeric(artist_level_df.copy())
+
+    rows = []
+    combinations = []
+    if "recognition" in df.columns and "basis" in df.columns:
+        for rec in ["core", "strict"]:
+            for bas in ["all", "excl_zero"]:
+                if len(df[(df["recognition"] == rec) & (df["basis"] == bas)]) > 0:
+                    combinations.append((rec, bas))
+    else:
+        combinations = [("core", "all")]
+
+    for rec, bas in combinations:
+        sub = (
+            df[(df["recognition"] == rec) & (df["basis"] == bas)]
+            if ("recognition" in df.columns and "basis" in df.columns)
+            else df
+        )
+        grammy_vals = sub[sub["is_grammy_artist"] == 1]["mean_popularity"].dropna().to_numpy(dtype=float)
+        non_vals = sub[sub["is_grammy_artist"] == 0]["mean_popularity"].dropna().to_numpy(dtype=float)
+
+        n_grammy = len(grammy_vals)
+        n_non = len(non_vals)
+        median_grammy = float(np.median(grammy_vals)) if n_grammy > 0 else 0.0
+        median_non = float(np.median(non_vals)) if n_non > 0 else 0.0
+        median_diff = median_grammy - median_non
+
+        if n_grammy > 0 and n_non > 0:
+            res = scipy.stats.mannwhitneyu(grammy_vals, non_vals, alternative="two-sided")
+            u_stat = float(res.statistic)
+            p_val = float(res.pvalue)
+            cliffs_delta = float((2.0 * u_stat / (n_grammy * n_non)) - 1.0)
+
+            # 2,000 bootstrap resamples with seed 42
+            rng = np.random.default_rng(42)
+            boot_g = rng.choice(grammy_vals, size=(2000, n_grammy), replace=True)
+            boot_ng = rng.choice(non_vals, size=(2000, n_non), replace=True)
+            boot_diffs = np.median(boot_g, axis=1) - np.median(boot_ng, axis=1)
+            ci_lower = float(np.percentile(boot_diffs, 2.5))
+            ci_upper = float(np.percentile(boot_diffs, 97.5))
+        else:
+            p_val = 1.0
+            cliffs_delta = 0.0
+            ci_lower = median_diff
+            ci_upper = median_diff
+
+        rows.append({
+            "recognition": rec,
+            "basis": bas,
+            "n_grammy": n_grammy,
+            "n_non": n_non,
+            "median_grammy": round(median_grammy, 2),
+            "median_non": round(median_non, 2),
+            "median_diff": round(median_diff, 2),
+            "p_value": p_val,
+            "cliffs_delta": round(cliffs_delta, 4),
+            "ci_lower": round(ci_lower, 2),
+            "ci_upper": round(ci_upper, 2),
+        })
+
+    stats_df = pd.DataFrame(rows)
+    out_path = config.KPI_RESULTS_DIR / "kpi_1_stats.csv"
+    stats_df.to_csv(out_path, index=False)
+    print(f"[analytics] R1 artist-level stats written to {out_path}")
+    return stats_df
+
+
+def compute_dedupe_impact(engine=None) -> pd.DataFrame:
+    """
+    Compute impact of deduplication (is_primary_song filter) on mean popularity per group.
+    Writes to docs/evidence/kpis/kpi_1_dedupe_impact.csv.
+    """
+    rows = []
+    queried = False
+    if engine is None:
+        try:
+            from src.load import get_engine
+            engine = get_engine()
+        except Exception:
+            engine = None
+
+    if engine is not None:
+        try:
+            with engine.connect() as conn:
+                df = pd.read_sql(
+                    text("""
+                        SELECT
+                            'with_dedupe' AS dedupe_status,
+                            CASE WHEN is_grammy_artist = 1 THEN 'Grammy-recognized' ELSE 'Not Grammy-recognized' END AS artist_group,
+                            is_grammy_artist,
+                            COUNT(*) AS n_tracks,
+                            ROUND(AVG(popularity)::numeric, 2) AS mean_popularity
+                        FROM fact_track_artist
+                        WHERE is_primary_song = 1
+                        GROUP BY is_grammy_artist
+                        UNION ALL
+                        SELECT
+                            'without_dedupe' AS dedupe_status,
+                            CASE WHEN is_grammy_artist = 1 THEN 'Grammy-recognized' ELSE 'Not Grammy-recognized' END AS artist_group,
+                            is_grammy_artist,
+                            COUNT(*) AS n_tracks,
+                            ROUND(AVG(popularity)::numeric, 2) AS mean_popularity
+                        FROM fact_track_artist
+                        GROUP BY is_grammy_artist
+                        ORDER BY dedupe_status DESC, is_grammy_artist DESC
+                    """),
+                    conn,
+                )
+                queried = True
+        except Exception:
+            queried = False
+
+    if not queried:
+        prep_path = config.DATA_PROCESSED_DIR / "prepared_tracks.csv"
+        if prep_path.exists():
+            pdf = pd.read_csv(prep_path)
+            for status, subset in [("with_dedupe", pdf[pdf["is_primary_song"] == 1]), ("without_dedupe", pdf)]:
+                for g_val, g_label in [(1, "Grammy-recognized"), (0, "Not Grammy-recognized")]:
+                    grp = subset[subset["is_grammy_artist"] == g_val]
+                    rows.append({
+                        "dedupe_status": status,
+                        "artist_group": g_label,
+                        "is_grammy_artist": g_val,
+                        "n_tracks": len(grp),
+                        "mean_popularity": round(float(grp["popularity"].mean()), 2) if len(grp) else 0.0,
+                    })
+            df = pd.DataFrame(rows)
+        else:
+            df = pd.DataFrame(columns=["dedupe_status", "artist_group", "is_grammy_artist", "n_tracks", "mean_popularity"])
+
+    out_path = config.KPI_RESULTS_DIR / "kpi_1_dedupe_impact.csv"
+    df.to_csv(out_path, index=False)
+    print(f"[analytics] Deduplication impact written to {out_path}")
+    return df
+
+
 def build_kpis() -> dict:
     config.ensure_directories()
     results = run_kpis()
@@ -207,6 +358,13 @@ def build_kpis() -> dict:
         target = config.KPI_RESULTS_DIR / CHART_FILES["kpi_4_top_awarded_artists_on_spotify"]
         _chart_top_artists(results["kpi_4_top_awarded_artists_on_spotify"], target)
         chart_paths["kpi_4_top_awarded_artists_on_spotify"] = str(target)
+
+    if "kpi_1_artist_level" in results:
+        r1_stats(results["kpi_1_artist_level"])
+        csv_paths["kpi_1_stats"] = str(config.KPI_RESULTS_DIR / "kpi_1_stats.csv")
+
+    compute_dedupe_impact()
+    csv_paths["kpi_1_dedupe_impact"] = str(config.KPI_RESULTS_DIR / "kpi_1_dedupe_impact.csv")
 
     summary = {
         "generated_at": datetime.now(timezone.utc).isoformat(),

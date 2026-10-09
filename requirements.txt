@@ -6,5 +6,6 @@ great_expectations==1.23.1
 psycopg2-binary==2.9.10
 SQLAlchemy==2.0.41
 matplotlib==3.10.7
+scipy>=1.13.0
 # Optional T12 step 5 (fuzzy artist matching); imported lazily, off by default.
 rapidfuzz==3.14.3

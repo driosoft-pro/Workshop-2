@@ -1,0 +1,2 @@
+recognition,basis,n_grammy,n_non,median_grammy,median_non,median_diff,p_value,cliffs_delta,ci_lower,ci_upper
+core,all,5,5,80.0,50.0,30.0,0.007936507936507936,1.0,15.0,45.0
