@@ -23,15 +23,15 @@ lote.
 **Objetivos específicos:**
 
 1. Extraer y armonizar dos fuentes incompatibles (CSV + tabla PostgreSQL) bajo
-   un contrato de columnas explícito (16 y 9 columnas).
-2. Validar cada etapa con reglas de calidad declarativas (23 reglas → 28
+   un contrato de columnas explícito (22 y 9 columnas).
+2. Validar cada etapa con reglas de calidad declarativas (34 reglas → 40
    expectativas de Great Expectations) y **compuertas que bloquean** el lote
    cuando la severidad es crítica.
 3. Transformar e integrar sin reparar valores: deduplicar, normalizar claves,
    explotar multivalores y medir la cobertura de integración en lugar de
    ocultarla.
 4. Cargar una **reemplazo transaccional controlado** en un modelo dimensional
-   (4 dimensiones + 2 hechos + log de lotes), repetible ante re-ejecuciones.
+   (4 dimensiones + 2 hechos + 1 tabla puente + log de lotes), repetible ante re-ejecuciones.
 5. Orquestar el flujo con Airflow (dependencias, reintentos por clase de fallo,
    logs y evidencia) y entregar KPIs + dashboard por requisito analítico.
 6. Verificar todo con una suite de pruebas reproducible (`tests/`, pytest).
@@ -51,17 +51,17 @@ arriba** nunca hacia abajo):
 
 ## 3. Resultados esperados
 
-* `music_dw`: 4 dimensiones, 2 hechos y `etl_batch_log` con auditoría por lote
+* `music_dw`: 4 dimensiones, 2 hechos, 1 tabla puente y `etl_batch_log` con auditoría por lote
   (filas antes/después).
-* **7 KPIs** (`sql/kpi_queries.sql`) exportados como CSV + **4 gráficos PNG**
+* **13 KPIs** (`sql/kpi_queries.sql`) exportados como CSV + **4 gráficos PNG**
   en `docs/evidence/kpis/`, uno por requisito.
-* Dashboard **Superset** con 7 gráficos (uno por KPI + panel de cobertura) y,
+* Dashboard **Superset** con 21 gráficos en 5 pestañas de requisitos + fila de encabezado y,
   como alternativa, el diseño de páginas Power BI/DAX.
 * Evidencia por corrida: JSON de Great Expectations por etapa, resumen y logs de
   Airflow, conteos de carga, estado de las tareas y política de reintentos.
 * Estado actual del almacén (lotes confirmados): `fact_track_artist` 157.530 ·
-  `fact_grammy_award` 4.810 · `dim_artist` 30.894 · `dim_genre` 114 ·
-  `dim_year` 62 · `dim_award_category` 638.
+  `fact_grammy_award` 4.810 · `bridge_award_artist` 2.841 · `dim_artist` 30.989 ·
+  `dim_genre` 114 · `dim_year` 62 · `dim_award_category` 638.
 
 ## 4. Problema
 
@@ -97,17 +97,17 @@ cada gráfico del dashboard.
 | Dimensión del curso | Cómo se cumple aquí |
 | --- | --- |
 | Pipeline por lotes | 8 tareas TaskFlow, ejecución manual/desde UI, `dagrun_timeout=2h` |
-| Calidad como propiedad medida | 23 reglas con métrica/umbral/severidad → 28 expectativas GX → 2 compuertas que bloquean |
+| Calidad como propiedad medida | 34 reglas con métrica/umbral/severidad → 40 expectativas GX → 2 compuertas que bloquean |
 | Confianza en la entrega | reintentos por clase de fallo, logs por tarea, `etl_batch_log` transaccional, re-ejecución segura |
-| Modelo dimensional | esquema estrella con claves de negocio únicas y grano declarado |
-| Analítica y BI | 7 KPIs ligados a R1–R4 + dashboard Superset (principal) y Power BI (alternativa) |
-| Reproducibilidad | entorno Nix + compose (Podman/Docker), `run.sh`/`run.bat`, suite pytest, evidencia versionada |
+| Modelo dimensional | esquema estrella con claves de negocio únicas, tabla puente y grano declarado |
+| Analítica y BI | 13 KPIs ligados a R1–R4 + dashboard Superset (21 gráficos) y Power BI (alternativa) |
+| Reproducibilidad | entorno Nix + compose (Podman/Docker), `run.sh`/`run.bat`, suite pytest (79 pruebas), evidencia versionada |
 
 ## 7. Fuentes de datos
 
 | Fuente | Forma usada por el pipeline | Filas | Notas |
 | --- | --- | --- | --- |
-| Pistas de Spotify | `data/raw/spotify_dataset.csv` (CSV) | 114.000 | 21 columnas crudas → **16 columnas del contrato** extraídas (`key`, `mode`, `instrumentalness`, `time_signature` e índice sin nombre se perfilan pero no se cargan) |
+| Pistas de Spotify | `data/raw/spotify_dataset.csv` (CSV) | 114.000 | 21 columnas crudas → **22 columnas del contrato** extraídas (`danceability, acousticness, speechiness, loudness, tempo, explicit` agregadas al contrato; índice sin nombre excluido) |
 | Premios Grammy | PostgreSQL `music_source.grammy_awards` | 4.810 | **Preparación de la fuente**: `scripts/prepare_source_db.py` importa el CSV proporcionado (evidencia `docs/evidence/runs/source_preparation.json`, 4.810 = 4.810). Esto *no* es la Carga del ETL: la Carga escribe en `music_dw` |
 
 Política de NA: `keep_default_na=False, na_values=[""]` — el archivo contiene
@@ -123,24 +123,24 @@ automático en `docs/evidence/profiling_summary.json`.
 
 | Dimensión | Hallazgos clave |
 | --- | --- |
-| Estructura | Spotify 114.000×21 (16 en el contrato); Grammy 4.810×10 (9 en el contrato) |
+| Estructura | Spotify 114.000×21 (22 en el contrato); Grammy 4.810×10 (9 en el contrato) |
 | Completitud | 1 fila de Spotify sin crédito de artista (0,0009%); en Grammy `artist` falta en **1.840 filas (38,25%)**, `nominee` en 6 (0,12%), `workers` 45,5% |
 | Unicidad | 24.259 `track_id` repetidos; **450 granos duplicados `(track_id, track_genre)`**; 0 filas duplicadas por completo; la clave de negocio del premio Grammy es única |
-| Categóricos | 114 géneros × exactamente 1.000 filas; 638 categorías de premio; `winner=True` en las 4.810 filas (solo ganadores) |
-| Numéricos | `popularity` 0–100 limpio; 1 fila `duration_ms=0`, 603 >10 min, 16 >1 h; 90 filas con loudness >0 dB; 157 con tempo ≤0; 163 con `time_signature=0` |
+| Categóricos | 114 géneros × exactamente 1.000 filas (100% mapeados en 12 familias de género); 638 categorías crudas de premio (579 limpias, 14 familias estándar); `winner=True` en las 4.810 filas (solo ganadores) |
+| Numéricos | `popularity` 0–100 limpio (14,1% con popularidad cero marcado con bandera); 1 fila `duration_ms=0`, 603 >10 min, 16 >1 h; 90 filas con loudness >0 dB; 157 con tempo ≤0; 163 con `time_signature=0` |
 | Temporal | premios 1958–2019, 62 años sin huecos; `published_at` analizable en 4.810/4.810 |
-| Entre fuentes | 29.789 claves de artista en Spotify vs 1.636 en Grammy → **531 coincidentes**; 1.395 filas de premio emparejadas (**29,0021%**); 90 claves normalizadas fusionan >1 nombre visible |
+| Entre fuentes | Cascada de emparejamiento T12: **tasa de coincidencia global de 52,49%** (2.525/4.810 filas de premio); **29,42% estricta** (1.415 exacta); 704 recuperadas por workers; 344 por división de créditos; 62 por nominee; **2.841 filas en tabla puente**; 26,13% de tasa de confirmación de canciones |
 
-**Matriz de riesgos → reglas → expectativas → compuertas** (tres capas):
+**Matriz de riesgos → reglas → expectativas → compuertas** (cuatro capas):
 
 1. **Riesgos** con métrica observada y justificación:
    [`docs/quality_rules.md`](docs/quality_rules.md) (matriz perfilado → riesgo →
    severidad → requisito).
-2. **Reglas de ejecución** en Python (`RULES` en `src/validation.py`, 23:
-   DQ-S1…S6 de esquema, DQ-G1…G5 de integridad de negocio, DQ-P1…P12 de
+2. **Reglas de ejecución** en Python (`RULES` en `src/validation.py`, **34 reglas**:
+   DQ-S1…S7 de esquema/contrato, DQ-G1…G11 de integridad de negocio/cascada/puente/familias, DQ-P1…P16 de
    perfilado/umbrales), consumidas por la política `enforce_policy`.
-3. **Great Expectations**: 5 suites ↔ 5 validaciones ↔ 5 checkpoints, 28
-   expectativas con `meta.rule_id/severity/dimension/requirement`
+3. **Great Expectations**: 6 suites ↔ 6 validaciones ↔ 6 checkpoints, **40
+   expectativas** con `meta.rule_id/severity/dimension/requirement`
    ([`docs/gx_design.md`](docs/gx_design.md)).
 4. **Compuertas de Airflow**: `validate_spotify_raw` y `validate_grammys_raw`
    (¿puede entrar a la transformación?) y `validate_prepared` (¿puede cargarse?).
@@ -469,7 +469,7 @@ git clone git@github.com:driosoft-pro/Workshop-2.git   # o con HTTPS
 cd Workshop-2
 cp .env.example .env                # revisar AIRFLOW_UID, puertos y credenciales
 ./run.sh up                         # valida/libera puertos + stack + fuente + Superset
-./run.sh test                       # 62 pruebas (unidad + integración)
+./run.sh test                       # 79 pruebas (unidad + integración)
 ./run.sh trigger                    # DAG Test A → 8/8 success
 ```
 
@@ -600,7 +600,7 @@ python -m scripts.smoke_test                          # Test A completo
 python -m scripts.make_bad_data                       # crea data/bad/spotify_bad.csv
 python -m scripts.smoke_test --source spotify_bad.csv # Test B: salida BLOQUEADO (código 2)
 python -m src.validation init                         # (re)construir assets de gx/
-python -m src.validation rules                        # imprimir el catálogo de 23 reglas
+python -m src.validation rules                        # imprimir el catálogo de 34 reglas
 ```
 
 ### 18.8 Estructura del repositorio
@@ -612,12 +612,13 @@ workshop-2/
 |-- src/                                # lógica reutilizable
 |   |-- config.py  extract.py  transform.py  validation.py  load.py  analytics.py
 |-- tests/                              # pytest: unit (offline) + integración (marker)
+|   |-- test_artist_match.py  test_mappings.py  test_flags_primary_song.py  test_dominant_genre.py
 |-- gx/                                 # proyecto Great Expectations (suites/validations/checkpoints)
 |-- notebooks/data_profiling.ipynb      # notebook de perfilado ejecutado
 |-- sql/source_setup.sql  dw_schema.sql # DDL fuente y esquema estrella
 |-- sql/db_init/01_create_dw.sql        # creado al iniciar music-postgres
 |-- sql/db_init/02_create_superset.sql  # base de metadatos de Superset
-|-- sql/kpi_queries.sql                 # 7 KPI (etiquetas -- Rn)
+|-- sql/kpi_queries.sql                 # 13 KPI (etiquetas -- Rn)
 |-- scripts/                            # prepare_source_db, make_bad_data, smoke_test,
 |   |                                   # superset_bootstrap, superset_create_metadata_db
 |-- config/superset_config.py  Dockerfile.superset
