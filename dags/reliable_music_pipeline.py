@@ -33,7 +33,7 @@ import logging
 from datetime import timedelta
 
 import pendulum
-from airflow.sdk import dag, get_current_context, task
+from airflow.sdk import Param, dag, get_current_context, task
 
 from src import analytics, config, extract, load, transform, validation
 
@@ -83,6 +83,21 @@ def _spotify_source_override() -> str | None:
     return str(value) if value else None
 
 
+def _enable_fuzzy_override() -> bool:
+    """Check if fuzzy artist matching is enabled via DAG params or run conf."""
+    try:
+        context = get_current_context()
+        dag_run = context.get("dag_run")
+        if dag_run and dag_run.conf and "enable_fuzzy" in dag_run.conf:
+            return bool(dag_run.conf["enable_fuzzy"])
+        params = context.get("params", {})
+        if "enable_fuzzy" in params:
+            return bool(params["enable_fuzzy"])
+    except Exception:
+        pass
+    return False
+
+
 @dag(
     dag_id="reliable_music_pipeline",
     description=(
@@ -95,22 +110,18 @@ def _spotify_source_override() -> str | None:
     max_active_runs=1,
     dagrun_timeout=timedelta(hours=2),
     default_args=DEFAULT_ARGS,
+    params={"enable_fuzzy": Param(False, type="boolean")},
     tags=["etl", "gx", "reliable-pipeline", "workshop-2", "spotify", "grammy"],
 )
 def reliable_music_pipeline():
     @task(
         task_id="extract_spotify",
         execution_timeout=timedelta(minutes=15),
+        doc_md="Acquire Spotify dataset and persist raw working extract with contract validation.",
         **TRANSIENT_TASK_RETRY,
     )
     def extract_spotify_task() -> dict:
-        """Acquire the Spotify CSV and persist the raw working dataset.
-
-        Bounded retry is justified: a missing/unmounted volume or a transient
-        filesystem error can succeed on a later attempt without changing data
-        or code. A missing required column raises SourceContractError, which is
-        deterministic and surfaces immediately (no retry can repair it).
-        """
+        """Acquire the Spotify CSV and persist the raw working dataset."""
         run_context = _run_context()
         source_override = _spotify_source_override()
         metadata = extract.extract_spotify(
@@ -127,15 +138,11 @@ def reliable_music_pipeline():
     @task(
         task_id="extract_grammys",
         execution_timeout=timedelta(minutes=15),
+        doc_md="Extract Grammy awards from source PostgreSQL database into raw working extract.",
         **TRANSIENT_TASK_RETRY,
     )
     def extract_grammys_task() -> dict:
-        """Extract Grammy awards from the PostgreSQL SOURCE database.
-
-        The source database is populated by scripts/prepare_source_db.py
-        (source preparation). Bounded retry covers transient database
-        unavailability during container startup.
-        """
+        """Extract Grammy awards from the PostgreSQL SOURCE database."""
         run_context = _run_context()
         metadata = extract.extract_grammys()
         metadata["run_context"] = run_context
@@ -143,14 +150,13 @@ def reliable_music_pipeline():
                  run_context, metadata["rows"], config.GRAMMY_SOURCE_TABLE)
         return metadata
 
-    @task(task_id="validate_spotify_raw", retries=0)
+    @task(
+        task_id="validate_spotify_raw",
+        retries=0,
+        doc_md="Validate raw Spotify extract against 22-column contract and quality rules via GX gate.",
+    )
     def validate_spotify_raw_task(spotify_metadata: dict) -> dict:
-        """Raw validation gate: are the incoming Spotify data safe enough?
-
-        Critical GX failures raise ValidationGateError and block the Spotify
-        branch; warning results are logged and reported (documented policy).
-        No retry: the rule violation is deterministic for a given input file.
-        """
+        """Raw validation gate: are the incoming Spotify data safe enough?"""
         run_context = _run_context()
         frame = config.read_csv(spotify_metadata["raw_path"])
         payload = validation.validate_gate(
@@ -169,7 +175,11 @@ def reliable_music_pipeline():
             "failed_warning_rules": payload["failed_warning_rules"],
         }
 
-    @task(task_id="validate_grammys_raw", retries=0)
+    @task(
+        task_id="validate_grammys_raw",
+        retries=0,
+        doc_md="Validate raw Grammy awards extract against source quality rules via GX gate.",
+    )
     def validate_grammys_raw_task(grammy_metadata: dict) -> dict:
         """Raw validation gate for the Grammy source database extract."""
         run_context = _run_context()
@@ -189,39 +199,38 @@ def reliable_music_pipeline():
             "failed_warning_rules": payload["failed_warning_rules"],
         }
 
-    @task(task_id="transform_and_integrate", retries=0)
+    @task(
+        task_id="transform_and_integrate",
+        retries=0,
+        doc_md="Execute T12-T16 cascade, cleaning, genre mapping, primary song flags, and bridge build.",
+    )
     def transform_and_integrate_task(spotify_gate: dict, grammy_gate: dict) -> dict:
-        """Clean, harmonise, integrate and derive the prepared datasets.
-
-        Runs only after BOTH raw gates satisfied their policy (dependencies are
-        declared through the gate outputs). The integration contract is
-        documented in docs/transformation_integration.md.
-        """
+        """Clean, harmonise, integrate and derive the prepared datasets."""
         run_context = _run_context()
+        enable_fuzzy = _enable_fuzzy_override()
         summary = transform.transform_and_integrate(
             spotify_raw_path=spotify_gate["raw_path"],
             grammy_raw_path=grammy_gate["raw_path"],
+            enable_fuzzy=enable_fuzzy,
         )
-        log.info("transform_and_integrate context=%s decisions=%s",
-                 run_context, summary["decisions"])
+        log.info("transform_and_integrate context=%s decisions=%s fuzzy=%s",
+                 run_context, summary["decisions"], enable_fuzzy)
         return {
             "prepared_tracks": summary["outputs"]["prepared_tracks"],
             "prepared_grammys": summary["outputs"]["prepared_grammys"],
+            "prepared_bridge": summary["outputs"]["bridge_award_artist"],
             "prepared_metrics": summary["outputs"]["prepared_metrics"],
+            "integration_metrics": summary["outputs"]["integration_metrics"],
             "transform_summary_path": str(config.TRANSFORM_SUMMARY_PATH),
-            "decisions": summary["decisions"],
-            "metrics": summary["metrics"],
-            "reconciliation": summary["reconciliation"],
         }
 
-    @task(task_id="validate_prepared", retries=0)
+    @task(
+        task_id="validate_prepared",
+        retries=0,
+        doc_md="Validate prepared tracks, grammys, metrics, and bridge tables against GX suites before DW load.",
+    )
     def validate_prepared_task(prepared_metadata: dict) -> dict:
-        """Prepared-data validation gate before the dimensional load.
-
-        Runs every prepared checkpoint (tracks, awards, integration metrics),
-        records all results, and only then applies the severity policy so that
-        a single run produces complete diagnostic evidence.
-        """
+        """Prepared-data validation gate before the dimensional load."""
         run_context = _run_context()
         stages = [
             ("prepared_tracks", prepared_metadata["prepared_tracks"], {}),
@@ -231,6 +240,7 @@ def reliable_music_pipeline():
                 {"dtype": {"winner_flag": "int64"}},
             ),
             ("prepared_metrics", prepared_metadata["prepared_metrics"], {}),
+            ("prepared_bridge", prepared_metadata["prepared_bridge"], {}),
         ]
 
         payloads = []
@@ -255,23 +265,19 @@ def reliable_music_pipeline():
             ],
             "prepared_tracks": prepared_metadata["prepared_tracks"],
             "prepared_grammys": prepared_metadata["prepared_grammys"],
+            "prepared_bridge": prepared_metadata["prepared_bridge"],
             "prepared_metrics": prepared_metadata["prepared_metrics"],
-            "metrics": prepared_metadata["metrics"],
+            "integration_metrics": prepared_metadata["integration_metrics"],
         }
 
     @task(
         task_id="load_dw",
         execution_timeout=timedelta(minutes=30),
+        doc_md="Load validated dimensions, facts, and award-artist bridge into PostgreSQL Data Warehouse.",
         **TRANSIENT_TASK_RETRY,
     )
     def load_dw_task(prepared_metadata: dict, prepared_gate: dict) -> dict:
-        """Load validated prepared data into the dimensional Data Warehouse.
-
-        Strategy: controlled replace inside one transaction (delete + insert)
-        with business-key unique constraints, so reruns cannot duplicate rows.
-        The load only runs when the prepared gate passed (dependency on the
-        gate output). Retry is limited to transient database failures.
-        """
+        """Load validated prepared data into the dimensional Data Warehouse."""
         run_context = _run_context()
         batch_id = f"{run_context['dag_id']}__{run_context['run_id']}"
         summary = load.load_dw(
@@ -288,6 +294,7 @@ def reliable_music_pipeline():
         retries=1,
         retry_delay=timedelta(minutes=1),
         retry_exponential_backoff=True,
+        doc_md="Compute analytical KPI datasets and render visualization charts for reporting and Superset BI.",
     )
     def build_kpis_task(load_summary: dict) -> dict:
         """Produce R1-R4 KPIs and visualisations from the Data Warehouse."""
