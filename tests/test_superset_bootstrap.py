@@ -7,10 +7,11 @@ import pytest
 from scripts import superset_bootstrap as boot
 
 
-def test_kpi_sql_defines_thirteen_queries():
+def test_kpi_sql_defines_fourteen_queries():
     queries = boot.load_kpi_queries()
-    assert len(queries) == 13
+    assert len(queries) == 14
     assert all(name.startswith("kpi_") for name in queries)
+
 
 
 def test_every_chart_dataset_exists_in_sql_and_specs():

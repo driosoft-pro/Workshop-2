@@ -28,6 +28,17 @@ FROM fact_grammy_award
 GROUP BY match_method
 ORDER BY award_rows DESC;
 
+-- @name: kpi_0_coverage_by_tier
+-- R1/R2/R3 - integration coverage broken down by recognition tier and match method.
+SELECT
+    COALESCE(recognition_tier, 'none')                                     AS recognition_tier,
+    COALESCE(match_method, 'none')                                         AS match_method,
+    COUNT(*)                                                               AS award_rows,
+    ROUND(100.0 * COUNT(*) / SUM(COUNT(*)) OVER (), 2)                     AS share_pct
+FROM fact_grammy_award
+GROUP BY recognition_tier, match_method
+ORDER BY recognition_tier, award_rows DESC;
+
 -- @name: kpi_0_coverage_by_decade
 -- R1/R2/R3 - integration coverage trend across ceremony decades.
 SELECT
@@ -54,12 +65,14 @@ WITH base_tracks AS (
         f.acousticness,
         f.speechiness,
         f.is_grammy_artist,
+        f.is_grammy_artist_strict,
         f.is_zero_popularity
     FROM fact_track_artist f
     WHERE f.is_primary_song = 1
 ),
 grouped_stats AS (
     SELECT
+        'core'                                                             AS recognition,
         'all'                                                              AS basis,
         CASE WHEN is_grammy_artist = 1 THEN 'Grammy-recognized'
              ELSE 'Not Grammy-recognized' END                              AS artist_group,
@@ -82,6 +95,7 @@ grouped_stats AS (
     UNION ALL
 
     SELECT
+        'core'                                                             AS recognition,
         'excl_zero'                                                        AS basis,
         CASE WHEN is_grammy_artist = 1 THEN 'Grammy-recognized'
              ELSE 'Not Grammy-recognized' END                              AS artist_group,
@@ -101,13 +115,62 @@ grouped_stats AS (
     FROM base_tracks
     WHERE is_zero_popularity = 0
     GROUP BY is_grammy_artist
+
+    UNION ALL
+
+    SELECT
+        'strict'                                                           AS recognition,
+        'all'                                                              AS basis,
+        CASE WHEN is_grammy_artist_strict = 1 THEN 'Grammy-recognized'
+             ELSE 'Not Grammy-recognized' END                              AS artist_group,
+        is_grammy_artist_strict                                            AS is_grammy_artist,
+        COUNT(*)                                                           AS n_tracks,
+        COUNT(DISTINCT artist_sk)                                          AS n_artists,
+        ROUND(AVG(popularity)::numeric, 2)                                 AS mean_popularity,
+        ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY popularity)::numeric, 2) AS median_popularity,
+        ROUND(PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY popularity)::numeric, 2) AS p25_popularity,
+        ROUND(PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY popularity)::numeric, 2) AS p75_popularity,
+        ROUND(STDDEV(popularity)::numeric, 2)                              AS stddev_popularity,
+        ROUND(AVG(danceability)::numeric, 4)                               AS mean_danceability,
+        ROUND(AVG(energy)::numeric, 4)                                     AS mean_energy,
+        ROUND(AVG(valence)::numeric, 4)                                    AS mean_valence,
+        ROUND(AVG(acousticness)::numeric, 4)                               AS mean_acousticness,
+        ROUND(AVG(speechiness)::numeric, 4)                                AS mean_speechiness
+    FROM base_tracks
+    GROUP BY is_grammy_artist_strict
+
+    UNION ALL
+
+    SELECT
+        'strict'                                                           AS recognition,
+        'excl_zero'                                                        AS basis,
+        CASE WHEN is_grammy_artist_strict = 1 THEN 'Grammy-recognized'
+             ELSE 'Not Grammy-recognized' END                              AS artist_group,
+        is_grammy_artist_strict                                            AS is_grammy_artist,
+        COUNT(*)                                                           AS n_tracks,
+        COUNT(DISTINCT artist_sk)                                          AS n_artists,
+        ROUND(AVG(popularity)::numeric, 2)                                 AS mean_popularity,
+        ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY popularity)::numeric, 2) AS median_popularity,
+        ROUND(PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY popularity)::numeric, 2) AS p25_popularity,
+        ROUND(PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY popularity)::numeric, 2) AS p75_popularity,
+        ROUND(STDDEV(popularity)::numeric, 2)                              AS stddev_popularity,
+        ROUND(AVG(danceability)::numeric, 4)                               AS mean_danceability,
+        ROUND(AVG(energy)::numeric, 4)                                     AS mean_energy,
+        ROUND(AVG(valence)::numeric, 4)                                    AS mean_valence,
+        ROUND(AVG(acousticness)::numeric, 4)                               AS mean_acousticness,
+        ROUND(AVG(speechiness)::numeric, 4)                                AS mean_speechiness
+    FROM base_tracks
+    WHERE is_zero_popularity = 0
+    GROUP BY is_grammy_artist_strict
 )
 SELECT * FROM grouped_stats
-ORDER BY basis, is_grammy_artist DESC;
+ORDER BY recognition, basis, is_grammy_artist DESC;
 
 -- @name: kpi_1_artist_level
 -- R1 - artist-level popularity distribution for box plots.
 SELECT
+    'core'                                                                 AS recognition,
+    'all'                                                                  AS basis,
     f.artist_sk,
     a.artist_display_name,
     CASE WHEN f.is_grammy_artist = 1 THEN 'Grammy-recognized'
@@ -119,7 +182,58 @@ FROM fact_track_artist f
 JOIN dim_artist a ON a.artist_sk = f.artist_sk
 WHERE f.is_primary_song = 1
 GROUP BY f.artist_sk, a.artist_display_name, f.is_grammy_artist
-ORDER BY f.artist_sk;
+
+UNION ALL
+
+SELECT
+    'core'                                                                 AS recognition,
+    'excl_zero'                                                            AS basis,
+    f.artist_sk,
+    a.artist_display_name,
+    CASE WHEN f.is_grammy_artist = 1 THEN 'Grammy-recognized'
+         ELSE 'Not Grammy-recognized' END                                  AS artist_group,
+    f.is_grammy_artist,
+    ROUND(AVG(f.popularity)::numeric, 2)                                   AS mean_popularity,
+    COUNT(*)                                                               AS primary_tracks
+FROM fact_track_artist f
+JOIN dim_artist a ON a.artist_sk = f.artist_sk
+WHERE f.is_primary_song = 1 AND f.is_zero_popularity = 0
+GROUP BY f.artist_sk, a.artist_display_name, f.is_grammy_artist
+
+UNION ALL
+
+SELECT
+    'strict'                                                               AS recognition,
+    'all'                                                                  AS basis,
+    f.artist_sk,
+    a.artist_display_name,
+    CASE WHEN f.is_grammy_artist_strict = 1 THEN 'Grammy-recognized'
+         ELSE 'Not Grammy-recognized' END                                  AS artist_group,
+    f.is_grammy_artist_strict                                              AS is_grammy_artist,
+    ROUND(AVG(f.popularity)::numeric, 2)                                   AS mean_popularity,
+    COUNT(*)                                                               AS primary_tracks
+FROM fact_track_artist f
+JOIN dim_artist a ON a.artist_sk = f.artist_sk
+WHERE f.is_primary_song = 1
+GROUP BY f.artist_sk, a.artist_display_name, f.is_grammy_artist_strict
+
+UNION ALL
+
+SELECT
+    'strict'                                                               AS recognition,
+    'excl_zero'                                                            AS basis,
+    f.artist_sk,
+    a.artist_display_name,
+    CASE WHEN f.is_grammy_artist_strict = 1 THEN 'Grammy-recognized'
+         ELSE 'Not Grammy-recognized' END                                  AS artist_group,
+    f.is_grammy_artist_strict                                              AS is_grammy_artist,
+    ROUND(AVG(f.popularity)::numeric, 2)                                   AS mean_popularity,
+    COUNT(*)                                                               AS primary_tracks
+FROM fact_track_artist f
+JOIN dim_artist a ON a.artist_sk = f.artist_sk
+WHERE f.is_primary_song = 1 AND f.is_zero_popularity = 0
+GROUP BY f.artist_sk, a.artist_display_name, f.is_grammy_artist_strict
+ORDER BY recognition, basis, artist_sk;
 
 -- @name: kpi_1_within_genre_diff
 -- R1/R2 - within-genre popularity differences and stratified weighted comparison.
@@ -300,7 +414,7 @@ GROUP BY y.decade, c.category_family
 ORDER BY y.decade, awards DESC;
 
 -- @name: kpi_4_top_awarded_artists_on_spotify
--- R1/R4 - most awarded artists measured inside the Spotify catalog.
+-- R1/R4 - most awarded artists measured inside the Spotify catalog (tiers A/B only).
 WITH artist_awards AS (
     SELECT
         b.artist_sk,
@@ -310,6 +424,7 @@ WITH artist_awards AS (
     FROM bridge_award_artist b
     JOIN fact_grammy_award w ON w.grammy_award_sk = b.grammy_award_sk
     JOIN dim_year y ON y.year_sk = w.year_sk
+    WHERE b.recognition_tier IN ('A', 'B')
     GROUP BY b.artist_sk
 ),
 ranked AS (
@@ -324,7 +439,10 @@ ranked AS (
     FROM artist_awards aw
     JOIN dim_artist a ON a.artist_sk = aw.artist_sk
     WHERE a.from_spotify = TRUE
-      AND a.artist_bk NOT IN ('various artists', 'original cast')
+      AND a.artist_bk NOT IN (
+          'various artists', 'original cast', 'original broadway cast',
+          'soundtrack', 'various', 'cast', 'unknown', 'traditional', 'anonymous'
+      )
 )
 SELECT
     artist_display_name,
@@ -339,21 +457,23 @@ WHERE rank <= 10
 ORDER BY rank, awards DESC, artist_display_name;
 
 -- @name: kpi_4_top_awarded_all
--- R4 - all top awarded Grammy artists including those absent from Spotify.
+-- R4 - all top awarded Grammy artists including those absent from Spotify (includes tier C).
 WITH artist_awards AS (
     SELECT
         b.artist_sk,
+        b.recognition_tier,
         COUNT(DISTINCT (w.year_sk, w.category_sk)) AS awards,
         MIN(y.year)                                AS first_award_year,
         MAX(y.year)                                AS last_award_year
     FROM bridge_award_artist b
     JOIN fact_grammy_award w ON w.grammy_award_sk = b.grammy_award_sk
     JOIN dim_year y ON y.year_sk = w.year_sk
-    GROUP BY b.artist_sk
+    GROUP BY b.artist_sk, b.recognition_tier
 ),
 ranked AS (
     SELECT
         a.artist_display_name,
+        aw.recognition_tier,
         aw.awards,
         aw.first_award_year,
         aw.last_award_year,
@@ -362,10 +482,14 @@ ranked AS (
         DENSE_RANK() OVER (ORDER BY aw.awards DESC) AS rank
     FROM artist_awards aw
     JOIN dim_artist a ON a.artist_sk = aw.artist_sk
-    WHERE a.artist_bk NOT IN ('various artists', 'original cast')
+    WHERE a.artist_bk NOT IN (
+        'various artists', 'original cast', 'original broadway cast',
+        'soundtrack', 'various', 'cast', 'unknown', 'traditional', 'anonymous'
+    )
 )
 SELECT
     artist_display_name,
+    recognition_tier,
     awards,
     first_award_year,
     last_award_year,

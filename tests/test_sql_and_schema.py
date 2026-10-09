@@ -18,7 +18,7 @@ DW_OBJECTS = [
 def test_kpi_queries_with_requirement_tags():
     sql = KPI_SQL.read_text()
     lines = re.findall(r"^-- (R[1-4](?:/R[1-4])*)", sql, flags=re.MULTILINE)
-    assert len(lines) == 13, lines
+    assert len(lines) == 14, lines
     covered = {tag for line in lines for tag in line.split("/")}
     assert covered == {"R1", "R2", "R3", "R4"}
 
@@ -26,8 +26,8 @@ def test_kpi_queries_with_requirement_tags():
 def test_kpi_queries_are_named_and_commented():
     sql = KPI_SQL.read_text()
     names = re.findall(r"^--\s*@name:\s*([A-Za-z0-9_]+)\s*$", sql, flags=re.MULTILINE)
-    assert len(names) == 13, names
-    assert len(set(names)) == 13
+    assert len(names) == 14, names
+    assert len(set(names)) == 14
     for name in names:
         assert name.startswith("kpi_"), name
 

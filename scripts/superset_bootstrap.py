@@ -52,6 +52,10 @@ DATASET_SPECS: dict[str, dict[str, str]] = {
         "award_rows": "SUM(award_rows)",
         "share_pct": "MAX(share_pct)",
     },
+    "kpi_0_coverage_by_tier": {
+        "award_rows": "SUM(award_rows)",
+        "share_pct": "MAX(share_pct)",
+    },
     "kpi_0_coverage_by_decade": {
         "award_rows": "SUM(award_rows)",
         "matched_rows": "SUM(matched_rows)",
@@ -386,7 +390,7 @@ CHART_SPECS: list[dict] = [
         "description": "Includes artists absent from Spotify (in_spotify = 0) linked through Grammy credits.",
         "candidates": [
             ("table", {
-                "all_columns": ["artist_display_name", "awards", "spotify_track_count", "in_spotify", "rank"],
+                "all_columns": ["artist_display_name", "recognition_tier", "awards", "spotify_track_count", "in_spotify", "rank"],
                 "order_by_cols": [["rank", True]],
                 "row_limit": 25,
             }),
@@ -406,6 +410,30 @@ CHART_SPECS: list[dict] = [
     },
 
     # --- Tab Quality ---
+    {
+        "dataset": "kpi_0_coverage_by_tier",
+        "slice_name": "[Quality] Awards by recognition tier",
+        "requirement": "R1,R2,R3",
+        "description": "Grammy awards distributed by recognition tier (A, B, C, none) and match cascade method.",
+        "candidates": [
+            ("echarts_timeseries_bar", {
+                "x_axis": "recognition_tier",
+                "groupby": ["match_method"],
+                "metrics": ["award_rows"],
+                "row_limit": 50,
+            }),
+            ("dist_bar", {
+                "groupby": ["recognition_tier"],
+                "columns": ["match_method"],
+                "metrics": ["award_rows"],
+                "row_limit": 50,
+            }),
+            ("table", {
+                "all_columns": ["recognition_tier", "match_method", "award_rows", "share_pct"],
+                "row_limit": 50,
+            }),
+        ],
+    },
     {
         "dataset": "kpi_0_coverage_by_method",
         "slice_name": "[Quality] Match Method Distribution",
@@ -619,7 +647,7 @@ def _validation_query(form: dict) -> dict:
     return query
 
 
-def ensure_chart(client: SupersetClient, spec: dict, dataset_id: int, dashboard_id: int) -> str:
+def ensure_chart(client: SupersetClient, spec: dict, dataset_id: int, dashboard_id: int) -> int:
     """Create the chart with the first candidate whose query actually executes."""
     failures: list[str] = []
     description = spec.get("description") or f"[{spec['requirement']}] generado por scripts/superset_bootstrap.py"
@@ -654,7 +682,7 @@ def ensure_chart(client: SupersetClient, spec: dict, dataset_id: int, dashboard_
             rows = ((out.get("result") or [{}])[0] or {}).get("rowcount")
             print(f"[superset-bootstrap] chart ok: {spec['slice_name']} "
                   f"({viz_type}, rows={rows})")
-            return viz_type
+            return int(record["id"])
         failures.append(f"{viz_type}: {status} {json.dumps(out)[:200]}")
     raise SystemExit(f"[superset-bootstrap] no candidate viz for {spec['slice_name']} "
                      f"executed successfully: {failures}")
@@ -679,6 +707,55 @@ def main() -> int:
         ),
     }
 
+    used_datasets: dict[str, int] = {}
+    for table_name, sql in all_queries.items():
+        if table_name in DATASET_SPECS:
+            used_datasets[table_name] = ensure_dataset(
+                client,
+                database_id,
+                table_name,
+                sql,
+                DATASET_SPECS[table_name],
+            )
+
+    dashboard = client.ensure(
+        "/api/v1/dashboard/",
+        "dashboard_title",
+        DASHBOARD_TITLE,
+        {
+            "dashboard_title": DASHBOARD_TITLE,
+            "published": True,
+            "json_metadata": "{}",
+        },
+        update_payload={
+            "dashboard_title": DASHBOARD_TITLE,
+            "published": True,
+        },
+    )
+
+    all_chart_ids: list[int] = []
+    r1_chart_ids: list[int] = []
+    for spec in CHART_SPECS:
+        table_name = spec["dataset"]
+        chart_id = ensure_chart(client, spec, used_datasets[table_name], dashboard["id"])
+        all_chart_ids.append(chart_id)
+        reqs = [r.strip() for r in spec["requirement"].split(",")]
+        if "R1" in reqs and table_name in {"kpi_1_popularity_by_grammy_recognition", "kpi_1_artist_level"}:
+            r1_chart_ids.append(chart_id)
+
+    non_r1_chart_ids = [cid for cid in all_chart_ids if cid not in r1_chart_ids]
+
+    r1_targets_basis = [
+        {"datasetId": used_datasets[ds], "column": {"name": "basis"}}
+        for ds in ["kpi_1_popularity_by_grammy_recognition", "kpi_1_artist_level"]
+        if ds in used_datasets
+    ]
+    r1_targets_recognition = [
+        {"datasetId": used_datasets[ds], "column": {"name": "recognition"}}
+        for ds in ["kpi_1_popularity_by_grammy_recognition", "kpi_1_artist_level"]
+        if ds in used_datasets
+    ]
+
     dashboard_metadata = {
         "label_colors": {
             "Grammy-recognized": "#C9A227",
@@ -690,6 +767,9 @@ def main() -> int:
             "workers": "#5B6C8F",
             "nominee": "#8B9BB4",
             "none": "#CBD5E1",
+            "A": "#C9A227",
+            "B": "#5B6C8F",
+            "C": "#8B9BB4",
         },
         "native_filter_configuration": [
             {
@@ -724,44 +804,38 @@ def main() -> int:
                 "id": "NATIVE_FILTER_basis",
                 "name": "basis",
                 "filterType": "filter_select",
-                "description": "Default excl_zero accounts for 14.1% tracks with popularity=0",
-                "targets": [{"column": {"name": "basis"}}],
+                "description": "Default excl_zero accounts for 14.1% tracks with popularity=0 (R1 datasets only)",
+                "targets": r1_targets_basis,
                 "defaultDataMask": {"filterState": {"value": ["excl_zero"]}},
+                "scope": {
+                    "rootPath": ["ROOT_ID"],
+                    "excluded": non_r1_chart_ids,
+                },
+                "chartsInScope": r1_chart_ids,
+            },
+            {
+                "id": "NATIVE_FILTER_recognition",
+                "name": "recognition",
+                "filterType": "filter_select",
+                "description": "Recognition tier: core (tiers A/B) vs strict (tier A) (R1 datasets only)",
+                "targets": r1_targets_recognition,
+                "defaultDataMask": {"filterState": {"value": ["core"]}},
+                "scope": {
+                    "rootPath": ["ROOT_ID"],
+                    "excluded": non_r1_chart_ids,
+                },
+                "chartsInScope": r1_chart_ids,
             },
         ],
     }
 
-    dashboard = client.ensure(
-        "/api/v1/dashboard/",
-        "dashboard_title",
-        DASHBOARD_TITLE,
-        {
-            "dashboard_title": DASHBOARD_TITLE,
-            "published": True,
-            "json_metadata": json.dumps(dashboard_metadata),
-        },
-        update_payload={
-            "dashboard_title": DASHBOARD_TITLE,
-            "published": True,
-            "json_metadata": json.dumps(dashboard_metadata),
-        },
+    client.call(
+        "PUT",
+        f"/api/v1/dashboard/{dashboard['id']}",
+        {"json_metadata": json.dumps(dashboard_metadata)},
     )
 
-    used_datasets: dict[str, int] = {}
-    for table_name, sql in all_queries.items():
-        if table_name in DATASET_SPECS:
-            used_datasets[table_name] = ensure_dataset(
-                client,
-                database_id,
-                table_name,
-                sql,
-                DATASET_SPECS[table_name],
-            )
-
-    for spec in CHART_SPECS:
-        table_name = spec["dataset"]
-        ensure_chart(client, spec, used_datasets[table_name], dashboard["id"])
-
+    print(f"[superset-bootstrap] total datasets: {len(used_datasets)}, total charts: {len(CHART_SPECS)}")
     print(f"[superset-bootstrap] dashboard ready: {BASE_URL}/superset/dashboard/{dashboard['id']}/")
     return 0
 
