@@ -42,154 +42,416 @@ DASHBOARD_TITLE = "Workshop-2 - KPIs (R1-R4)"
 DATASET_SPECS: dict[str, dict[str, str]] = {
     "kpi_0_integration_coverage": {
         "award_rows": "SUM(award_rows)",
-        "matched_award_rows": "SUM(matched_award_rows)",
-        "matched_award_pct": "MAX(matched_award_pct)",
+        "matched_strict_rows": "SUM(matched_strict_rows)",
+        "matched_strict_pct": "MAX(matched_strict_pct)",
+        "matched_enriched_rows": "SUM(matched_enriched_rows)",
+        "matched_enriched_pct": "MAX(matched_enriched_pct)",
         "rows_without_artist_pct": "MAX(rows_without_artist_pct)",
     },
-    "kpi_1_popularity_by_grammy_recognition": {
-        "track_listings": "SUM(track_listings)",
-        "distinct_tracks": "SUM(distinct_tracks)",
-        "avg_popularity": "AVG(avg_popularity)",
-        "avg_energy": "AVG(avg_energy)",
-        "avg_danceability": "AVG(avg_danceability)",
-        "avg_valence": "AVG(avg_valence)",
+    "kpi_0_coverage_by_method": {
+        "award_rows": "SUM(award_rows)",
+        "share_pct": "MAX(share_pct)",
     },
-    "kpi_1_genre_split": {
-        "track_listings": "SUM(track_listings)",
-        "avg_popularity_grammy_artist": "AVG(avg_popularity_grammy_artist)",
-        "avg_popularity_other_artist": "AVG(avg_popularity_other_artist)",
+    "kpi_0_coverage_by_decade": {
+        "award_rows": "SUM(award_rows)",
+        "matched_rows": "SUM(matched_rows)",
+        "match_rate_pct": "MAX(match_rate_pct)",
+        "matched_strict_rows": "SUM(matched_strict_rows)",
+        "match_rate_strict_pct": "MAX(match_rate_strict_pct)",
+    },
+    "kpi_1_popularity_by_grammy_recognition": {
+        "n_tracks": "SUM(n_tracks)",
+        "n_artists": "SUM(n_artists)",
+        "mean_popularity": "AVG(mean_popularity)",
+        "median_popularity": "AVG(median_popularity)",
+        "mean_danceability": "AVG(mean_danceability)",
+        "mean_energy": "AVG(mean_energy)",
+        "mean_valence": "AVG(mean_valence)",
+        "mean_acousticness": "AVG(mean_acousticness)",
+        "mean_speechiness": "AVG(mean_speechiness)",
+    },
+    "kpi_1_artist_level": {
+        "mean_popularity": "AVG(mean_popularity)",
+        "primary_tracks": "SUM(primary_tracks)",
+    },
+    "kpi_1_within_genre_diff": {
+        "n_grammy_artists": "SUM(n_grammy_artists)",
+        "n_non_grammy_artists": "SUM(n_non_grammy_artists)",
+        "mean_pop_grammy": "AVG(mean_pop_grammy)",
+        "mean_pop_non": "AVG(mean_pop_non)",
+        "diff": "AVG(diff)",
+        "mean_pop_grammy_strict": "AVG(mean_pop_grammy_strict)",
+        "diff_strict": "AVG(diff_strict)",
+        "stratified_weighted_diff": "MAX(stratified_weighted_diff)",
     },
     "kpi_2_awards_by_dominant_genre": {
-        "grammy_awards": "SUM(grammy_awards)",
-        "recognized_artists": "SUM(recognized_artists)",
+        "awards": "SUM(awards)",
+        "n_artists": "SUM(n_artists)",
         "award_share_pct": "MAX(award_share_pct)",
+        "awards_per_100_artists": "MAX(awards_per_100_artists)",
+    },
+    "kpi_2_heatmap": {
+        "awards": "SUM(awards)",
     },
     "kpi_3_awards_and_profile_by_decade": {
-        "grammy_awards": "SUM(grammy_awards)",
-        "recognized_artists": "SUM(recognized_artists)",
-        "avg_artist_popularity": "AVG(avg_artist_popularity)",
-        "avg_artist_energy": "AVG(avg_artist_energy)",
+        "awards": "SUM(awards)",
+        "distinct_artists": "SUM(distinct_artists)",
+        "matched_awards": "SUM(matched_awards)",
+        "matched_share_pct": "MAX(matched_share_pct)",
+        "mean_energy": "AVG(mean_energy)",
+        "mean_valence": "AVG(mean_valence)",
+        "mean_danceability": "AVG(mean_danceability)",
+        "mean_acousticness": "AVG(mean_acousticness)",
     },
     "kpi_3_awards_per_year": {
-        "grammy_awards": "SUM(grammy_awards)",
+        "awards": "SUM(awards)",
         "recognized_artists": "SUM(recognized_artists)",
-        "matched_award_rows": "SUM(matched_award_rows)",
+        "matched_awards": "SUM(matched_awards)",
+        "matched_share_pct": "MAX(matched_share_pct)",
+    },
+    "kpi_3_awards_by_family_decade": {
+        "awards": "SUM(awards)",
     },
     "kpi_4_top_awarded_artists_on_spotify": {
-        "grammy_awards": "SUM(grammy_awards)",
+        "awards": "SUM(awards)",
         "spotify_track_count": "SUM(spotify_track_count)",
-        "avg_track_popularity": "AVG(avg_track_popularity)",
-        "first_award_year": "MIN(first_award_year)",
-        "last_award_year": "MAX(last_award_year)",
+        "in_spotify": "MAX(in_spotify)",
+    },
+    "kpi_4_top_awarded_all": {
+        "awards": "SUM(awards)",
+        "spotify_track_count": "SUM(spotify_track_count)",
+        "in_spotify": "MAX(in_spotify)",
+    },
+    "etl_batch_log": {
+        "rows_fact_track_artist": "MAX(rows_fact_track_artist)",
+        "rows_fact_grammy_award": "MAX(rows_fact_grammy_award)",
+        "rows_bridge_award_artist": "MAX(rows_bridge_award_artist)",
     },
 }
 
 # Charts: preferred viz type first, "table" always last as the safe fallback.
 CHART_SPECS: list[dict] = [
+    # --- Header row KPI Big Numbers ---
+    {
+        "dataset": "kpi_0_integration_coverage",
+        "slice_name": "[Header] Coverage Enriched %",
+        "requirement": "R1,R2,R3",
+        "description": "Enriched match rate via cascade across all Grammy award rows.",
+        "candidates": [
+            ("big_number_total", {"metric": "matched_enriched_pct"}),
+            ("table", {"all_columns": ["matched_enriched_pct"], "row_limit": 10}),
+        ],
+    },
+    {
+        "dataset": "kpi_0_integration_coverage",
+        "slice_name": "[Header] Coverage Strict %",
+        "requirement": "R1,R2,R3",
+        "description": "Exact un-split credit match rate baseline.",
+        "candidates": [
+            ("big_number_total", {"metric": "matched_strict_pct"}),
+            ("table", {"all_columns": ["matched_strict_pct"], "row_limit": 10}),
+        ],
+    },
+    {
+        "dataset": "kpi_3_awards_and_profile_by_decade",
+        "slice_name": "[Header] Grammy Artists Matched",
+        "requirement": "R3",
+        "description": "Distinct Grammy awardee artists successfully resolved in Spotify warehouse.",
+        "candidates": [
+            ("big_number_total", {"metric": "distinct_artists"}),
+            ("table", {"all_columns": ["distinct_artists"], "row_limit": 10}),
+        ],
+    },
+    {
+        "dataset": "etl_batch_log",
+        "slice_name": "[Header] Awards Loaded",
+        "requirement": "R4",
+        "description": "Total Grammy award rows loaded in the latest warehouse batch.",
+        "candidates": [
+            ("big_number_total", {"metric": "rows_fact_grammy_award"}),
+            ("table", {"all_columns": ["rows_fact_grammy_award"], "row_limit": 10}),
+        ],
+    },
+
+    # --- Tab R1: Popularity & Audio Profile ---
+    {
+        "dataset": "kpi_1_artist_level",
+        "slice_name": "[R1] Artist Popularity Distribution",
+        "requirement": "R1",
+        "description": "Name-based match; 14.1% of raw catalog tracks have zero popularity.",
+        "candidates": [
+            ("box_plot", {
+                "columns": ["artist_group"],
+                "metrics": ["mean_popularity"],
+                "row_limit": 1000,
+            }),
+            ("table", {
+                "all_columns": ["artist_group", "artist_display_name", "mean_popularity", "primary_tracks"],
+                "row_limit": 100,
+            }),
+        ],
+    },
     {
         "dataset": "kpi_1_popularity_by_grammy_recognition",
-        "slice_name": "R1 - Popularidad: artistas Grammy vs resto del catalogo",
+        "slice_name": "[R1] Audio Features: Grammy vs Non-Grammy",
         "requirement": "R1",
+        "description": "Audio features in [0, 1]; comparisons reflect surviving catalog tracks.",
         "candidates": [
-            ("dist_bar", {
+            ("radar", {
                 "columns": ["artist_group"],
-                "metrics": ["avg_popularity"],
+                "metrics": ["mean_danceability", "mean_energy", "mean_valence", "mean_acousticness", "mean_speechiness"],
                 "row_limit": 10,
             }),
             ("table", {
-                "all_columns": ["artist_group", "avg_popularity", "avg_energy", "avg_danceability"],
-                "row_limit": 100,
+                "all_columns": [
+                    "basis", "artist_group", "mean_danceability", "mean_energy",
+                    "mean_valence", "mean_acousticness", "mean_speechiness",
+                ],
+                "row_limit": 20,
+            }),
+        ],
+    },
+    {
+        "dataset": "kpi_1_within_genre_diff",
+        "slice_name": "[R1] Popularity Difference within Genre Family",
+        "requirement": "R1,R2",
+        "description": "Filtered to families with >= 30 Grammy artists; stratified weighting applied.",
+        "candidates": [
+            ("dist_bar", {
+                "columns": ["genre_family"],
+                "metrics": ["diff"],
+                "row_limit": 20,
+            }),
+            ("table", {
+                "all_columns": [
+                    "genre_family", "mean_pop_grammy", "mean_pop_non", "diff",
+                    "n_grammy_artists", "stratified_weighted_diff",
+                ],
+                "row_limit": 50,
+            }),
+        ],
+    },
+    {
+        "dataset": "kpi_1_popularity_by_grammy_recognition",
+        "slice_name": "[R1] Popularity Summary Table",
+        "requirement": "R1",
+        "description": "Group-level medians and quartiles; basis separates zero-popularity tracks.",
+        "candidates": [
+            ("table", {
+                "all_columns": [
+                    "basis", "artist_group", "n_tracks", "n_artists",
+                    "mean_popularity", "median_popularity", "p25_popularity", "p75_popularity",
+                ],
+                "row_limit": 20,
+            }),
+        ],
+    },
+
+    # --- Tab R2: Genre & Award Mapping ---
+    {
+        "dataset": "kpi_2_heatmap",
+        "slice_name": "[R2] Genre Family vs Category Family Heatmap",
+        "requirement": "R2",
+        "description": "Cross-domain mappings; categories without clear family fall back to Other.",
+        "candidates": [
+            ("heatmap", {
+                "all_columns": ["dominant_genre_family", "category_family", "awards"],
+                "row_limit": 200,
+            }),
+            ("table", {
+                "all_columns": ["dominant_genre_family", "category_family", "awards"],
+                "row_limit": 200,
             }),
         ],
     },
     {
         "dataset": "kpi_2_awards_by_dominant_genre",
-        "slice_name": "R2 - Premios Grammy por genero Spotify dominante",
+        "slice_name": "[R2] Awards per 100 Artists by Dominant Genre Family",
         "requirement": "R2",
+        "description": "Rate denominator is distinct artists classified into dominant genre family.",
         "candidates": [
-            ("pie", {
-                "groupby": ["dominant_spotify_genre"],
-                "metrics": ["grammy_awards"],
+            ("dist_bar", {
+                "columns": ["dominant_genre_family"],
+                "metrics": ["awards_per_100_artists"],
                 "row_limit": 15,
             }),
             ("table", {
-                "all_columns": ["dominant_spotify_genre", "grammy_awards", "award_share_pct"],
-                "row_limit": 100,
+                "all_columns": ["dominant_genre_family", "awards", "n_artists", "awards_per_100_artists"],
+                "row_limit": 50,
             }),
         ],
     },
+
+    # --- Tab R3: Historical Evolution ---
     {
-        "dataset": "kpi_1_genre_split",
-        "slice_name": "R1 - Popularidad por genero (top volumen)",
-        "requirement": "R1,R2",
+        "dataset": "kpi_3_awards_and_profile_by_decade",
+        "slice_name": "[R3] Energy Trend by Decade",
+        "requirement": "R3",
+        "description": "Trend interpretation depends on historical coverage; older decades have fewer tracks.",
         "candidates": [
-            ("table", {
-                "all_columns": [
-                    "genre", "track_listings", "avg_popularity_grammy_artist",
-                    "avg_popularity_other_artist",
-                ],
+            ("echarts_timeseries_line", {
+                "x_axis": "decade",
+                "metrics": ["mean_energy"],
                 "row_limit": 100,
+            }),
+            ("table", {"all_columns": ["decade", "mean_energy"], "row_limit": 100}),
+        ],
+    },
+    {
+        "dataset": "kpi_3_awards_and_profile_by_decade",
+        "slice_name": "[R3] Valence Trend by Decade",
+        "requirement": "R3",
+        "description": "Trend interpretation depends on coverage; surviving recordings bias older periods.",
+        "candidates": [
+            ("echarts_timeseries_line", {
+                "x_axis": "decade",
+                "metrics": ["mean_valence"],
+                "row_limit": 100,
+            }),
+            ("table", {"all_columns": ["decade", "mean_valence"], "row_limit": 100}),
+        ],
+    },
+    {
+        "dataset": "kpi_3_awards_and_profile_by_decade",
+        "slice_name": "[R3] Danceability Trend by Decade",
+        "requirement": "R3",
+        "description": "Danceability on primary tracks only to prevent repeat song inflation.",
+        "candidates": [
+            ("echarts_timeseries_line", {
+                "x_axis": "decade",
+                "metrics": ["mean_danceability"],
+                "row_limit": 100,
+            }),
+            ("table", {"all_columns": ["decade", "mean_danceability"], "row_limit": 100}),
+        ],
+    },
+    {
+        "dataset": "kpi_3_awards_by_family_decade",
+        "slice_name": "[R3] Awards by Category Family per Decade",
+        "requirement": "R3",
+        "description": "Historical Grammy categories merged to 14 canonical families.",
+        "candidates": [
+            ("dist_bar", {
+                "groupby": ["category_family"],
+                "columns": ["decade"],
+                "metrics": ["awards"],
+                "row_limit": 150,
+            }),
+            ("table", {
+                "all_columns": ["decade", "category_family", "awards"],
+                "row_limit": 150,
             }),
         ],
     },
     {
         "dataset": "kpi_3_awards_and_profile_by_decade",
-        "slice_name": "R3 - Premios y perfil de artistas por decada",
+        "slice_name": "[R3] Matched Share by Decade",
         "requirement": "R3",
+        "description": "Trend interpretation depends on coverage; older decades have lower coverage.",
         "candidates": [
             ("echarts_timeseries_line", {
                 "x_axis": "decade",
-                "metrics": ["grammy_awards"],
+                "metrics": ["matched_share_pct"],
                 "row_limit": 100,
             }),
             ("table", {
-                "all_columns": ["decade", "grammy_awards", "recognized_artists", "avg_artist_popularity"],
+                "all_columns": ["decade", "awards", "matched_awards", "matched_share_pct"],
                 "row_limit": 100,
             }),
         ],
     },
-    {
-        "dataset": "kpi_3_awards_per_year",
-        "slice_name": "R3 - Serie anual de premios Grammy",
-        "requirement": "R3",
-        "candidates": [
-            ("echarts_timeseries_line", {
-                "x_axis": "year",
-                "metrics": ["grammy_awards"],
-                "row_limit": 100,
-            }),
-            ("table", {
-                "all_columns": ["year", "grammy_awards", "recognized_artists", "matched_award_rows"],
-                "row_limit": 100,
-            }),
-        ],
-    },
+
+    # --- Tab R4: Top Artists ---
     {
         "dataset": "kpi_4_top_awarded_artists_on_spotify",
-        "slice_name": "R4 - Top artistas premiados presentes en Spotify",
+        "slice_name": "[R4] Top-10 Awarded Artists on Spotify",
         "requirement": "R4",
+        "description": "Excludes aggregate credits (Various Artists, Original Cast); top 10 with ties kept.",
+        "candidates": [
+            ("dist_bar", {
+                "columns": ["artist_display_name"],
+                "metrics": ["awards"],
+                "row_limit": 10,
+            }),
+            ("table", {
+                "all_columns": ["artist_display_name", "awards", "spotify_track_count", "first_award_year", "last_award_year"],
+                "row_limit": 20,
+            }),
+        ],
+    },
+    {
+        "dataset": "kpi_4_top_awarded_all",
+        "slice_name": "[R4] Top Awarded Artists Overall",
+        "requirement": "R4",
+        "description": "Includes artists absent from Spotify (in_spotify = 0) linked through Grammy credits.",
         "candidates": [
             ("table", {
-                "all_columns": [
-                    "artist_display_name", "grammy_awards", "spotify_track_count",
-                    "avg_track_popularity",
-                ],
-                "order_by_cols": [["grammy_awards", False]],
+                "all_columns": ["artist_display_name", "awards", "spotify_track_count", "in_spotify", "rank"],
+                "order_by_cols": [["rank", True]],
                 "row_limit": 25,
             }),
         ],
     },
     {
-        "dataset": "kpi_0_integration_coverage",
-        "slice_name": "Calidad - Cobertura de integracion (KPI-0)",
+        "dataset": "kpi_4_top_awarded_all",
+        "slice_name": "[R4] Top Artists Absent from Spotify",
+        "requirement": "R4",
+        "description": "Top-N artists celebrated by Grammy Awards but absent from the Spotify dataset.",
+        "candidates": [
+            ("table", {
+                "all_columns": ["artist_display_name", "awards", "first_award_year", "last_award_year"],
+                "row_limit": 15,
+            }),
+        ],
+    },
+
+    # --- Tab Quality ---
+    {
+        "dataset": "kpi_0_coverage_by_method",
+        "slice_name": "[Quality] Match Method Distribution",
         "requirement": "R1,R2,R3",
+        "description": "Hierarchical cascade: exact -> split -> workers -> nominee -> fuzzy -> none.",
+        "candidates": [
+            ("pie", {
+                "groupby": ["match_method"],
+                "metrics": ["award_rows"],
+                "row_limit": 10,
+            }),
+            ("table", {
+                "all_columns": ["match_method", "award_rows", "share_pct"],
+                "row_limit": 10,
+            }),
+        ],
+    },
+    {
+        "dataset": "kpi_0_coverage_by_decade",
+        "slice_name": "[Quality] Coverage Trend by Decade",
+        "requirement": "R1,R2,R3",
+        "description": "Strict match vs enriched cascade coverage over ceremony decades.",
+        "candidates": [
+            ("echarts_timeseries_line", {
+                "x_axis": "decade",
+                "metrics": ["match_rate_pct"],
+                "row_limit": 100,
+            }),
+            ("table", {
+                "all_columns": ["decade", "award_rows", "match_rate_pct", "match_rate_strict_pct"],
+                "row_limit": 100,
+            }),
+        ],
+    },
+    {
+        "dataset": "etl_batch_log",
+        "slice_name": "[Quality] Last ETL Batches",
+        "requirement": "R4",
+        "description": "Audit trail of warehouse batch loads from etl_batch_log.",
         "candidates": [
             ("table", {
                 "all_columns": [
-                    "award_rows", "matched_award_rows", "matched_award_pct",
-                    "rows_without_artist_pct",
+                    "batch_id", "dag_id", "run_id", "status",
+                    "rows_fact_track_artist", "rows_fact_grammy_award", "rows_bridge_award_artist",
                 ],
-                "row_limit": 10,
+                "row_limit": 5,
             }),
         ],
     },
@@ -359,18 +621,25 @@ def _validation_query(form: dict) -> dict:
 def ensure_chart(client: SupersetClient, spec: dict, dataset_id: int, dashboard_id: int) -> str:
     """Create the chart with the first candidate whose query actually executes."""
     failures: list[str] = []
+    description = spec.get("description") or f"[{spec['requirement']}] generado por scripts/superset_bootstrap.py"
     for viz_type, form in spec["candidates"]:
         form_data = {**form, "viz_type": viz_type, "datasource": f"{dataset_id}__table"}
         payload = {
             "slice_name": spec["slice_name"],
-            "description": f"[{spec['requirement']}] generado por scripts/superset_bootstrap.py",
+            "description": description,
             "datasource_id": dataset_id,
             "datasource_type": "table",
             "viz_type": viz_type,
             "params": json.dumps(form_data),
             "dashboards": [dashboard_id],
         }
-        record = client.ensure("/api/v1/chart/", "slice_name", spec["slice_name"], payload)
+        record = client.ensure(
+            "/api/v1/chart/",
+            "slice_name",
+            spec["slice_name"],
+            payload,
+            update_payload=payload,
+        )
 
         query_context = {
             "datasource": {"id": dataset_id, "type": "table"},
@@ -397,23 +666,92 @@ def main() -> int:
 
     database_id = ensure_database(client)
     queries = load_kpi_queries()
+    all_queries = {
+        **queries,
+        "etl_batch_log": "SELECT * FROM etl_batch_log ORDER BY started_at DESC LIMIT 5",
+    }
 
-    dashboard = client.ensure("/api/v1/dashboard/", "dashboard_title", DASHBOARD_TITLE, {
-        "dashboard_title": DASHBOARD_TITLE,
-        "published": True,
-    })
+    dashboard_metadata = {
+        "label_colors": {
+            "Grammy-recognized": "#C9A227",
+            "Not Grammy-recognized": "#5B6C8F",
+            "Grammy": "#C9A227",
+            "Non-Grammy": "#5B6C8F",
+            "exact": "#C9A227",
+            "split": "#E5C158",
+            "workers": "#5B6C8F",
+            "nominee": "#8B9BB4",
+            "none": "#CBD5E1",
+        },
+        "native_filter_configuration": [
+            {
+                "id": "NATIVE_FILTER_decade",
+                "name": "decade",
+                "filterType": "filter_select",
+                "targets": [{"column": {"name": "decade"}}],
+                "defaultDataMask": {"filterState": {"value": None}},
+            },
+            {
+                "id": "NATIVE_FILTER_genre_family",
+                "name": "genre_family",
+                "filterType": "filter_select",
+                "targets": [{"column": {"name": "genre_family"}}],
+                "defaultDataMask": {"filterState": {"value": None}},
+            },
+            {
+                "id": "NATIVE_FILTER_category_family",
+                "name": "category_family",
+                "filterType": "filter_select",
+                "targets": [{"column": {"name": "category_family"}}],
+                "defaultDataMask": {"filterState": {"value": None}},
+            },
+            {
+                "id": "NATIVE_FILTER_match_method",
+                "name": "match_method",
+                "filterType": "filter_select",
+                "targets": [{"column": {"name": "match_method"}}],
+                "defaultDataMask": {"filterState": {"value": None}},
+            },
+            {
+                "id": "NATIVE_FILTER_basis",
+                "name": "basis",
+                "filterType": "filter_select",
+                "description": "Default excl_zero accounts for 14.1% tracks with popularity=0",
+                "targets": [{"column": {"name": "basis"}}],
+                "defaultDataMask": {"filterState": {"value": ["excl_zero"]}},
+            },
+        ],
+    }
+
+    dashboard = client.ensure(
+        "/api/v1/dashboard/",
+        "dashboard_title",
+        DASHBOARD_TITLE,
+        {
+            "dashboard_title": DASHBOARD_TITLE,
+            "published": True,
+            "json_metadata": json.dumps(dashboard_metadata),
+        },
+        update_payload={
+            "dashboard_title": DASHBOARD_TITLE,
+            "published": True,
+            "json_metadata": json.dumps(dashboard_metadata),
+        },
+    )
 
     used_datasets: dict[str, int] = {}
-    for spec in CHART_SPECS:
-        table_name = spec["dataset"]
-        if table_name not in queries:
-            raise SystemExit(f"[superset-bootstrap] query {table_name} not found in "
-                             f"{KPI_SQL_PATH}")
-        if table_name not in used_datasets:
+    for table_name, sql in all_queries.items():
+        if table_name in DATASET_SPECS:
             used_datasets[table_name] = ensure_dataset(
-                client, database_id, table_name, queries[table_name],
+                client,
+                database_id,
+                table_name,
+                sql,
                 DATASET_SPECS[table_name],
             )
+
+    for spec in CHART_SPECS:
+        table_name = spec["dataset"]
         ensure_chart(client, spec, used_datasets[table_name], dashboard["id"])
 
     print(f"[superset-bootstrap] dashboard ready: {BASE_URL}/superset/dashboard/{dashboard['id']}/")

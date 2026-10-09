@@ -7,9 +7,9 @@ import pytest
 from scripts import superset_bootstrap as boot
 
 
-def test_kpi_sql_defines_seven_queries():
+def test_kpi_sql_defines_thirteen_queries():
     queries = boot.load_kpi_queries()
-    assert len(queries) == 7
+    assert len(queries) == 13
     assert all(name.startswith("kpi_") for name in queries)
 
 
@@ -17,7 +17,8 @@ def test_every_chart_dataset_exists_in_sql_and_specs():
     queries = boot.load_kpi_queries()
     for spec in boot.CHART_SPECS:
         dataset = spec["dataset"]
-        assert dataset in queries, dataset
+        if dataset != "etl_batch_log":
+            assert dataset in queries, dataset
         assert dataset in boot.DATASET_SPECS, dataset
         assert spec["requirement"] and set(
             part.strip() for part in spec["requirement"].split(",")

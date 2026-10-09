@@ -28,7 +28,7 @@ from src import config
 QUERY_MARKER = re.compile(r"^--\s*@name:\s*(?P<name>[A-Za-z0-9_]+)\s*$", re.MULTILINE)
 
 CHART_FILES = {
-    "kpi_1_genre_split": "ar1_popularity_by_genre.png",
+    "kpi_1_within_genre_diff": "ar1_popularity_by_genre.png",
     "kpi_2_awards_by_dominant_genre": "ar2_awards_by_dominant_genre.png",
     "kpi_3_awards_and_profile_by_decade": "ar3_awards_and_profile_by_decade.png",
     "kpi_4_top_awarded_artists_on_spotify": "ar4_top_awarded_artists.png",
@@ -85,88 +85,100 @@ def _save_csvs(results: dict[str, pd.DataFrame]) -> dict[str, str]:
     return paths
 
 
-def _chart_genre_split(frame: pd.DataFrame, path: Path) -> None:
-    plot = frame.plot(
-        x="genre",
-        y=["avg_popularity_grammy_artist", "avg_popularity_other_artist"],
-        kind="bar",
-        figsize=(13, 6),
-        color=["#1f77b4", "#ff7f0e"],
+def _chart_within_genre_diff(frame: pd.DataFrame, path: Path) -> None:
+    ordered = frame.sort_values("diff", ascending=True)
+    figure, ax = plt.subplots(figsize=(12, 6))
+    y_pos = list(range(len(ordered)))
+    bar_height = 0.35
+
+    ax.barh(
+        [y - bar_height / 2 for y in y_pos],
+        ordered["mean_pop_grammy"],
+        height=bar_height,
+        color="#C9A227",
+        label="Grammy-recognized",
     )
-    plot.set_title("R1 - Average Spotify popularity by genre\n"
-                   "Grammy-recognized vs other artists")
-    plot.set_xlabel("Spotify genre")
-    plot.set_ylabel("Average popularity (0-100)")
-    plot.tick_params(axis="x", rotation=60)
-    plot.legend(["Grammy-recognized artists", "Other artists"])
+    ax.barh(
+        [y + bar_height / 2 for y in y_pos],
+        ordered["mean_pop_non"],
+        height=bar_height,
+        color="#5B6C8F",
+        label="Non-Grammy",
+    )
+
+    ax.set_yticks(y_pos)
+    ax.set_yticklabels(ordered["genre_family"])
+    ax.set_xlabel("Mean Popularity (0-100)")
+    ax.set_title("R1 - Popularity within Genre Family: Grammy vs Non-Grammy Artists")
+    ax.legend(loc="lower right")
     plt.tight_layout()
     plt.savefig(path, dpi=150)
     plt.close()
 
 
 def _chart_awards_by_genre(frame: pd.DataFrame, path: Path) -> None:
-    ordered = frame.sort_values("grammy_awards")
-    ax = ordered.plot(
-        x="dominant_spotify_genre",
-        y="grammy_awards",
-        kind="barh",
-        figsize=(10, 7),
-        color="#2ca02c",
-        legend=False,
+    metric = "awards_per_100_artists" if "awards_per_100_artists" in frame.columns else "awards"
+    ordered = frame.sort_values(metric, ascending=True)
+    figure, ax = plt.subplots(figsize=(11, 6))
+    ax.barh(
+        ordered["dominant_genre_family"],
+        ordered[metric],
+        color="#C9A227",
     )
-    ax.set_title("R2 - Grammy awards by the awardee's dominant Spotify genre")
-    ax.set_xlabel("Grammy awards")
-    ax.set_ylabel("Dominant Spotify genre")
+    ax.set_title("R2 - Grammy Awards per 100 Artists by Dominant Genre Family")
+    ax.set_xlabel("Awards per 100 Artists in Family" if metric == "awards_per_100_artists" else "Awards")
+    ax.set_ylabel("Dominant Genre Family")
     plt.tight_layout()
     plt.savefig(path, dpi=150)
     plt.close()
 
 
 def _chart_decade_evolution(frame: pd.DataFrame, path: Path) -> None:
-    figure, axes = plt.subplots(1, 2, figsize=(14, 5))
-    axes[0].bar(frame["decade"].astype(str), frame["grammy_awards"], color="#9467bd")
-    axes[0].set_title("R3 - Grammy awards per decade")
+    figure, axes = plt.subplots(1, 2, figsize=(15, 5))
+    decades = frame["decade"].astype(str)
+
+    axes[0].bar(decades, frame["awards"], color="#5B6C8F", alpha=0.7, label="Total Awards")
+    axes[0].set_title("R3 - Award Volume and Matched Share by Decade")
     axes[0].set_xlabel("Decade")
     axes[0].set_ylabel("Awards")
     axes[0].tick_params(axis="x", rotation=45)
 
-    axes[1].plot(
-        frame["decade"].astype(str),
-        frame["avg_artist_popularity"],
-        marker="o",
-        color="#1f77b4",
-        label="Avg popularity",
-    )
-    axes[1].plot(
-        frame["decade"].astype(str),
-        (frame["avg_artist_energy"].astype(float) * 100).round(2),
-        marker="s",
-        color="#d62728",
-        label="Avg energy (x100)",
-    )
-    axes[1].set_title("R3 - Audio profile of recognized artists")
+    if "matched_share_pct" in frame.columns:
+        ax0_twin = axes[0].twinx()
+        ax0_twin.plot(decades, frame["matched_share_pct"], color="#C9A227", marker="o", linewidth=2, label="Matched %")
+        ax0_twin.set_ylabel("Matched Share %")
+        ax0_twin.set_ylim(0, 100)
+
+    if "mean_energy" in frame.columns:
+        axes[1].plot(decades, frame["mean_energy"], marker="o", color="#d62728", label="Energy")
+    if "mean_danceability" in frame.columns:
+        axes[1].plot(decades, frame["mean_danceability"], marker="s", color="#1f77b4", label="Danceability")
+    if "mean_valence" in frame.columns:
+        axes[1].plot(decades, frame["mean_valence"], marker="^", color="#2ca02c", label="Valence")
+    if "mean_acousticness" in frame.columns:
+        axes[1].plot(decades, frame["mean_acousticness"], marker="d", color="#9467bd", label="Acousticness")
+
+    axes[1].set_title("R3 - Audio Profile of Matched Artists Across Decades")
     axes[1].set_xlabel("Decade")
-    axes[1].set_ylabel("Score")
+    axes[1].set_ylabel("Audio Feature Score [0, 1]")
     axes[1].tick_params(axis="x", rotation=45)
-    axes[1].legend()
-    figure.suptitle("R3 - Evolution of Grammy-recognized artists over time")
+    axes[1].legend(loc="best")
+
     plt.tight_layout()
     plt.savefig(path, dpi=150)
     plt.close()
 
 
 def _chart_top_artists(frame: pd.DataFrame, path: Path) -> None:
-    ordered = frame.sort_values("grammy_awards")
-    ax = ordered.plot(
-        x="artist_display_name",
-        y="grammy_awards",
-        kind="barh",
-        figsize=(10, 6),
-        color="#e377c2",
-        legend=False,
+    ordered = frame.sort_values("awards", ascending=True).tail(10)
+    figure, ax = plt.subplots(figsize=(11, 6))
+    ax.barh(
+        ordered["artist_display_name"],
+        ordered["awards"],
+        color="#C9A227",
     )
-    ax.set_title("R4 - Most awarded artists present in the Spotify catalog")
-    ax.set_xlabel("Grammy awards")
+    ax.set_title("R4 - Top Awarded Artists on Spotify")
+    ax.set_xlabel("Grammy Awards")
     ax.set_ylabel("Artist")
     plt.tight_layout()
     plt.savefig(path, dpi=150)
@@ -179,10 +191,10 @@ def build_kpis() -> dict:
     csv_paths = _save_csvs(results)
 
     chart_paths: dict[str, str] = {}
-    if "kpi_1_genre_split" in results:
-        target = config.KPI_RESULTS_DIR / CHART_FILES["kpi_1_genre_split"]
-        _chart_genre_split(results["kpi_1_genre_split"], target)
-        chart_paths["kpi_1_genre_split"] = str(target)
+    if "kpi_1_within_genre_diff" in results:
+        target = config.KPI_RESULTS_DIR / CHART_FILES["kpi_1_within_genre_diff"]
+        _chart_within_genre_diff(results["kpi_1_within_genre_diff"], target)
+        chart_paths["kpi_1_within_genre_diff"] = str(target)
     if "kpi_2_awards_by_dominant_genre" in results:
         target = config.KPI_RESULTS_DIR / CHART_FILES["kpi_2_awards_by_dominant_genre"]
         _chart_awards_by_genre(results["kpi_2_awards_by_dominant_genre"], target)

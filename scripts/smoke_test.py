@@ -57,6 +57,7 @@ def run(source_filename: str | None, skip_load: bool, skip_kpis: bool) -> int:
             {"dtype": {"winner_flag": "int64"}},
         ),
         ("prepared_metrics", summary["outputs"]["prepared_metrics"], {}),
+        ("prepared_bridge", summary["outputs"]["bridge_award_artist"], {}),
     ):
         frame = config.read_csv(path, **options)
         validation.validate_gate(stage, frame, run_context={**run_context, "stage": stage})
