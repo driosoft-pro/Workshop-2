@@ -11,23 +11,21 @@ Creates (idempotently) on top of the analytical Data Warehouse ``music_dw``:
   1. "Workshop-2 - Granularity & Data Quality"  (/superset/dashboard/w2-granularity/)
   2. "Workshop-2 - KPIs (R1-R4)"                (/superset/dashboard/w2-requirements/)
 
-Light / dark:
-* Superset >= 6.0 (this repo: 6.1.0) has native themes -> see config/superset_config.py
-  (THEME_DEFAULT / THEME_DARK). This script registers the UI themes via API.
-* Fallback CSS templates ("W2 Light" / "W2 Dark") are also registered for manual CSS styling.
+Light / dark: handled natively by Superset (>= 6.0; this repo: 6.1.0) from
+config/superset_config.py (THEME_DEFAULT / THEME_DARK). This script neither
+registers themes via API nor injects CSS into dashboards.
 
 Every chart query is executed through the Superset API as a smoke test, so a
 failing KPI query fails this script (exit code 1).
 
 Usage (inside the compose network):
-    python /app/scripts/superset_bootstrap.py [--theme light|dark|none]
+    python /app/scripts/superset_bootstrap.py
 On the host, with the UI published on :8088:
-    SUPERSET_URL=http://localhost:8088 python -m scripts.superset_bootstrap --theme dark
+    SUPERSET_URL=http://localhost:8088 python -m scripts.superset_bootstrap
 """
 
 from __future__ import annotations
 
-import argparse
 import json
 import os
 import re
@@ -607,93 +605,6 @@ LABEL_COLORS = {
     "A": "#C9A227", "B": "#5B6C8F", "C": "#8B9BB4",
 }
 
-# --- Themes ------------------------------------------------------------------------------
-CSS_BASE = """\
-.dashboard-component-header .header-title { font-weight: 700; letter-spacing: .2px; }
-.dashboard-component-chart-holder { border-radius: 10px; }
-.dashboard-markdown a { text-decoration: underline; font-weight: 600; }
-.dashboard-markdown h2 { margin-top: 0; }
-.dashboard-markdown blockquote { border-left: 4px solid #C9A227; padding-left: 12px; }
-"""
-# Superset 4.x has no native dark mode toggle: modern CSS dark theme.
-CSS_DARK = """\
-body, #app, .dashboard, .dashboard-content, .grid-container, .dragdroptarget {
-  background-color: #0b0f19 !important;
-  color: #f1f5f9 !important;
-}
-.dashboard-header, .dashboard-filter-bar, .filter-bar, .filter-bar-container {
-  background-color: #111827 !important;
-  border-bottom: 1px solid #1f2937 !important;
-  color: #f1f5f9 !important;
-}
-.dashboard-component-chart-holder, .chart-slice, .slice_container {
-  background-color: #151d30 !important;
-  border: 1px solid #1f2937 !important;
-  border-radius: 12px !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
-  color: #f1f5f9 !important;
-}
-.dashboard-component-header .header-title, .header-title, h1, h2, h3, h4,
-.dashboard-markdown h2, .dashboard-markdown h3 {
-  color: #f8fafc !important;
-  font-weight: 700 !important;
-  letter-spacing: .2px;
-}
-.dashboard-markdown, .dashboard-markdown p, .dashboard-markdown li {
-  color: #94a3b8 !important;
-}
-.dashboard-markdown a {
-  color: #E5C158 !important;
-  text-decoration: underline;
-  font-weight: 600;
-}
-.dashboard-markdown blockquote {
-  border-left: 4px solid #C9A227 !important;
-  background: rgba(201, 162, 39, 0.08) !important;
-  color: #f1f5f9 !important;
-  padding: 8px 12px !important;
-  border-radius: 4px;
-}
-.big-number-total, .header-line {
-  color: #f8fafc !important;
-}
-.subheader-line {
-  color: #94a3b8 !important;
-}
-.table, .table-condensed, table, .table-bordered {
-  background-color: #151d30 !important;
-  color: #e2e8f0 !important;
-}
-table th, .table th {
-  background-color: #1e293b !important;
-  color: #f8fafc !important;
-  border-bottom: 2px solid #334155 !important;
-}
-table td, .table td {
-  border-color: #1e293b !important;
-  color: #cbd5e1 !important;
-}
-.table-striped tbody tr:nth-of-type(odd) {
-  background-color: rgba(255, 255, 255, 0.02) !important;
-}
-.ant-select, .ant-select-selector {
-  background-color: #1e293b !important;
-  border-color: #334155 !important;
-  color: #f1f5f9 !important;
-}
-.ant-select-selection-item {
-  color: #f1f5f9 !important;
-}
-"""
-CSS_TEMPLATES = {"W2 Light": CSS_BASE, "W2 Dark (Superset 4.x)": CSS_DARK, "W2 Dark": CSS_DARK}
-
-NATIVE_THEMES = {
-    "W2 Light": {"token": {"colorPrimary": "#C9A227", "brandLogoHref": "/"}},
-    "W2 Dark": {"algorithm": "dark", "token": {"colorPrimary": "#E5C158", "brandLogoHref": "/"}},
-}
-
-
-
 class SupersetClient:
     def __init__(self, base_url: str):
         self.base_url = base_url
@@ -1023,38 +934,11 @@ def build_filters(key: str, dash_chart_ids: list[int], chart_dataset: dict[int, 
     return filters
 
 
-def ensure_css_templates(client: SupersetClient) -> None:
-    for name, css in CSS_TEMPLATES.items():
-        try:
-            client.ensure("/api/v1/css_template/", "template_name", name,
-                          {"template_name": name, "css": css})
-        except SystemExit as exc:
-            print(f"[superset-bootstrap] WARNING: css template '{name}' skipped ({exc})")
-
-
-def ensure_native_themes(client: SupersetClient) -> bool:
-    """Superset >= 6.0 only (best effort, never fatal)."""
-    status, _ = client.call("GET", "/api/v1/theme/?q=(page_size:1)")
-    if status != 200:
-        return False
-    for name, tokens in NATIVE_THEMES.items():
-        try:
-            record = client.ensure("/api/v1/theme/", "theme_name", name,
-                                   {"theme_name": name, "json_data": json.dumps(tokens)})
-            endpoint = "set_system_dark" if "Dark" in name else "set_system_default"
-            status, out = client.call("PUT", f"/api/v1/theme/{record['id']}/{endpoint}")
-            print(f"[superset-bootstrap] theme '{name}' -> {endpoint}: {status}")
-        except SystemExit as exc:
-            print(f"[superset-bootstrap] WARNING: theme '{name}' skipped ({exc})")
-    return True
-
-
 def apply_dashboard(client: SupersetClient, dash_id: int, info: dict, layout: dict,
-                    metadata: dict, css: str | None) -> None:
+                    metadata: dict) -> None:
     base = {"dashboard_title": info["title"], "published": True,
-            "position_json": json.dumps(layout), "json_metadata": json.dumps(metadata)}
-    if css is not None:
-        base["css"] = css
+            "position_json": json.dumps(layout), "json_metadata": json.dumps(metadata),
+            "css": ""}  # clear any CSS injected by older bootstrap runs
     slim = json.dumps({k: v for k, v in metadata.items() if k not in OPTIONAL_META_KEYS})
     attempts = [
         dict(base, slug=info["slug"]),
@@ -1071,12 +955,6 @@ def apply_dashboard(client: SupersetClient, dash_id: int, info: dict, layout: di
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Bootstrap Superset dashboards for Workshop-2")
-    parser.add_argument("--theme", choices=["light", "dark", "none"],
-                        default=os.environ.get("W2_THEME", "dark"),
-                        help="CSS theme applied to the dashboards (Superset 4.x); default dark")
-    args = parser.parse_args(argv)
-
     check_layouts()
     client = SupersetClient(BASE_URL)
     client.login()
@@ -1114,13 +992,6 @@ def main(argv: list[str] | None = None) -> int:
         chart_ids[key][spec["slice_name"]] = chart_id
         chart_dataset[chart_id] = dataset_id
 
-    native = ensure_native_themes(client)
-    if not native:
-        ensure_css_templates(client)
-    css = None
-    if args.theme != "none":
-        css = CSS_DARK if args.theme == "dark" else CSS_BASE
-
     for key, info in DASHBOARDS.items():
         dash_id = dashboard_ids[key]
         layout = build_layout(info["title"], LAYOUTS[key], chart_ids[key])
@@ -1138,13 +1009,13 @@ def main(argv: list[str] | None = None) -> int:
             "filter_bar_orientation": "HORIZONTAL",
             "native_filter_configuration": filters,
         })
-        apply_dashboard(client, dash_id, info, layout, existing, css)
+        apply_dashboard(client, dash_id, info, layout, existing)
         print(f"[superset-bootstrap] dashboard ready: {info['title']} "
               f"({len(chart_ids[key])} charts, {len(filters)} filters) "
               f"{BASE_URL}/superset/dashboard/{info['slug']}/")
 
     print(f"[superset-bootstrap] total datasets: {len(used_datasets)}, total charts: {len(CHART_SPECS)}, "
-          f"themes: {'native (>=6.0)' if native else 'css (4.x), applied=' + args.theme}")
+          "themes: managed by Superset (config/superset_config.py THEME_DEFAULT/THEME_DARK)")
     return 0
 
 
