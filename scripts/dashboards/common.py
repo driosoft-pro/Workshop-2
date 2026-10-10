@@ -56,7 +56,7 @@ def _table(cols: list[str], limit: int = 50, order: list | None = None, filters:
 
 
 def _big(metric: str, subheader: str, fmt: str = ".1f", color: dict | None = None,
-         header_font_size: float = 0.55, subheader_font_size: float = 0.28):
+         header_font_size: float = 0.48, subheader_font_size: float = 0.22):
     form = {
         "metric": metric, "subheader": subheader, "y_axis_format": fmt,
         "header_font_size": header_font_size, "subheader_font_size": subheader_font_size,

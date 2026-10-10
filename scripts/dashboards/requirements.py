@@ -19,8 +19,8 @@ REQUIREMENTS_CSS = """
 }
 #MARKDOWN-r0c0 .dashboard-markdown {
     padding: 6px 12px !important;
-    background: #f8fafc !important;
-    border: 1px solid #e2e8f0 !important;
+    background: rgba(128, 128, 128, 0.08) !important;
+    border: 1px solid rgba(128, 128, 128, 0.30) !important;
     border-left: 4px solid #1DB954 !important;
     border-radius: 6px !important;
 }
@@ -28,7 +28,7 @@ REQUIREMENTS_CSS = """
     margin: 0 !important;
     font-size: 13.5px !important;
     line-height: 1.4 !important;
-    color: #334155 !important;
+    color: inherit !important;
 }
 #MARKDOWN-r0c0 a {
     color: #1DB954 !important;
@@ -45,7 +45,7 @@ REQUIREMENTS_CSS = """
     border-left: 1px solid rgba(30, 215, 96, 0.25) !important;
     border-right: 1px solid rgba(30, 215, 96, 0.25) !important;
     border-bottom: 1px solid rgba(30, 215, 96, 0.25) !important;
-    background: linear-gradient(180deg, rgba(30, 215, 96, 0.12) 0%, rgba(255, 255, 255, 0.98) 100%) !important;
+    background: linear-gradient(180deg, rgba(30, 215, 96, 0.12) 0%, transparent 100%) !important;
     box-shadow: 0 4px 12px rgba(30, 215, 96, 0.15) !important;
     border-radius: 10px !important;
 }
@@ -54,7 +54,7 @@ REQUIREMENTS_CSS = """
 }
 #CHART-r0c1 .header-title, #CHART-r0c1 [data-test="slice-header-text"],
 .dashboard-chart-id-52 [data-test="slice-header-text"] {
-    color: #15803D !important;
+    color: inherit !important;
     font-weight: 700 !important;
     font-size: 13.5px !important;
 }
@@ -72,7 +72,8 @@ REQUIREMENTS_CSS = """
     color: #1DB954 !important;
 }
 #CHART-r0c1 .subheader-line, .dashboard-chart-id-52 .subheader-line {
-    color: #64748B !important;
+    color: inherit !important;
+    opacity: 0.72 !important;
     font-weight: 600 !important;
     font-size: 12px !important;
     margin-top: 2px !important;
@@ -80,15 +81,15 @@ REQUIREMENTS_CSS = """
 
 /* --- Cajas de Guía Metodológica (R1, R3, R4) --- */
 #MARKDOWN-r3c1, #MARKDOWN-r8c1, #MARKDOWN-r11c1 {
-    background: #f8fafc !important;
-    border: 1px solid #e2e8f0 !important;
+    background: rgba(128, 128, 128, 0.08) !important;
+    border: 1px solid rgba(128, 128, 128, 0.30) !important;
     border-left: 4px solid #0EA5E9 !important;
     border-radius: 8px !important;
     padding: 10px 14px !important;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04) !important;
+    box-shadow: 0 2px 6px rgba(128, 128, 128, 0.08) !important;
 }
 #MARKDOWN-r3c1 h3, #MARKDOWN-r8c1 h3, #MARKDOWN-r11c1 h3 {
-    color: #0369A1 !important;
+    color: inherit !important;
     font-size: 15px !important;
     margin-bottom: 8px !important;
     font-weight: 700 !important;
@@ -98,15 +99,44 @@ REQUIREMENTS_CSS = """
     margin-bottom: 0 !important;
     font-size: 13px !important;
     line-height: 1.5 !important;
-    color: #334155 !important;
+    color: inherit !important;
 }
 
 /* --- Títulos de secciones R1-R4 --- */
 .dashboard-component-header h2 {
     font-weight: 600 !important;
-    color: #1E293B !important;
-    border-bottom: 2px solid #E2E8F0 !important;
+    color: inherit !important;
+    border-bottom: 2px solid rgba(128, 128, 128, 0.30) !important;
     padding-bottom: 6px !important;
+}
+
+/* ====================================================================
+   FIX KPI: una sola tarjeta (se limpia toda caja anidada) y número
+   completo. Colores neutros/transparentes -> compatible dark y light.
+   ==================================================================== */
+#CHART-r0c1 .dashboard-chart-id-52,
+#CHART-r0c1:hover .dashboard-chart-id-52,
+#CHART-r0c1 div[data-test-chart-name="Contexto · Cobertura Enriquecida %"],
+#CHART-r0c1:hover div[data-test-chart-name="Contexto · Cobertura Enriquecida %"],
+.dashboard-chart-id-52 #CHART-r0c1,
+.dashboard-chart-id-52:hover #CHART-r0c1,
+.dashboard-chart-id-52 div[data-test-chart-name="Contexto · Cobertura Enriquecida %"],
+.dashboard-chart-id-52:hover div[data-test-chart-name="Contexto · Cobertura Enriquecida %"],
+div[data-test-chart-name="Contexto · Cobertura Enriquecida %"] #CHART-r0c1,
+div[data-test-chart-name="Contexto · Cobertura Enriquecida %"]:hover #CHART-r0c1,
+div[data-test-chart-name="Contexto · Cobertura Enriquecida %"] .dashboard-chart-id-52,
+div[data-test-chart-name="Contexto · Cobertura Enriquecida %"]:hover .dashboard-chart-id-52 {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    transform: none !important;
+}
+#CHART-r0c1 .header-line,
+.dashboard-chart-id-52 .header-line {
+    line-height: 1.1 !important;
+    overflow: visible !important;
+    white-space: nowrap !important;
 }
 """
 
@@ -203,7 +233,7 @@ REQUIREMENTS_CHARTS: list[dict] = [
 ]
 
 REQUIREMENTS_LAYOUT: list = [
-    [("md", "req_intro", 9, 14), ("chart", "Contexto · Cobertura Enriquecida %", 3, 14)],
+    [("md", "req_intro", 9, 17), ("chart", "Contexto · Cobertura Enriquecida %", 3, 17)],
     "R1 — ¿Los artistas reconocidos por el Grammy rinden distinto en Spotify?",
     [("chart", "R1 · Distribución de popularidad por artista", 4, 46),
      ("chart", "R1 · Perfil de audio: Grammy vs No-Grammy", 4, 46),

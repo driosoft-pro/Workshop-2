@@ -18,8 +18,8 @@ GRANULARITY_CSS = """
 }
 #MARKDOWN-r0c0 .dashboard-markdown {
     padding: 6px 12px !important;
-    background: #f8fafc !important;
-    border: 1px solid #e2e8f0 !important;
+    background: rgba(128, 128, 128, 0.08) !important;
+    border: 1px solid rgba(128, 128, 128, 0.30) !important;
     border-left: 4px solid #0EA5E9 !important;
     border-radius: 6px !important;
 }
@@ -27,7 +27,7 @@ GRANULARITY_CSS = """
     margin: 0 !important;
     font-size: 13.5px !important;
     line-height: 1.4 !important;
-    color: #334155 !important;
+    color: inherit !important;
 }
 #MARKDOWN-r0c0 a {
     color: #0284C7 !important;
@@ -65,7 +65,7 @@ GRANULARITY_CSS = """
     border-left: 1px solid rgba(212, 175, 55, 0.25) !important;
     border-right: 1px solid rgba(212, 175, 55, 0.25) !important;
     border-bottom: 1px solid rgba(212, 175, 55, 0.25) !important;
-    background: linear-gradient(180deg, rgba(212, 175, 55, 0.12) 0%, rgba(255, 255, 255, 0.98) 100%) !important;
+    background: linear-gradient(180deg, rgba(212, 175, 55, 0.12) 0%, transparent 100%) !important;
     box-shadow: 0 4px 12px rgba(212, 175, 55, 0.15) !important;
 }
 #CHART-r1c0:hover, .dashboard-chart-id-41:hover {
@@ -73,7 +73,7 @@ GRANULARITY_CSS = """
 }
 #CHART-r1c0 .header-title, #CHART-r1c0 [data-test="slice-header-text"],
 .dashboard-chart-id-41 [data-test="slice-header-text"] {
-    color: #997A15 !important;
+    color: inherit !important;
     font-weight: 700 !important;
     font-size: 14px !important;
 }
@@ -84,7 +84,8 @@ GRANULARITY_CSS = """
     font-weight: 800 !important;
 }
 #CHART-r1c0 .subheader-line, .dashboard-chart-id-41 .subheader-line {
-    color: #64748B !important;
+    color: inherit !important;
+    opacity: 0.72 !important;
     font-weight: 600 !important;
     font-size: 12.5px !important;
     margin-top: 2px !important;
@@ -96,7 +97,7 @@ GRANULARITY_CSS = """
     border-left: 1px solid rgba(30, 215, 96, 0.25) !important;
     border-right: 1px solid rgba(30, 215, 96, 0.25) !important;
     border-bottom: 1px solid rgba(30, 215, 96, 0.25) !important;
-    background: linear-gradient(180deg, rgba(30, 215, 96, 0.12) 0%, rgba(255, 255, 255, 0.98) 100%) !important;
+    background: linear-gradient(180deg, rgba(30, 215, 96, 0.12) 0%, transparent 100%) !important;
     box-shadow: 0 4px 12px rgba(30, 215, 96, 0.15) !important;
 }
 #CHART-r1c1:hover, .dashboard-chart-id-42:hover {
@@ -104,7 +105,7 @@ GRANULARITY_CSS = """
 }
 #CHART-r1c1 .header-title, #CHART-r1c1 [data-test="slice-header-text"],
 .dashboard-chart-id-42 [data-test="slice-header-text"] {
-    color: #15803D !important;
+    color: inherit !important;
     font-weight: 700 !important;
     font-size: 14px !important;
 }
@@ -122,7 +123,8 @@ GRANULARITY_CSS = """
     color: #1DB954 !important;
 }
 #CHART-r1c1 .subheader-line, .dashboard-chart-id-42 .subheader-line {
-    color: #64748B !important;
+    color: inherit !important;
+    opacity: 0.72 !important;
     font-weight: 600 !important;
     font-size: 12.5px !important;
     margin-top: 2px !important;
@@ -134,7 +136,7 @@ GRANULARITY_CSS = """
     border-left: 1px solid rgba(139, 92, 246, 0.25) !important;
     border-right: 1px solid rgba(139, 92, 246, 0.25) !important;
     border-bottom: 1px solid rgba(139, 92, 246, 0.25) !important;
-    background: linear-gradient(180deg, rgba(139, 92, 246, 0.12) 0%, rgba(255, 255, 255, 0.98) 100%) !important;
+    background: linear-gradient(180deg, rgba(139, 92, 246, 0.12) 0%, transparent 100%) !important;
     box-shadow: 0 4px 12px rgba(139, 92, 246, 0.15) !important;
 }
 #CHART-r1c2:hover, .dashboard-chart-id-43:hover {
@@ -142,7 +144,7 @@ GRANULARITY_CSS = """
 }
 #CHART-r1c2 .header-title, #CHART-r1c2 [data-test="slice-header-text"],
 .dashboard-chart-id-43 [data-test="slice-header-text"] {
-    color: #6D28D9 !important;
+    color: inherit !important;
     font-weight: 700 !important;
     font-size: 14px !important;
 }
@@ -160,7 +162,8 @@ GRANULARITY_CSS = """
     color: #7C3AED !important;
 }
 #CHART-r1c2 .subheader-line, .dashboard-chart-id-43 .subheader-line {
-    color: #64748B !important;
+    color: inherit !important;
+    opacity: 0.72 !important;
     font-weight: 600 !important;
     font-size: 12.5px !important;
     margin-top: 2px !important;
@@ -172,7 +175,7 @@ GRANULARITY_CSS = """
     border-left: 1px solid rgba(14, 165, 233, 0.25) !important;
     border-right: 1px solid rgba(14, 165, 233, 0.25) !important;
     border-bottom: 1px solid rgba(14, 165, 233, 0.25) !important;
-    background: linear-gradient(180deg, rgba(14, 165, 233, 0.12) 0%, rgba(255, 255, 255, 0.98) 100%) !important;
+    background: linear-gradient(180deg, rgba(14, 165, 233, 0.12) 0%, transparent 100%) !important;
     box-shadow: 0 4px 12px rgba(14, 165, 233, 0.15) !important;
 }
 #CHART-r1c3:hover, .dashboard-chart-id-44:hover {
@@ -180,7 +183,7 @@ GRANULARITY_CSS = """
 }
 #CHART-r1c3 .header-title, #CHART-r1c3 [data-test="slice-header-text"],
 .dashboard-chart-id-44 [data-test="slice-header-text"] {
-    color: #0369A1 !important;
+    color: inherit !important;
     font-weight: 700 !important;
     font-size: 14px !important;
 }
@@ -191,7 +194,8 @@ GRANULARITY_CSS = """
     font-weight: 800 !important;
 }
 #CHART-r1c3 .subheader-line, .dashboard-chart-id-44 .subheader-line {
-    color: #64748B !important;
+    color: inherit !important;
+    opacity: 0.72 !important;
     font-weight: 600 !important;
     font-size: 12.5px !important;
     margin-top: 2px !important;
@@ -200,9 +204,80 @@ GRANULARITY_CSS = """
 /* --- Títulos de secciones intermedias --- */
 .dashboard-component-header h2 {
     font-weight: 600 !important;
-    color: #1E293B !important;
-    border-bottom: 2px solid #E2E8F0 !important;
+    color: inherit !important;
+    border-bottom: 2px solid rgba(128, 128, 128, 0.30) !important;
     padding-bottom: 6px !important;
+}
+
+/* ====================================================================
+   FIX KPI: una sola tarjeta (se limpia toda caja anidada) y número
+   completo. Colores neutros/transparentes -> compatible dark y light.
+   ==================================================================== */
+#CHART-r1c0 .dashboard-chart-id-41,
+#CHART-r1c0:hover .dashboard-chart-id-41,
+#CHART-r1c0 div[data-test-chart-name="Premios Cargados"],
+#CHART-r1c0:hover div[data-test-chart-name="Premios Cargados"],
+.dashboard-chart-id-41 #CHART-r1c0,
+.dashboard-chart-id-41:hover #CHART-r1c0,
+.dashboard-chart-id-41 div[data-test-chart-name="Premios Cargados"],
+.dashboard-chart-id-41:hover div[data-test-chart-name="Premios Cargados"],
+div[data-test-chart-name="Premios Cargados"] #CHART-r1c0,
+div[data-test-chart-name="Premios Cargados"]:hover #CHART-r1c0,
+div[data-test-chart-name="Premios Cargados"] .dashboard-chart-id-41,
+div[data-test-chart-name="Premios Cargados"]:hover .dashboard-chart-id-41,
+#CHART-r1c1 .dashboard-chart-id-42,
+#CHART-r1c1:hover .dashboard-chart-id-42,
+#CHART-r1c1 div[data-test-chart-name="Cobertura Enriquecida %"],
+#CHART-r1c1:hover div[data-test-chart-name="Cobertura Enriquecida %"],
+.dashboard-chart-id-42 #CHART-r1c1,
+.dashboard-chart-id-42:hover #CHART-r1c1,
+.dashboard-chart-id-42 div[data-test-chart-name="Cobertura Enriquecida %"],
+.dashboard-chart-id-42:hover div[data-test-chart-name="Cobertura Enriquecida %"],
+div[data-test-chart-name="Cobertura Enriquecida %"] #CHART-r1c1,
+div[data-test-chart-name="Cobertura Enriquecida %"]:hover #CHART-r1c1,
+div[data-test-chart-name="Cobertura Enriquecida %"] .dashboard-chart-id-42,
+div[data-test-chart-name="Cobertura Enriquecida %"]:hover .dashboard-chart-id-42,
+#CHART-r1c2 .dashboard-chart-id-43,
+#CHART-r1c2:hover .dashboard-chart-id-43,
+#CHART-r1c2 div[data-test-chart-name="Cobertura Estricta (Línea Base)"],
+#CHART-r1c2:hover div[data-test-chart-name="Cobertura Estricta (Línea Base)"],
+.dashboard-chart-id-43 #CHART-r1c2,
+.dashboard-chart-id-43:hover #CHART-r1c2,
+.dashboard-chart-id-43 div[data-test-chart-name="Cobertura Estricta (Línea Base)"],
+.dashboard-chart-id-43:hover div[data-test-chart-name="Cobertura Estricta (Línea Base)"],
+div[data-test-chart-name="Cobertura Estricta (Línea Base)"] #CHART-r1c2,
+div[data-test-chart-name="Cobertura Estricta (Línea Base)"]:hover #CHART-r1c2,
+div[data-test-chart-name="Cobertura Estricta (Línea Base)"] .dashboard-chart-id-43,
+div[data-test-chart-name="Cobertura Estricta (Línea Base)"]:hover .dashboard-chart-id-43,
+#CHART-r1c3 .dashboard-chart-id-44,
+#CHART-r1c3:hover .dashboard-chart-id-44,
+#CHART-r1c3 div[data-test-chart-name="Artistas Grammy Vinculados"],
+#CHART-r1c3:hover div[data-test-chart-name="Artistas Grammy Vinculados"],
+.dashboard-chart-id-44 #CHART-r1c3,
+.dashboard-chart-id-44:hover #CHART-r1c3,
+.dashboard-chart-id-44 div[data-test-chart-name="Artistas Grammy Vinculados"],
+.dashboard-chart-id-44:hover div[data-test-chart-name="Artistas Grammy Vinculados"],
+div[data-test-chart-name="Artistas Grammy Vinculados"] #CHART-r1c3,
+div[data-test-chart-name="Artistas Grammy Vinculados"]:hover #CHART-r1c3,
+div[data-test-chart-name="Artistas Grammy Vinculados"] .dashboard-chart-id-44,
+div[data-test-chart-name="Artistas Grammy Vinculados"]:hover .dashboard-chart-id-44 {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    transform: none !important;
+}
+#CHART-r1c0 .header-line,
+.dashboard-chart-id-41 .header-line,
+#CHART-r1c1 .header-line,
+.dashboard-chart-id-42 .header-line,
+#CHART-r1c2 .header-line,
+.dashboard-chart-id-43 .header-line,
+#CHART-r1c3 .header-line,
+.dashboard-chart-id-44 .header-line {
+    line-height: 1.1 !important;
+    overflow: visible !important;
+    white-space: nowrap !important;
 }
 """
 
@@ -307,10 +382,10 @@ GRANULARITY_CHARTS: list[dict] = [
 
 GRANULARITY_LAYOUT: list = [
     [("md", "gran_intro", 12, 4)],
-    [("chart", "Premios Cargados", 3, 14),
-     ("chart", "Cobertura Enriquecida %", 3, 14),
-     ("chart", "Cobertura Estricta (Línea Base)", 3, 14),
-     ("chart", "Artistas Grammy Vinculados", 3, 14)],
+    [("chart", "Premios Cargados", 3, 17),
+     ("chart", "Cobertura Enriquecida %", 3, 17),
+     ("chart", "Cobertura Estricta (Línea Base)", 3, 17),
+     ("chart", "Artistas Grammy Vinculados", 3, 17)],
     "Granularidad del Data Warehouse: Modelado y Grano por Tabla",
     [("chart", "Granularidad · Filas y grano por tabla", 12, 34)],
     [("chart", "Granularidad · De créditos a puente", 4, 42),

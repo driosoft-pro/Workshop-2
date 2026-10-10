@@ -18,8 +18,8 @@ WORKSHOP_CSS = """
 }
 #MARKDOWN-r0c0 .dashboard-markdown {
     padding: 6px 12px !important;
-    background: #f8fafc !important;
-    border: 1px solid #e2e8f0 !important;
+    background: rgba(128, 128, 128, 0.08) !important;
+    border: 1px solid rgba(128, 128, 128, 0.30) !important;
     border-left: 4px solid #1DB954 !important;
     border-radius: 6px !important;
 }
@@ -27,7 +27,7 @@ WORKSHOP_CSS = """
     margin: 0 !important;
     font-size: 13.5px !important;
     line-height: 1.4 !important;
-    color: #334155 !important;
+    color: inherit !important;
 }
 #MARKDOWN-r0c0 a {
     color: #1DB954 !important;
@@ -65,7 +65,7 @@ WORKSHOP_CSS = """
     border-left: 1px solid rgba(212, 175, 55, 0.25) !important;
     border-right: 1px solid rgba(212, 175, 55, 0.25) !important;
     border-bottom: 1px solid rgba(212, 175, 55, 0.25) !important;
-    background: linear-gradient(180deg, rgba(212, 175, 55, 0.12) 0%, rgba(255, 255, 255, 0.98) 100%) !important;
+    background: linear-gradient(180deg, rgba(212, 175, 55, 0.12) 0%, transparent 100%) !important;
     box-shadow: 0 4px 12px rgba(212, 175, 55, 0.15) !important;
 }
 #CHART-r1c0:hover, .dashboard-chart-id-34:hover {
@@ -73,7 +73,7 @@ WORKSHOP_CSS = """
 }
 #CHART-r1c0 .header-title, #CHART-r1c0 [data-test="slice-header-text"],
 .dashboard-chart-id-34 [data-test="slice-header-text"] {
-    color: #997A15 !important;
+    color: inherit !important;
     font-weight: 700 !important;
     font-size: 14px !important;
 }
@@ -84,7 +84,8 @@ WORKSHOP_CSS = """
     font-weight: 800 !important;
 }
 #CHART-r1c0 .subheader-line, .dashboard-chart-id-34 .subheader-line {
-    color: #64748B !important;
+    color: inherit !important;
+    opacity: 0.72 !important;
     font-weight: 600 !important;
     font-size: 12.5px !important;
     margin-top: 2px !important;
@@ -96,7 +97,7 @@ WORKSHOP_CSS = """
     border-left: 1px solid rgba(30, 215, 96, 0.25) !important;
     border-right: 1px solid rgba(30, 215, 96, 0.25) !important;
     border-bottom: 1px solid rgba(30, 215, 96, 0.25) !important;
-    background: linear-gradient(180deg, rgba(30, 215, 96, 0.12) 0%, rgba(255, 255, 255, 0.98) 100%) !important;
+    background: linear-gradient(180deg, rgba(30, 215, 96, 0.12) 0%, transparent 100%) !important;
     box-shadow: 0 4px 12px rgba(30, 215, 96, 0.15) !important;
 }
 #CHART-r1c1:hover, .dashboard-chart-id-35:hover {
@@ -104,7 +105,7 @@ WORKSHOP_CSS = """
 }
 #CHART-r1c1 .header-title, #CHART-r1c1 [data-test="slice-header-text"],
 .dashboard-chart-id-35 [data-test="slice-header-text"] {
-    color: #15803D !important;
+    color: inherit !important;
     font-weight: 700 !important;
     font-size: 14px !important;
 }
@@ -122,7 +123,8 @@ WORKSHOP_CSS = """
     color: #1DB954 !important;
 }
 #CHART-r1c1 .subheader-line, .dashboard-chart-id-35 .subheader-line {
-    color: #64748B !important;
+    color: inherit !important;
+    opacity: 0.72 !important;
     font-weight: 600 !important;
     font-size: 12.5px !important;
     margin-top: 2px !important;
@@ -134,7 +136,7 @@ WORKSHOP_CSS = """
     border-left: 1px solid rgba(14, 165, 233, 0.25) !important;
     border-right: 1px solid rgba(14, 165, 233, 0.25) !important;
     border-bottom: 1px solid rgba(14, 165, 233, 0.25) !important;
-    background: linear-gradient(180deg, rgba(14, 165, 233, 0.12) 0%, rgba(255, 255, 255, 0.98) 100%) !important;
+    background: linear-gradient(180deg, rgba(14, 165, 233, 0.12) 0%, transparent 100%) !important;
     box-shadow: 0 4px 12px rgba(14, 165, 233, 0.15) !important;
 }
 #CHART-r1c2:hover, .dashboard-chart-id-36:hover {
@@ -142,7 +144,7 @@ WORKSHOP_CSS = """
 }
 #CHART-r1c2 .header-title, #CHART-r1c2 [data-test="slice-header-text"],
 .dashboard-chart-id-36 [data-test="slice-header-text"] {
-    color: #0369A1 !important;
+    color: inherit !important;
     font-weight: 700 !important;
     font-size: 14px !important;
 }
@@ -153,7 +155,8 @@ WORKSHOP_CSS = """
     font-weight: 800 !important;
 }
 #CHART-r1c2 .subheader-line, .dashboard-chart-id-36 .subheader-line {
-    color: #64748B !important;
+    color: inherit !important;
+    opacity: 0.72 !important;
     font-weight: 600 !important;
     font-size: 12.5px !important;
     margin-top: 2px !important;
@@ -165,7 +168,7 @@ WORKSHOP_CSS = """
     border-left: 1px solid rgba(139, 92, 246, 0.25) !important;
     border-right: 1px solid rgba(139, 92, 246, 0.25) !important;
     border-bottom: 1px solid rgba(139, 92, 246, 0.25) !important;
-    background: linear-gradient(180deg, rgba(139, 92, 246, 0.12) 0%, rgba(255, 255, 255, 0.98) 100%) !important;
+    background: linear-gradient(180deg, rgba(139, 92, 246, 0.12) 0%, transparent 100%) !important;
     box-shadow: 0 4px 12px rgba(139, 92, 246, 0.15) !important;
 }
 #CHART-r1c3:hover, .dashboard-chart-id-37:hover {
@@ -173,7 +176,7 @@ WORKSHOP_CSS = """
 }
 #CHART-r1c3 .header-title, #CHART-r1c3 [data-test="slice-header-text"],
 .dashboard-chart-id-37 [data-test="slice-header-text"] {
-    color: #6D28D9 !important;
+    color: inherit !important;
     font-weight: 700 !important;
     font-size: 14px !important;
 }
@@ -191,7 +194,8 @@ WORKSHOP_CSS = """
     color: #7C3AED !important;
 }
 #CHART-r1c3 .subheader-line, .dashboard-chart-id-37 .subheader-line {
-    color: #64748B !important;
+    color: inherit !important;
+    opacity: 0.72 !important;
     font-weight: 600 !important;
     font-size: 12.5px !important;
     margin-top: 2px !important;
@@ -200,9 +204,80 @@ WORKSHOP_CSS = """
 /* --- Títulos de secciones intermedias --- */
 .dashboard-component-header h2 {
     font-weight: 600 !important;
-    color: #1E293B !important;
-    border-bottom: 2px solid #E2E8F0 !important;
+    color: inherit !important;
+    border-bottom: 2px solid rgba(128, 128, 128, 0.30) !important;
     padding-bottom: 6px !important;
+}
+
+/* ====================================================================
+   FIX KPI: una sola tarjeta (se limpia toda caja anidada) y número
+   completo. Colores neutros/transparentes -> compatible dark y light.
+   ==================================================================== */
+#CHART-r1c0 .dashboard-chart-id-34,
+#CHART-r1c0:hover .dashboard-chart-id-34,
+#CHART-r1c0 div[data-test-chart-name="Premios Evaluados"],
+#CHART-r1c0:hover div[data-test-chart-name="Premios Evaluados"],
+.dashboard-chart-id-34 #CHART-r1c0,
+.dashboard-chart-id-34:hover #CHART-r1c0,
+.dashboard-chart-id-34 div[data-test-chart-name="Premios Evaluados"],
+.dashboard-chart-id-34:hover div[data-test-chart-name="Premios Evaluados"],
+div[data-test-chart-name="Premios Evaluados"] #CHART-r1c0,
+div[data-test-chart-name="Premios Evaluados"]:hover #CHART-r1c0,
+div[data-test-chart-name="Premios Evaluados"] .dashboard-chart-id-34,
+div[data-test-chart-name="Premios Evaluados"]:hover .dashboard-chart-id-34,
+#CHART-r1c1 .dashboard-chart-id-35,
+#CHART-r1c1:hover .dashboard-chart-id-35,
+#CHART-r1c1 div[data-test-chart-name="Cobertura Integración %"],
+#CHART-r1c1:hover div[data-test-chart-name="Cobertura Integración %"],
+.dashboard-chart-id-35 #CHART-r1c1,
+.dashboard-chart-id-35:hover #CHART-r1c1,
+.dashboard-chart-id-35 div[data-test-chart-name="Cobertura Integración %"],
+.dashboard-chart-id-35:hover div[data-test-chart-name="Cobertura Integración %"],
+div[data-test-chart-name="Cobertura Integración %"] #CHART-r1c1,
+div[data-test-chart-name="Cobertura Integración %"]:hover #CHART-r1c1,
+div[data-test-chart-name="Cobertura Integración %"] .dashboard-chart-id-35,
+div[data-test-chart-name="Cobertura Integración %"]:hover .dashboard-chart-id-35,
+#CHART-r1c2 .dashboard-chart-id-36,
+#CHART-r1c2:hover .dashboard-chart-id-36,
+#CHART-r1c2 div[data-test-chart-name="Artistas Grammy en Spotify"],
+#CHART-r1c2:hover div[data-test-chart-name="Artistas Grammy en Spotify"],
+.dashboard-chart-id-36 #CHART-r1c2,
+.dashboard-chart-id-36:hover #CHART-r1c2,
+.dashboard-chart-id-36 div[data-test-chart-name="Artistas Grammy en Spotify"],
+.dashboard-chart-id-36:hover div[data-test-chart-name="Artistas Grammy en Spotify"],
+div[data-test-chart-name="Artistas Grammy en Spotify"] #CHART-r1c2,
+div[data-test-chart-name="Artistas Grammy en Spotify"]:hover #CHART-r1c2,
+div[data-test-chart-name="Artistas Grammy en Spotify"] .dashboard-chart-id-36,
+div[data-test-chart-name="Artistas Grammy en Spotify"]:hover .dashboard-chart-id-36,
+#CHART-r1c3 .dashboard-chart-id-37,
+#CHART-r1c3:hover .dashboard-chart-id-37,
+#CHART-r1c3 div[data-test-chart-name="Cobertura Estricta %"],
+#CHART-r1c3:hover div[data-test-chart-name="Cobertura Estricta %"],
+.dashboard-chart-id-37 #CHART-r1c3,
+.dashboard-chart-id-37:hover #CHART-r1c3,
+.dashboard-chart-id-37 div[data-test-chart-name="Cobertura Estricta %"],
+.dashboard-chart-id-37:hover div[data-test-chart-name="Cobertura Estricta %"],
+div[data-test-chart-name="Cobertura Estricta %"] #CHART-r1c3,
+div[data-test-chart-name="Cobertura Estricta %"]:hover #CHART-r1c3,
+div[data-test-chart-name="Cobertura Estricta %"] .dashboard-chart-id-37,
+div[data-test-chart-name="Cobertura Estricta %"]:hover .dashboard-chart-id-37 {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    transform: none !important;
+}
+#CHART-r1c0 .header-line,
+.dashboard-chart-id-34 .header-line,
+#CHART-r1c1 .header-line,
+.dashboard-chart-id-35 .header-line,
+#CHART-r1c2 .header-line,
+.dashboard-chart-id-36 .header-line,
+#CHART-r1c3 .header-line,
+.dashboard-chart-id-37 .header-line {
+    line-height: 1.1 !important;
+    overflow: visible !important;
+    white-space: nowrap !important;
 }
 """
 
@@ -246,10 +321,10 @@ WORKSHOP_CHARTS: list[dict] = [
 
 WORKSHOP_LAYOUT: list = [
     [("md", "workshop_intro", 12, 4)],
-    [("chart", "Premios Evaluados", 3, 14),
-     ("chart", "Cobertura Integración %", 3, 14),
-     ("chart", "Artistas Grammy en Spotify", 3, 14),
-     ("chart", "Cobertura Estricta %", 3, 14)],
+    [("chart", "Premios Evaluados", 3, 17),
+     ("chart", "Cobertura Integración %", 3, 17),
+     ("chart", "Artistas Grammy en Spotify", 3, 17),
+     ("chart", "Cobertura Estricta %", 3, 17)],
     "R1 & R2: Desempeño Musical y Géneros | R3: Evolución Histórica",
     [("chart", "Diferencia de Popularidad por Género (R1/R2)", 6, 46),
      ("chart", "Evolución de Premios por Categoría y Década (R3)", 6, 46)],
