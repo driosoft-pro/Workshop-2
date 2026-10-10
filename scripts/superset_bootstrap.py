@@ -84,14 +84,16 @@ GRANULARITY_TITLE = "Workshop-2 - Granularity & Data Quality"
 WORKSHOP_TITLE = "Dashboard Spotify & Grammy (R1–R4)"
 
 WORKSHOP_CSS = """
-/* === Estilos Modernos y Vistosos: Dashboard Spotify & Grammy === */
+/* ====================================================================
+   DASHBOARD SPOTIFY & GRAMMY (R1-R4) - ESTILOS PREMIUM
+   ==================================================================== */
 
-/* Banner intro compacto: una sola línea, sin scroll innecesario */
+/* --- Banner intro compacto (una sola línea, sin scroll) --- */
 #MARKDOWN-r0c0 {
-    margin-bottom: 0px !important;
+    margin-bottom: 2px !important;
 }
 #MARKDOWN-r0c0 .dashboard-markdown {
-    padding: 4px 10px !important;
+    padding: 6px 12px !important;
     background: #f8fafc !important;
     border: 1px solid #e2e8f0 !important;
     border-left: 4px solid #1DB954 !important;
@@ -112,117 +114,168 @@ WORKSHOP_CSS = """
     text-decoration: underline !important;
 }
 
-/* --- Tarjeta 1: Premios Evaluados (Dorado Grammy) --- */
-#CHART-r1c0, div[data-test-chart-name="Premios Evaluados"] {
+/* ====================================================================
+   TARJETAS KPI / HEADERS (4 COLORES VIBRANTES)
+   ==================================================================== */
+
+/* Contenedores base de tarjeta */
+#CHART-r1c0, #CHART-r1c1, #CHART-r1c2, #CHART-r1c3,
+.dashboard-chart-id-34, .dashboard-chart-id-35, .dashboard-chart-id-36, .dashboard-chart-id-37 {
+    border-radius: 10px !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+#CHART-r1c0:hover, #CHART-r1c1:hover, #CHART-r1c2:hover, #CHART-r1c3:hover,
+.dashboard-chart-id-34:hover, .dashboard-chart-id-35:hover, .dashboard-chart-id-36:hover, .dashboard-chart-id-37:hover {
+    transform: translateY(-2px) !important;
+}
+
+/* Asegurar que el fondo del slice sea transparente para ver el gradiente */
+#CHART-r1c0 .chart-slice, #CHART-r1c0 .dashboard-chart, #CHART-r1c0 .slice_container,
+#CHART-r1c1 .chart-slice, #CHART-r1c1 .dashboard-chart, #CHART-r1c1 .slice_container,
+#CHART-r1c2 .chart-slice, #CHART-r1c2 .dashboard-chart, #CHART-r1c2 .slice_container,
+#CHART-r1c3 .chart-slice, #CHART-r1c3 .dashboard-chart, #CHART-r1c3 .slice_container {
+    background: transparent !important;
+}
+
+/* --- TARJETA 1: Premios Evaluados (Dorado Grammy) --- */
+#CHART-r1c0, .dashboard-chart-id-34, div[data-test-chart-name="Premios Evaluados"] {
     border-top: 4px solid #D4AF37 !important;
-    border-radius: 8px !important;
-    background: linear-gradient(180deg, rgba(212, 175, 55, 0.08) 0%, rgba(255, 255, 255, 0.95) 100%) !important;
-    box-shadow: 0 2px 6px rgba(212, 175, 55, 0.15) !important;
-    transition: all 0.2s ease !important;
+    border-left: 1px solid rgba(212, 175, 55, 0.25) !important;
+    border-right: 1px solid rgba(212, 175, 55, 0.25) !important;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.25) !important;
+    background: linear-gradient(180deg, rgba(212, 175, 55, 0.12) 0%, rgba(255, 255, 255, 0.98) 100%) !important;
+    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.15) !important;
 }
-#CHART-r1c0:hover {
-    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.25) !important;
+#CHART-r1c0:hover, .dashboard-chart-id-34:hover {
+    box-shadow: 0 6px 18px rgba(212, 175, 55, 0.25) !important;
 }
-#CHART-r1c0 .header-line,
-#CHART-r1c0 .big-number-number,
-#CHART-r1c0 [class*="header-line"],
-#CHART-r1c0 text {
-    color: #B8860B !important;
-    fill: #B8860B !important;
-    font-weight: 700 !important;
-}
-#CHART-r1c0 .slice_title,
-#CHART-r1c0 [data-test="slice-header-text"] {
+#CHART-r1c0 .header-title, #CHART-r1c0 [data-test="slice-header-text"],
+.dashboard-chart-id-34 [data-test="slice-header-text"] {
     color: #997A15 !important;
-    font-weight: 600 !important;
-}
-
-/* --- Tarjeta 2: Cobertura Integración % (Verde Spotify) --- */
-#CHART-r1c1, div[data-test-chart-name="Cobertura Integración %"] {
-    border-top: 4px solid #1DB954 !important;
-    border-radius: 8px !important;
-    background: linear-gradient(180deg, rgba(30, 215, 96, 0.08) 0%, rgba(255, 255, 255, 0.95) 100%) !important;
-    box-shadow: 0 2px 6px rgba(30, 215, 96, 0.15) !important;
-    transition: all 0.2s ease !important;
-}
-#CHART-r1c1:hover {
-    box-shadow: 0 4px 12px rgba(30, 215, 96, 0.25) !important;
-}
-#CHART-r1c1 .header-line,
-#CHART-r1c1 .big-number-number,
-#CHART-r1c1 [class*="header-line"],
-#CHART-r1c1 text {
-    color: #1DB954 !important;
-    fill: #1DB954 !important;
     font-weight: 700 !important;
+    font-size: 14px !important;
 }
-#CHART-r1c1 .slice_title,
-#CHART-r1c1 [data-test="slice-header-text"] {
-    color: #15803D !important;
+#CHART-r1c0 .header-line, #CHART-r1c0 .header-line *,
+.dashboard-chart-id-34 .header-line, .dashboard-chart-id-34 .header-line *,
+#CHART-r1c0 .superset-legacy-chart-big-number .header-line {
+    color: #C9A227 !important;
+    font-weight: 800 !important;
+}
+#CHART-r1c0 .subheader-line, .dashboard-chart-id-34 .subheader-line {
+    color: #64748B !important;
     font-weight: 600 !important;
-}
-
-/* --- Tarjeta 3: Artistas Grammy en Spotify (Azul Océano) --- */
-#CHART-r1c2, div[data-test-chart-name="Artistas Grammy en Spotify"] {
-    border-top: 4px solid #0EA5E9 !important;
-    border-radius: 8px !important;
-    background: linear-gradient(180deg, rgba(14, 165, 233, 0.08) 0%, rgba(255, 255, 255, 0.95) 100%) !important;
-    box-shadow: 0 2px 6px rgba(14, 165, 233, 0.15) !important;
-    transition: all 0.2s ease !important;
-}
-#CHART-r1c2:hover {
-    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.25) !important;
-}
-#CHART-r1c2 .header-line,
-#CHART-r1c2 .big-number-number,
-#CHART-r1c2 [class*="header-line"],
-#CHART-r1c2 text {
-    color: #0284C7 !important;
-    fill: #0284C7 !important;
-    font-weight: 700 !important;
-}
-#CHART-r1c2 .slice_title,
-#CHART-r1c2 [data-test="slice-header-text"] {
-    color: #0369A1 !important;
-    font-weight: 600 !important;
-}
-
-/* --- Tarjeta 4: Cobertura Estricta % (Púrpura Amatista) --- */
-#CHART-r1c3, div[data-test-chart-name="Cobertura Estricta %"] {
-    border-top: 4px solid #8B5CF6 !important;
-    border-radius: 8px !important;
-    background: linear-gradient(180deg, rgba(139, 92, 246, 0.08) 0%, rgba(255, 255, 255, 0.95) 100%) !important;
-    box-shadow: 0 2px 6px rgba(139, 92, 246, 0.15) !important;
-    transition: all 0.2s ease !important;
-}
-#CHART-r1c3:hover {
-    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.25) !important;
-}
-#CHART-r1c3 .header-line,
-#CHART-r1c3 .big-number-number,
-#CHART-r1c3 [class*="header-line"],
-#CHART-r1c3 text {
-    color: #7C3AED !important;
-    fill: #7C3AED !important;
-    font-weight: 700 !important;
-}
-#CHART-r1c3 .slice_title,
-#CHART-r1c3 [data-test="slice-header-text"] {
-    color: #6D28D9 !important;
-    font-weight: 600 !important;
-}
-
-/* Subencabezados legibles en las 4 tarjetas */
-#CHART-r1c0 .subheader-line,
-#CHART-r1c1 .subheader-line,
-#CHART-r1c2 .subheader-line,
-#CHART-r1c3 .subheader-line {
-    font-weight: 500 !important;
-    color: #475569 !important;
+    font-size: 12.5px !important;
     margin-top: 2px !important;
 }
 
-/* Encabezados de sección intermedios */
+/* --- TARJETA 2: Cobertura Integración % (Verde Spotify) --- */
+#CHART-r1c1, .dashboard-chart-id-35, div[data-test-chart-name="Cobertura Integración %"] {
+    border-top: 4px solid #1DB954 !important;
+    border-left: 1px solid rgba(30, 215, 96, 0.25) !important;
+    border-right: 1px solid rgba(30, 215, 96, 0.25) !important;
+    border-bottom: 1px solid rgba(30, 215, 96, 0.25) !important;
+    background: linear-gradient(180deg, rgba(30, 215, 96, 0.12) 0%, rgba(255, 255, 255, 0.98) 100%) !important;
+    box-shadow: 0 4px 12px rgba(30, 215, 96, 0.15) !important;
+}
+#CHART-r1c1:hover, .dashboard-chart-id-35:hover {
+    box-shadow: 0 6px 18px rgba(30, 215, 96, 0.25) !important;
+}
+#CHART-r1c1 .header-title, #CHART-r1c1 [data-test="slice-header-text"],
+.dashboard-chart-id-35 [data-test="slice-header-text"] {
+    color: #15803D !important;
+    font-weight: 700 !important;
+    font-size: 14px !important;
+}
+#CHART-r1c1 .header-line, #CHART-r1c1 .header-line *,
+.dashboard-chart-id-35 .header-line, .dashboard-chart-id-35 .header-line *,
+#CHART-r1c1 .superset-legacy-chart-big-number .header-line {
+    color: #1DB954 !important;
+    font-weight: 800 !important;
+}
+#CHART-r1c1 .header-line::after, .dashboard-chart-id-35 .header-line::after {
+    content: "%" !important;
+    font-size: 0.65em !important;
+    font-weight: 700 !important;
+    margin-left: 2px !important;
+    color: #1DB954 !important;
+}
+#CHART-r1c1 .subheader-line, .dashboard-chart-id-35 .subheader-line {
+    color: #64748B !important;
+    font-weight: 600 !important;
+    font-size: 12.5px !important;
+    margin-top: 2px !important;
+}
+
+/* --- TARJETA 3: Artistas Grammy en Spotify (Azul Océano) --- */
+#CHART-r1c2, .dashboard-chart-id-36, div[data-test-chart-name="Artistas Grammy en Spotify"] {
+    border-top: 4px solid #0EA5E9 !important;
+    border-left: 1px solid rgba(14, 165, 233, 0.25) !important;
+    border-right: 1px solid rgba(14, 165, 233, 0.25) !important;
+    border-bottom: 1px solid rgba(14, 165, 233, 0.25) !important;
+    background: linear-gradient(180deg, rgba(14, 165, 233, 0.12) 0%, rgba(255, 255, 255, 0.98) 100%) !important;
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.15) !important;
+}
+#CHART-r1c2:hover, .dashboard-chart-id-36:hover {
+    box-shadow: 0 6px 18px rgba(14, 165, 233, 0.25) !important;
+}
+#CHART-r1c2 .header-title, #CHART-r1c2 [data-test="slice-header-text"],
+.dashboard-chart-id-36 [data-test="slice-header-text"] {
+    color: #0369A1 !important;
+    font-weight: 700 !important;
+    font-size: 14px !important;
+}
+#CHART-r1c2 .header-line, #CHART-r1c2 .header-line *,
+.dashboard-chart-id-36 .header-line, .dashboard-chart-id-36 .header-line *,
+#CHART-r1c2 .superset-legacy-chart-big-number .header-line {
+    color: #0284C7 !important;
+    font-weight: 800 !important;
+}
+#CHART-r1c2 .subheader-line, .dashboard-chart-id-36 .subheader-line {
+    color: #64748B !important;
+    font-weight: 600 !important;
+    font-size: 12.5px !important;
+    margin-top: 2px !important;
+}
+
+/* --- TARJETA 4: Cobertura Estricta % (Púrpura Amatista) --- */
+#CHART-r1c3, .dashboard-chart-id-37, div[data-test-chart-name="Cobertura Estricta %"] {
+    border-top: 4px solid #8B5CF6 !important;
+    border-left: 1px solid rgba(139, 92, 246, 0.25) !important;
+    border-right: 1px solid rgba(139, 92, 246, 0.25) !important;
+    border-bottom: 1px solid rgba(139, 92, 246, 0.25) !important;
+    background: linear-gradient(180deg, rgba(139, 92, 246, 0.12) 0%, rgba(255, 255, 255, 0.98) 100%) !important;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.15) !important;
+}
+#CHART-r1c3:hover, .dashboard-chart-id-37:hover {
+    box-shadow: 0 6px 18px rgba(139, 92, 246, 0.25) !important;
+}
+#CHART-r1c3 .header-title, #CHART-r1c3 [data-test="slice-header-text"],
+.dashboard-chart-id-37 [data-test="slice-header-text"] {
+    color: #6D28D9 !important;
+    font-weight: 700 !important;
+    font-size: 14px !important;
+}
+#CHART-r1c3 .header-line, #CHART-r1c3 .header-line *,
+.dashboard-chart-id-37 .header-line, .dashboard-chart-id-37 .header-line *,
+#CHART-r1c3 .superset-legacy-chart-big-number .header-line {
+    color: #7C3AED !important;
+    font-weight: 800 !important;
+}
+#CHART-r1c3 .header-line::after, .dashboard-chart-id-37 .header-line::after {
+    content: "%" !important;
+    font-size: 0.65em !important;
+    font-weight: 700 !important;
+    margin-left: 2px !important;
+    color: #7C3AED !important;
+}
+#CHART-r1c3 .subheader-line, .dashboard-chart-id-37 .subheader-line {
+    color: #64748B !important;
+    font-weight: 600 !important;
+    font-size: 12.5px !important;
+    margin-top: 2px !important;
+}
+
+/* --- Títulos de secciones intermedias --- */
 .dashboard-component-header h2 {
     font-weight: 600 !important;
     color: #1E293B !important;
