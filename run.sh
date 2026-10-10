@@ -276,14 +276,25 @@ cmd_up() {
   wait_http "http://localhost:${af_port}/api/v2/monitor/health" 90 || true
   wait_http "http://localhost:${sp_port}/health" 90 || true
   cmd_source
+  if ! dw_ready; then
+    echo "[run] inicializando Data Warehouse mediante el pipeline ETL (Test A) ..."
+    cmd_trigger
+    echo "[run] esperando a que el pipeline pueble music_dw ..."
+    local i=1
+    while [ "$i" -le 60 ]; do
+      if dw_ready; then
+        echo "[run] OK  music_dw preparado"
+        break
+      fi
+      sleep 2
+      i=$((i + 1))
+    done
+  fi
   if dw_ready; then
     cmd_superset
   else
-    warn "[run] AVISO: music_dw aun no tiene tablas (fact_grammy_award ausente)."
-    warn "[run]          El data warehouse se llena en la primera corrida del DAG;"
-    warn "[run]          el bootstrap de Superset se omite en este arranque."
-    warn "[run]          Completa la configuracion con:"
-    warn "[run]            ./run.sh trigger     # Test A -> carga music_dw"
+    warn "[run] AVISO: el pipeline aun no ha completado la carga de music_dw."
+    warn "[run]          Cuando finalice en Airflow, ejecuta:"
     warn "[run]            ./run.sh superset    # datasets + charts + dashboard"
   fi
   cmd_status
@@ -371,13 +382,15 @@ cmd_source() {
 }
 
 cmd_trigger() {
-  echo "[run] disparando reliable_music_pipeline (Test A) ..."
+  echo "[run] activando y disparando reliable_music_pipeline (Test A) ..."
+  compose exec -T airflow-apiserver airflow dags unpause reliable_music_pipeline 2>/dev/null || true
   compose exec -T airflow-apiserver airflow dags trigger reliable_music_pipeline
 }
 
 cmd_trigger_bad() {
   run_python -m scripts.make_bad_data
-  echo "[run] disparando el Test B (fallo controlado, bad_musical_pipeline) ..."
+  echo "[run] activando y disparando el Test B (fallo controlado, bad_musical_pipeline) ..."
+  compose exec -T airflow-apiserver airflow dags unpause bad_musical_pipeline 2>/dev/null || true
   compose exec -T airflow-apiserver airflow dags trigger bad_musical_pipeline
 }
 
@@ -470,6 +483,7 @@ case "${1:-help}" in
   bad)          cmd_bad ;;
   superset)     cmd_superset ;;
   dags)         cmd_dags ;;
+  compose)      shift; compose "$@" ;;
   logs)         shift; cmd_logs "$@" ;;
   help|-h|--help) usage ;;
   *) echo "comando desconocido: $1" >&2; usage; exit 1 ;;

@@ -85,20 +85,25 @@ if errorlevel 1 exit /b 1
 echo [run] esperando servicios ...
 timeout /t 30 /nobreak >nul
 call :source
-rem El DW lo llena el ETL en la primera corrida del DAG. En un clone o volumen
-rem nuevo music_dw esta vacio y el bootstrap de Superset revienta con 500
-rem (relation "fact_grammy_award" does not exist): se omite y se avisa.
+rem Si music_dw esta vacio (nuevo entorno), inicializa el pipeline y espera
 call :dwready
 if errorlevel 1 (
-  echo [run] AVISO: music_dw aun no tiene tablas ^(fact_grammy_award ausente^).
-  echo [run]          El data warehouse se llena en la primera corrida del DAG;
-  echo [run]          el bootstrap de Superset se omite en este arranque.
-  echo [run]          Completa la configuracion con:
-  echo [run]            run.bat trigger     rem Test A -^> carga music_dw
-  echo [run]            run.bat superset    rem datasets + charts + dashboard
-  goto :status
+  echo [run] inicializando Data Warehouse mediante el pipeline ETL ^(Test A^)...
+  call :trigger
+  echo [run] esperando a que el pipeline pueble music_dw...
+  for /l %%i in (1,1,30) do (
+    call :dwready
+    if not errorlevel 1 goto :dw_is_ready
+    timeout /t 3 /nobreak >nul
+  )
 )
-call :superset
+:dw_is_ready
+call :dwready
+if not errorlevel 1 (
+  call :superset
+) else (
+  echo [run] AVISO: el pipeline aun esta procesando. Cuando finalice ejecuta: run.bat superset
+)
 call :status
 goto :eof
 
@@ -218,13 +223,15 @@ echo [run] preparacion de la fuente Grammy (CSV -^> music_source) ...
 goto :eof
 
 :trigger
-echo [run] disparando reliable_music_pipeline (Test A) ...
+echo [run] activando y disparando reliable_music_pipeline (Test A) ...
+%COMPOSE% -f docker-compose.yaml exec -T airflow-apiserver airflow dags unpause reliable_music_pipeline
 %COMPOSE% -f docker-compose.yaml exec -T airflow-apiserver airflow dags trigger reliable_music_pipeline
 goto :eof
 
 :triggerbad
 %PY% -m scripts.make_bad_data
-echo [run] disparando el Test B (fallo controlado, bad_musical_pipeline) ...
+echo [run] activando y disparando el Test B (fallo controlado, bad_musical_pipeline) ...
+%COMPOSE% -f docker-compose.yaml exec -T airflow-apiserver airflow dags unpause bad_musical_pipeline
 %COMPOSE% -f docker-compose.yaml exec -T airflow-apiserver airflow dags trigger bad_musical_pipeline
 goto :eof
 
