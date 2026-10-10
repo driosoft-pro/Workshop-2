@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from .common import G, ALL_REQ, _spec, _big, _hbar, _line, _table
 
-GRANULARITY_TITLE = "Workshop-2 - Granularity & Data Quality"
+GRANULARITY_TITLE = "Granularity & Data Quality - Spotify & Grammy"
 GRANULARITY_SLUG = "w2-granularity"
 
 GRANULARITY_CSS = """
@@ -324,10 +324,10 @@ GRANULARITY_LAYOUT: list = [
 
 GRANULARITY_MARKDOWN: dict[str, str] = {
     "gran_intro": (
-        "**Workshop · Granularidad & Calidad de Datos** &nbsp;|&nbsp; "
+        "**Granularity & Data Quality - Spotify & Grammy** &nbsp;|&nbsp; "
         "Auditoría del modelado dimensional y estrategia de integración Spotify × Grammy (Airflow → PostgreSQL `music_dw`) &nbsp;·&nbsp; "
         "[Ver Dashboard Principal (R1–R4) →](/superset/dashboard/workshop-dashboard/) &nbsp;·&nbsp; "
-        "[Ver Detalle Analítico R1–R4 →](/superset/dashboard/w2-requirements/)"
+        "[Ver Detalle Analítico (KPIs R1–R4) →](/superset/dashboard/w2-requirements/)"
     ),
 }
 

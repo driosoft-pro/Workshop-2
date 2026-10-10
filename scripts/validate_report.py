@@ -401,8 +401,11 @@ def check_v15(superset_flag: bool) -> tuple[str, str, str]:
             if status != 200:
                 return "FAIL", f"Failed to get dashboard detail: {status}", "all OK"
             dash = detail.get("result", {})
-            meta = json.loads(dash.get("json_metadata") or "{}")
-            names = {f.get("name") for f in meta.get("native_filter_configuration", [])}
+            names = {f.get("name") for f in meta.get("native_filter_configuration", [])} | {
+                t.get("column", {}).get("name")
+                for f in meta.get("native_filter_configuration", [])
+                for t in f.get("targets", [])
+            }
             if not required.get(key, set()) <= names:
                 return "FAIL", f"{key}: native filters missing (found: {names})", "all OK"
             positions = json.loads(dash.get("position_json") or "{}")

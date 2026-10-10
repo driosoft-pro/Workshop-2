@@ -6,8 +6,8 @@ Orquestador central que reconcilia en Superset (de forma idempotente):
   - Gráficos métricos y analíticos asociados a R1–R4 y calidad de datos
   - Dashboards interactivos organizados en submódulos:
       * Dashboard Spotify & Grammy (R1–R4) (scripts/dashboards/workshop.py)
-      * Workshop-2 - Granularity & Data Quality (scripts/dashboards/granularity.py)
-      * Workshop-2 - KPIs (R1-R4) (scripts/dashboards/requirements.py)
+      * Granularity & Data Quality - Spotify & Grammy (scripts/dashboards/granularity.py)
+      * KPIs Spotify & Grammy (R1-R4) (scripts/dashboards/requirements.py)
 
 Uso en red Docker / Podman:
     python /app/scripts/superset_bootstrap.py

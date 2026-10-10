@@ -3,8 +3,8 @@
 Agrupa y reexporta todas las definiciones de gráficos, layouts, filtros,
 consultas y hojas de estilo de:
   - Workshop Dashboard (Dashboard Spotify & Grammy R1–R4)
-  - Granularity & Data Quality (Workshop-2 - Granularity & Data Quality)
-  - Requirements & KPIs (Workshop-2 - KPIs R1-R4)
+  - Granularity & Data Quality (Granularity & Data Quality - Spotify & Grammy)
+  - Requirements & KPIs (KPIs Spotify & Grammy R1-R4)
 """
 
 from __future__ import annotations

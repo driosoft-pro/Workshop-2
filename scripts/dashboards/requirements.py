@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from .common import R, _spec, _big, _hbar, _line, _table, _simple_filter
 
-REQUIREMENTS_TITLE = "Workshop-2 - KPIs (R1-R4)"
+REQUIREMENTS_TITLE = "KPIs Spotify & Grammy (R1-R4)"
 DASHBOARD_TITLE = REQUIREMENTS_TITLE  # Compatibilidad histórica
 REQUIREMENTS_SLUG = "w2-requirements"
 
@@ -226,7 +226,7 @@ REQUIREMENTS_LAYOUT: list = [
 
 REQUIREMENTS_MARKDOWN: dict[str, str] = {
     "req_intro": (
-        "**Workshop · Requerimientos Analíticos (R1–R4)** &nbsp;|&nbsp; "
+        "**KPIs Spotify & Grammy (R1–R4)** &nbsp;|&nbsp; "
         "Exploración profunda de hipótesis musicales, popularidad e impacto histórico en Spotify &nbsp;·&nbsp; "
         "[Ver Dashboard Ejecutivo →](/superset/dashboard/workshop-dashboard/) &nbsp;·&nbsp; "
         "[Ver Granularidad & Calidad →](/superset/dashboard/w2-granularity/)\n\n"
