@@ -1,5 +1,7 @@
 # --- Secrets / local environment ---
 .env
+.env.*
+!.env.example
 *.env.local
 
 # --- Python ---
@@ -9,6 +11,15 @@ __pycache__/
 .venv/
 venv/
 .ipynb_checkpoints/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.nox/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
 
 # --- Airflow runtime ---
 logs/
@@ -24,7 +35,15 @@ data/bad/
 gx/.logs/
 gx/uncommitted/
 
+# --- Scratch / temp files ---
+*.log
+*.tmp
+*.swp
+*~
+.cache/
+
 # --- OS / editor ---
 .DS_Store
+Thumbs.db
 .idea/
 .vscode/
