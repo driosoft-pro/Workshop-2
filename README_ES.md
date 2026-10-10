@@ -342,7 +342,8 @@ premios sin coincidencia conservan `artist_sk NULL` por diseño.
 ## 13. Pipeline ETL, puertas y orquestación
 
 [`docs/architecture.md`](docs/architecture.md) ·
-[`dags/reliable_music_pipeline.py`](dags/reliable_music_pipeline.py)
+[`dags/reliable_music_pipeline.py`](dags/reliable_music_pipeline.py) ·
+[`dags/bad_musical_pipeline.py`](dags/bad_musical_pipeline.py)
 
 ```
 spotify CSV ─ extract_spotify ─ validate_spotify_raw ─┐
@@ -532,8 +533,8 @@ Para evitar filtraciones de seguridad y exposición de credenciales sensibles:
 ./run.sh clean-data            # limpia datos intermedios y de salida (data/work, output, bad, gx)
 ./run.sh clean [--yes]         # alias de clean-all
 ./run.sh reset [--yes]         # alias de clean-all
-./run.sh trigger               # DAG Test A (8/8 success)
-./run.sh trigger-bad           # crea data/bad/spotify_bad.csv y dispara el Test B (bloqueo controlado)
+./run.sh trigger               # DAG Test A (8/8 success en reliable_music_pipeline)
+./run.sh trigger-bad           # crea data/bad/spotify_bad.csv y dispara bad_musical_pipeline (Test B: bloqueo controlado)
 ./run.sh trigger-fuzzy         # ejecuta pipeline con enable_fuzzy=true
 ./run.sh validate [--superset] # reporte automatizado de validación de extremo a extremo (V1-V16, --superset, --json)
 ./run.sh test                  # pytest (unidad + integración, 95 pruebas)
@@ -649,7 +650,9 @@ python -m scripts.match_audit --sample                # generar muestra de audit
 ```
 workshop-2/
 |-- run.sh  run.bat                     # punto de entrada único (up/ports/down/test/trigger/validate/…)
-|-- dags/reliable_music_pipeline.py     # DAG TaskFlow (solo flujo de trabajo + política)
+|-- dags/                               # DAGs TaskFlow (flujo de trabajo + política)
+|   |-- reliable_music_pipeline.py      # Test A: flujo confiable / exitoso (8/8 success)
+|   |-- bad_musical_pipeline.py         # Test B: flujo con fallo controlado (bloqueo en DQ-S3)
 |-- src/                                # lógica reutilizable
 |   |-- config.py  extract.py  transform.py  validation.py  load.py  analytics.py
 |   |-- artist_match.py  mappings.py    # cascada de emparejamiento, derivación de niveles, diccionarios

@@ -11,7 +11,7 @@ from pathlib import Path  # noqa: E402
 from airflow.models import DagBag  # noqa: E402
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-DAG_ID = "reliable_music_pipeline"
+DAG_IDS = ["reliable_music_pipeline", "bad_musical_pipeline"]
 EXPECTED_TASKS = [
     "extract_spotify",
     "extract_grammys",
@@ -25,11 +25,17 @@ EXPECTED_TASKS = [
 
 
 @pytest.fixture(scope="module")
-def dag():
+def dag_bag():
     bag = DagBag(dag_folder=str(PROJECT_ROOT / "dags"), include_examples=False)
     assert not bag.import_errors, bag.import_errors
-    assert DAG_ID in bag.dags, bag.dag_ids
-    return bag.dags[DAG_ID]
+    for dag_id in DAG_IDS:
+        assert dag_id in bag.dags, bag.dag_ids
+    return bag
+
+
+@pytest.fixture(params=DAG_IDS)
+def dag(dag_bag, request):
+    return dag_bag.dags[request.param]
 
 
 def test_dag_exposes_eight_taskflow_tasks(dag):

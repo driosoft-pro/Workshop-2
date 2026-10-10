@@ -336,7 +336,8 @@ transaction; business keys are UNIQUE-constrained; unmatched awards keep
 ## 13. ETL pipeline, gates and orchestration
 
 [`docs/architecture.md`](docs/architecture.md) ·
-[`dags/reliable_music_pipeline.py`](dags/reliable_music_pipeline.py)
+[`dags/reliable_music_pipeline.py`](dags/reliable_music_pipeline.py) ·
+[`dags/bad_musical_pipeline.py`](dags/bad_musical_pipeline.py)
 
 ```
 spotify CSV ─ extract_spotify ─ validate_spotify_raw ─┐
@@ -546,8 +547,8 @@ To avoid security leaks and sensitive credential exposure:
 ./run.sh prune                 # automatic prune, standalone (KEEP_COPIES copias por carpeta)
 ./run.sh clean [--yes]         # alias of clean-all
 ./run.sh reset [--yes]         # alias of clean-all
-./run.sh trigger               # DAG Test A (8/8 success)
-./run.sh trigger-bad           # creates data/bad/spotify_bad.csv and runs Test B (controlled block)
+./run.sh trigger               # DAG Test A (8/8 success on reliable_music_pipeline)
+./run.sh trigger-bad           # creates data/bad/spotify_bad.csv and runs bad_musical_pipeline (Test B: controlled block)
 ./run.sh trigger-fuzzy         # runs pipeline with enable_fuzzy=true
 ./run.sh validate [--superset] # automated end-to-end validation report (V1-V16, --superset, --json)
 ./run.sh test                  # pytest (unit + integration, 95 tests)
@@ -684,7 +685,9 @@ python -m scripts.match_audit --sample                # generate audit sample
 ```
 workshop-2/
 |-- run.sh  run.bat                     # single entry point (up/ports/down/test/trigger/validate/…)
-|-- dags/reliable_music_pipeline.py     # TaskFlow DAG (workflow + policy only)
+|-- dags/                               # TaskFlow DAGs (workflow + policy only)
+|   |-- reliable_music_pipeline.py      # Test A: reliable / successful pipeline (8/8 success)
+|   |-- bad_musical_pipeline.py         # Test B: controlled failure pipeline (blocked at DQ-S3)
 |-- src/                                # reusable logic
 |   |-- config.py  extract.py  transform.py  validation.py  load.py  analytics.py
 |   |-- artist_match.py  mappings.py    # matching cascade, tier derivation, genre/category dictionaries

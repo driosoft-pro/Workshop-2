@@ -224,8 +224,8 @@ goto :eof
 
 :triggerbad
 %PY% -m scripts.make_bad_data
-echo [run] disparando el Test B (fallo controlado, spotify_bad.csv) ...
-%COMPOSE% -f docker-compose.yaml exec -T airflow-apiserver airflow dags trigger reliable_music_pipeline --conf "{\"spotify_source_file\":\"spotify_bad.csv\"}"
+echo [run] disparando el Test B (fallo controlado, bad_musical_pipeline) ...
+%COMPOSE% -f docker-compose.yaml exec -T airflow-apiserver airflow dags trigger bad_musical_pipeline
 goto :eof
 
 :triggerfuzzy

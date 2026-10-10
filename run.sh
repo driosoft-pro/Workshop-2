@@ -377,9 +377,8 @@ cmd_trigger() {
 
 cmd_trigger_bad() {
   run_python -m scripts.make_bad_data
-  echo "[run] disparando el Test B (fallo controlado, spotify_bad.csv) ..."
-  compose exec -T airflow-apiserver airflow dags trigger reliable_music_pipeline \
-    --conf '{"spotify_source_file":"spotify_bad.csv"}'
+  echo "[run] disparando el Test B (fallo controlado, bad_musical_pipeline) ..."
+  compose exec -T airflow-apiserver airflow dags trigger bad_musical_pipeline
 }
 
 cmd_trigger_fuzzy() {
