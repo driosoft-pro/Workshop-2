@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-10T02:43:54.603182+00:00",
+  "generated_at": "2026-10-10T06:53:36.227086+00:00",
   "source": "music_dw",
   "kpi_csvs": {
     "kpi_0_integration_coverage": "/opt/airflow/docs/evidence/kpis/kpi_0_integration_coverage.csv",
@@ -526,17 +526,17 @@
       },
       {
         "decade": 1950,
-        "category_family": "Pop",
-        "awards": 7
-      },
-      {
-        "decade": 1950,
         "category_family": "General Field",
         "awards": 7
       },
       {
         "decade": 1950,
-        "category_family": "Spoken & Comedy",
+        "category_family": "Pop",
+        "awards": 7
+      },
+      {
+        "decade": 1950,
+        "category_family": "Production & Technical",
         "awards": 6
       }
     ],
