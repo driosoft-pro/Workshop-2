@@ -9,7 +9,11 @@
 #   ./run.sh test        pytest (unit + integration si la BD esta disponible)
 #   ./run.sh trigger     dispara el DAG (Test A: corrida exitosa)
 #   ./run.sh status      estado de contenedores + URLs
+#   ./run.sh prune       poda basura y deja solo 2 copias por carpeta
 #   ./run.sh help        todos los comandos
+#
+# Cada comando de trabajo arranca con una poda automatica (KEEP_COPIES=2);
+# help, prune y los comandos de limpieza/bajada la saltan.
 # =============================================================================
 set -euo pipefail
 
@@ -38,13 +42,76 @@ fi
 
 warn() { echo "$@" >&2; }
 
-get_port() {
+# --- poda automatica (basura + rotacion de copias) ---------------------------
+# KEEP_COPIES = copias que se conservan por carpeta (por defecto 2).
+# Nunca toca: data/raw (fuente), data/work, data/output, .env, .venv,
+# docs/evidence/runs ni kpis, y preserva los JSON de Test A/B/C citados en
+# docs/evidence_register.md (data/work y data/output se borran solo a mano,
+# con clean-data / clean-all).
+KEEP_COPIES="${KEEP_COPIES:-2}"
+[[ "$KEEP_COPIES" =~ ^[1-9][0-9]*$ ]] || KEEP_COPIES=2
+
+_prune_logs() {
+  local dag i runs=()
+  [ -d logs ] || return 0
+  for dag in logs/*/; do
+    [ -d "$dag" ] || continue
+    mapfile -t runs < <(find "$dag" -mindepth 1 -maxdepth 1 -type d -name 'run_id=*' \
+                         -printf '%T@ %p\n' 2>/dev/null | sort -rn | cut -d' ' -f2-)
+    for (( i = KEEP_COPIES; i < ${#runs[@]}; i++ )); do
+      rm -rf -- "${runs[$i]}" 2>/dev/null || true
+    done
+  done
+  return 0
+}
+
+_prune_evidence() {
+  local stage i newest=()
+  [ -d docs/evidence/gx ] || return 0
+  for stage in docs/evidence/gx/*/; do
+    [ -d "$stage" ] || continue
+    mapfile -t newest < <(find "$stage" -maxdepth 1 -type f -name '*.json' \
+        ! -name '*_test_a_success.json' \
+        ! -name '*_test_b_critical_failure.json' \
+        ! -name '*_test_c_safe_rerun.json' \
+        -printf '%T@ %p\n' 2>/dev/null | sort -rn | cut -d' ' -f2-)
+    for (( i = KEEP_COPIES; i < ${#newest[@]}; i++ )); do
+      rm -f -- "${newest[$i]}" 2>/dev/null || true
+    done
+  done
+  return 0
+}
+
+_prune_junk() {
+  find . -path ./.venv -prune -o -path ./.git -prune -o \
+       -type d \( -name '__pycache__' -o -name '.pytest_cache' \
+                  -o -name '.ruff_cache' -o -name '.mypy_cache' \) \
+       -prune -exec rm -rf {} + 2>/dev/null || true
+  find . -path ./.venv -prune -o -path ./.git -prune -o \
+       -type f \( -name '*.pyc' -o -name '*.pyo' -o -name '*.tmp' \
+                  -o -name '*.swp' -o -name '*~' \) \
+       -exec rm -f {} + 2>/dev/null || true
+  rm -rf gx/uncommitted/* data/bad/* 2>/dev/null || true
+  return 0
+}
+
+cmd_prune() {
+  echo "[run] poda: conservando $KEEP_COPIES copias por carpeta y eliminando basura ..."
+  _prune_logs
+  _prune_evidence
+  _prune_junk
+  echo "[run] poda completada"
+}
+
+get_env() {
   local var="$1" default="$2" envf=".env"
   [ -f "$envf" ] || envf=".env.example"
   local val
   val=$(sed -n "s/^${var}=//p" "$envf" 2>/dev/null | head -1)
   echo "${val:-$default}"
 }
+
+get_port() { get_env "$1" "$2"; }
 
 # --- motor de contenedores (podman primero, docker como respaldo) -----------
 detect_engine() {
@@ -73,7 +140,7 @@ required_ports() {
 }
 
 # --- compose provider -------------------------------------------------------
-compose() {
+_compose_cmd() {
   detect_engine || exit 1
   if [ -z "${COMPOSE_CMD:-}" ]; then
     if command -v podman >/dev/null 2>&1 && podman compose version >/dev/null 2>&1; then
@@ -85,8 +152,31 @@ compose() {
       exit 1
     fi
   fi
+}
+
+compose() {
+  _compose_cmd
+  # el wrapper `podman compose` avisa a stderr en cada invocacion; no aporta nada.
   # shellcheck disable=SC2086
-  $COMPOSE_CMD -f docker-compose.yaml "$@"
+  $COMPOSE_CMD -f docker-compose.yaml "$@" \
+    2> >(grep -v 'Executing external compose provider' >&2 || true)
+}
+
+# Igual que compose, pero filtra el ruido benigno de la desmantelacion
+# ("no container with name or ID ...", "no container with ID or name ...",
+# "unable to find pod ...") que podman-compose imprime cuando el recurso ya
+# no existe. Todo lo demas de stderr se muestra tal cual y el codigo de salida
+# real se conserva. No usar para `exec`: ahi ese mensaje si es un fallo real.
+compose_teardown() {
+  _compose_cmd
+  local err rc=0
+  err=$(mktemp)
+  # shellcheck disable=SC2086
+  $COMPOSE_CMD -f docker-compose.yaml "$@" 2>"$err" || rc=$?
+  grep -vE 'no container with (name or ID|ID or name)|unable to find pod' \
+    "$err" >&2 || true
+  rm -f "$err"
+  return "$rc"
 }
 
 # --- python (nix develop si existe el flake, si no el .venv) ----------------
@@ -163,6 +253,18 @@ cmd_ports() {
   echo "[run] puertos listos: $ports"
 }
 
+# El DW lo llena el ETL (src/load.py aplica sql/dw_schema.sql en la primera
+# corrida del DAG). En un clone/volumen nuevo music_dw existe pero esta vacio,
+# y en ese estado el bootstrap de Superset revienta con 500
+# (relation "fact_grammy_award" does not exist).
+dw_ready() {
+  local pg_user
+  pg_user=$(get_env "POSTGRES_USER" "music")
+  compose exec -T music-postgres \
+    psql -U "$pg_user" -d music_dw -Atc "select to_regclass('public.fact_grammy_award')" \
+    2>/dev/null | grep -q 'fact_grammy_award'
+}
+
 cmd_up() {
   [ -f .env ] || { cp .env.example .env; echo "[run] creado .env desde .env.example"; }
   cmd_ports
@@ -174,13 +276,22 @@ cmd_up() {
   wait_http "http://localhost:${af_port}/api/v2/monitor/health" 90 || true
   wait_http "http://localhost:${sp_port}/health" 90 || true
   cmd_source
-  cmd_superset
+  if dw_ready; then
+    cmd_superset
+  else
+    warn "[run] AVISO: music_dw aun no tiene tablas (fact_grammy_award ausente)."
+    warn "[run]          El data warehouse se llena en la primera corrida del DAG;"
+    warn "[run]          el bootstrap de Superset se omite en este arranque."
+    warn "[run]          Completa la configuracion con:"
+    warn "[run]            ./run.sh trigger     # Test A -> carga music_dw"
+    warn "[run]            ./run.sh superset    # datasets + charts + dashboard"
+  fi
   cmd_status
 }
 
 cmd_down() {
-  compose stop 2>/dev/null || true
-  compose down
+  compose_teardown stop || true
+  compose_teardown down
   echo "[run] servicios del proyecto detenidos (volumenes conservados)"
 }
 
@@ -210,7 +321,7 @@ cmd_clean_db() {
     esac
   fi
   echo "[run] deteniendo contenedores y eliminando volumenes de base de datos ..."
-  compose down -v --remove-orphans
+  compose_teardown down -v --remove-orphans
   echo "[run] bases de datos y contenedores eliminados"
 }
 
@@ -226,7 +337,7 @@ cmd_clean_all() {
     esac
   fi
   echo "[run] deteniendo contenedores y eliminando volumenes ..."
-  compose down -v --remove-orphans
+  compose_teardown down -v --remove-orphans
   echo "[run] limpiando logs de Airflow y datos intermedios ..."
   rm -rf logs/* data/work/* data/output/* data/bad/* gx/uncommitted/* 2>/dev/null || true
   mkdir -p logs data/work data/output data/bad
@@ -297,13 +408,15 @@ usage() {
   cat <<'EOF'
 Uso: ./run.sh <comando>
 
-  up                  .env + valida/libera puertos + compose up -d --build + fuente + superset
+  up                  .env + valida/libera puertos + compose up -d --build + fuente
+                      (+ superset si music_dw ya tiene tablas; si no avisa y sigue)
   down | stop         baja TODOS los servicios del proyecto (volumenes intactos)
   fresh [--yes]       limpieza TOTAL y arranque desde cero (clean-all + up)
   clean-all [--yes]   limpieza TOTAL (contenedores, BDs, logs de Airflow y datos temporales)
   clean-airflow       limpia solo los logs de Airflow (logs/)
   clean-db [--yes]    baja contenedores y borra volumenes de bases de datos
   clean-data          limpia datos de trabajo y salida (data/work, output, bad, gx)
+  prune               poda basura y deja solo 2 copias por carpeta (KEEP_COPIES)
   clean [--yes]       alias de clean-all
   reset [--yes]       alias de clean-all
   ports [--yes]       valida contenedores/puertos activos y detiene los ajenos (conflictos)
@@ -325,6 +438,14 @@ Uso: ./run.sh <comando>
 EOF
 }
 
+# --- poda automatica al inicio de cada comando -------------------------------
+# Se salta en: help, prune (es la poda) y los comandos de limpieza/bajada,
+# que ya limpian ellos mismos y no deben podar antes de la confirmacion y/N.
+case "${1:-help}" in
+  help|-h|--help|prune|down|stop|clean|clean-all|clean-airflow|clean-db|clean-data|reset|fresh) ;;
+  *) cmd_prune || true ;;
+esac
+
 case "${1:-help}" in
   up)           cmd_up ;;
   down|stop)    cmd_down ;;
@@ -333,6 +454,7 @@ case "${1:-help}" in
   clean-airflow) cmd_clean_airflow ;;
   clean-db)     shift; cmd_clean_db "$@" ;;
   clean-data)   cmd_clean_data ;;
+  prune)        cmd_prune ;;
   clean)        shift; cmd_clean_all "$@" ;;
   reset)        shift; cmd_reset "$@" ;;
   ports|check-ports) shift; cmd_ports "$@" ;;

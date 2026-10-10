@@ -6,10 +6,16 @@ rem
 rem   run.bat up        levanta el stack (Airflow + PostgreSQL + Superset)
 rem   run.bat test      pytest (unit + integracion si la BD esta disponible)
 rem   run.bat trigger   dispara el DAG (Test A)
+rem   run.bat prune     poda basura y deja solo 2 copias por carpeta
 rem   run.bat help      todos los comandos
+rem
+rem Cada comando de trabajo arranca con una poda automatica (KEEP_COPIES=2);
+rem help, prune y los comandos de limpieza/bajada la saltan.
 rem ============================================================================
 setlocal enabledelayedexpansion
 cd /d "%~dp0"
+
+if not defined KEEP_COPIES set "KEEP_COPIES=2"
 
 rem --- proveedor compose (podman si existe, si no docker) -------------------
 set "COMPOSE="
@@ -29,6 +35,15 @@ if not exist "%PY%" set "PY=python"
 if "%1"=="" goto :usage
 if "%1"=="help" goto :usage
 
+rem --- poda automatica al inicio de cada comando -----------------------------
+rem Se salta en help, prune (es la poda) y los comandos de limpieza/bajada,
+rem que ya limpian ellos mismos y no deben podar antes de su confirmacion.
+set "SKIP_PRUNE="
+for %%c in (prune down stop clean clean-all clean-airflow clean-db clean-data reset fresh) do (
+  if /i "%1"=="%%c" set "SKIP_PRUNE=1"
+)
+if not defined SKIP_PRUNE call :prune
+
 if "%1"=="up" goto :up
 if "%1"=="down" goto :down
 if "%1"=="stop" goto :down
@@ -38,6 +53,7 @@ if "%1"=="clean-all" goto :cleanall
 if "%1"=="clean-airflow" goto :cleanairflow
 if "%1"=="clean-db" goto :cleandb
 if "%1"=="clean-data" goto :cleandata
+if "%1"=="prune" goto :prunecmd
 if "%1"=="reset" goto :reset
 if "%1"=="ports" goto :ports
 if "%1"=="check-ports" goto :ports
@@ -69,6 +85,19 @@ if errorlevel 1 exit /b 1
 echo [run] esperando servicios ...
 timeout /t 30 /nobreak >nul
 call :source
+rem El DW lo llena el ETL en la primera corrida del DAG. En un clone o volumen
+rem nuevo music_dw esta vacio y el bootstrap de Superset revienta con 500
+rem (relation "fact_grammy_award" does not exist): se omite y se avisa.
+call :dwready
+if errorlevel 1 (
+  echo [run] AVISO: music_dw aun no tiene tablas ^(fact_grammy_award ausente^).
+  echo [run]          El data warehouse se llena en la primera corrida del DAG;
+  echo [run]          el bootstrap de Superset se omite en este arranque.
+  echo [run]          Completa la configuracion con:
+  echo [run]            run.bat trigger     rem Test A -^> carga music_dw
+  echo [run]            run.bat superset    rem datasets + charts + dashboard
+  goto :status
+)
 call :superset
 call :status
 goto :eof
@@ -97,9 +126,29 @@ echo [run] puertos listos: 5432 8080 8088
 goto :eof
 
 :down
-%COMPOSE% -f docker-compose.yaml down
+call :compose_down_quiet
 echo [run] servicios del proyecto detenidos (volumenes conservados)
 goto :eof
+
+:dwready
+rem 0 = music_dw ya tiene la tabla del DW, 1 = DW vacio (o BD no disponible).
+%COMPOSE% -f docker-compose.yaml exec -T music-postgres psql -U music -d music_dw -Atc "select to_regclass('public.fact_grammy_award')" 2>nul | findstr /c:"fact_grammy_award" >nul
+if errorlevel 1 exit /b 1
+exit /b 0
+
+:compose_down_quiet
+rem podman-compose imprime ruido benigno al desmantelar ("no container with
+rem name or ID ...", "unable to find pod ..."). Se filtra SOLO eso; lo demas
+rem de stderr se muestra tal cual y el codigo de salida se conserva.
+set "ERRF=%TEMP%\workshop2_compose_%RANDOM%.err"
+%COMPOSE% -f docker-compose.yaml %* 2>"%ERRF%"
+set "DOWN_RC=%ERRORLEVEL%"
+if exist "%ERRF%" (
+  findstr /v /c:"no container with name or ID" /c:"no container with ID or name" /c:"unable to find pod" /c:"Executing external compose provider" "%ERRF%" 1>&2
+  del /q "%ERRF%" >nul 2>nul
+)
+if not "%DOWN_RC%"=="0" exit /b %DOWN_RC%
+exit /b 0
 
 :cleanairflow
 echo [run] limpiando logs de Airflow ...
@@ -136,12 +185,12 @@ echo [run] datos intermedios y de salida eliminados
 goto :eof
 
 :cleandb
-%COMPOSE% -f docker-compose.yaml down -v --remove-orphans
+call :compose_down_quiet down -v --remove-orphans
 echo [run] bases de datos y contenedores eliminados
 goto :eof
 
 :cleanall
-%COMPOSE% -f docker-compose.yaml down -v --remove-orphans
+call :compose_down_quiet down -v --remove-orphans
 call :cleanairflow
 call :cleandata
 echo [run] entorno completamente limpio desde cero
@@ -219,16 +268,37 @@ if "%SVC%"=="" set "SVC=airflow-scheduler"
 %COMPOSE% -f docker-compose.yaml logs -f %SVC%
 goto :eof
 
+:prune
+rem --- basura + rotacion de copias (KEEP_COPIES por carpeta) -----------------
+rem Nunca toca data\raw, data\work, data\output, .env, .venv, docs\evidence\runs
+rem ni kpis, y preserva los JSON de Test A/B/C citados en
+rem docs\evidence_register.md (data\work y data\output se borran solo a mano,
+rem con clean-data / clean-all).
+where powershell >nul 2>nul
+if errorlevel 1 (
+  echo [run] aviso: powershell no disponible, poda omitida
+  goto :eof
+)
+echo [run] poda: conservando %KEEP_COPIES% copias por carpeta y eliminando basura ...
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$k=0; if($env:KEEP_COPIES -match '^[1-9][0-9]*$'){$k=[int]$env:KEEP_COPIES}; if($k -lt 1){$k=1}; $junk=@('__pycache__','.pytest_cache','.ruff_cache','.mypy_cache'); $skip=@('.venv','.git'); $gx='docs\evidence\gx'; if(Test-Path -LiteralPath $gx){Get-ChildItem -LiteralPath $gx -Directory | ForEach-Object { Get-ChildItem -LiteralPath $_.FullName -File -Filter '*.json' | Where-Object { $_.Name -notlike '*_test_a_success.json' -and $_.Name -notlike '*_test_b_critical_failure.json' -and $_.Name -notlike '*_test_c_safe_rerun.json' } | Sort-Object LastWriteTime -Descending | Select-Object -Skip $k | Remove-Item -Force }}; if(Test-Path -LiteralPath 'logs'){Get-ChildItem -LiteralPath 'logs' -Directory | ForEach-Object { Get-ChildItem -LiteralPath $_.FullName -Directory -Filter 'run_id=*' | Sort-Object LastWriteTime -Descending | Select-Object -Skip $k | Remove-Item -Recurse -Force }}; Get-ChildItem -LiteralPath . -Directory -Force | Where-Object { $skip -notcontains $_.Name } | ForEach-Object { if($junk -contains $_.Name){ Remove-Item -LiteralPath $_.FullName -Recurse -Force } else { Get-ChildItem -LiteralPath $_.FullName -Directory -Recurse -Force -ErrorAction SilentlyContinue | Where-Object { $junk -contains $_.Name } | Remove-Item -Recurse -Force; Get-ChildItem -LiteralPath $_.FullName -File -Recurse -Force -ErrorAction SilentlyContinue | Where-Object { $_.Extension -in '.pyc','.pyo','.tmp','.swp' -or $_.Name.EndsWith('~') } | Remove-Item -Force } }; foreach($d in @('gx\uncommitted','data\bad')){ if(Test-Path -LiteralPath $d){ Get-ChildItem -LiteralPath $d -Force -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force } }" >nul 2>&1
+echo [run] poda completada
+goto :eof
+
+:prunecmd
+goto :eof
+
 :usage
 echo Uso: run.bat ^<comando^>
 echo(
-echo   up                  .env + libera puertos + compose up -d --build + source prep + superset bootstrap
+echo   up                  .env + libera puertos + compose up -d --build + source prep
+echo                         (+ superset si music_dw ya tiene tablas; si no avisa y sigue)
 echo   down ^| stop         para TODOS los servicios del proyecto (volumenes intactos)
 echo   fresh               limpieza TOTAL y arranque desde cero (clean-all + up)
 echo   clean-all           limpieza TOTAL (contenedores, BDs, logs de Airflow y datos temporales)
 echo   clean-airflow       limpia solo los logs de Airflow (logs\)
 echo   clean-db            para contenedores y borra volumenes de bases de datos
 echo   clean-data          limpia datos de trabajo y salida (data\work, output, bad, gx)
+echo   prune               poda basura y deja solo 2 copias por carpeta (KEEP_COPIES)
 echo   clean               alias de clean-all
 echo   reset               alias de clean-all
 echo   ports               valida contenedores/puertos activos y detiene los ajenos

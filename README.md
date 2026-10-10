@@ -486,6 +486,22 @@ cp .env.example .env                # review AIRFLOW_UID, ports, credentials
 ./run.sh trigger                    # DAG Test A → 8/8 success
 ```
 
+> **Fresh clone / fresh volumes.** The star schema is created by the ETL itself
+> (`src/load.py` applies `sql/dw_schema.sql` on the first DAG run), so right
+> after `clean-all` / `clean-db` the `music_dw` database exists but is empty.
+> In that state the Superset bootstrap would fail with
+> `relation "fact_grammy_award" does not exist`, so **`./run.sh up` skips it on
+> purpose**: it prints a warning and continues instead of aborting. Finish the
+> setup with:
+>
+> ```bash
+> ./run.sh trigger      # Test A → loads the star schema into music_dw
+> ./run.sh superset     # datasets + charts + dashboard (idempotent)
+> ```
+>
+> Every later `./run.sh up` runs the bootstrap automatically, because
+> `music_dw` already has `fact_grammy_award`.
+
 `./run.sh up` first runs `./run.sh ports`: it frees the ports this project
 needs (5432, 8080, 8088) if another project holds them, and only then starts
 the stack. Quick verification:
@@ -517,7 +533,8 @@ To avoid security leaks and sensitive credential exposure:
 
 
 ```bash
-./run.sh up                    # frees ports + compose up -d --build + source prep + Superset bootstrap
+./run.sh up                    # frees ports + compose up -d --build + source prep
+                               # (+ Superset bootstrap when music_dw already has tables)
 ./run.sh ports [--yes]         # checks active containers/ports and stops foreign ones (--yes skips prompt)
 ./run.sh down                  # stops ALL project services (volumes intact)
 ./run.sh stop                  # alias of down
@@ -526,6 +543,7 @@ To avoid security leaks and sensitive credential exposure:
 ./run.sh clean-airflow         # cleans only Airflow logs (logs/)
 ./run.sh clean-db [--yes]      # stops containers and drops database volumes (PostgreSQL/Superset)
 ./run.sh clean-data            # cleans intermediate pipeline data (data/work, output, bad, gx)
+./run.sh prune                 # automatic prune, standalone (KEEP_COPIES copias por carpeta)
 ./run.sh clean [--yes]         # alias of clean-all
 ./run.sh reset [--yes]         # alias of clean-all
 ./run.sh trigger               # DAG Test A (8/8 success)
@@ -544,6 +562,27 @@ To avoid security leaks and sensitive credential exposure:
 publishes 5432/8080/8088, **automatically stops** the ones that do not belong
 to this project and warns when the port is held by a non-container process
 (that one must be freed manually). Pass `--yes` or set `ASSUME_YES=1` for non-interactive execution. Add extra ports with `EXTRA_PORTS="9000"`.
+
+**Automatic prune.** Every working command (`up`, `status`, `trigger`, `test`,
+…) starts by pruning junk, so the repository never accumulates caches, stale
+DAG run folders or superseded Great Expectations reports. The prune:
+
+* keeps the **2 most recent** `run_id=*` folders per DAG under `logs/` and the
+  **2 most recent** JSON per stage under `docs/evidence/gx/` (`KEEP_COPIES=n`
+  changes the count, e.g. `KEEP_COPIES=5 ./run.sh up`);
+* never deletes the Test A/B/C evidence quoted in
+  [`docs/evidence_register.md`](docs/evidence_register.md)
+  (`*_test_a_success.json`, `*_test_b_critical_failure.json`,
+  `*_test_c_safe_rerun.json`);
+* removes `__pycache__`, `.pytest_cache`, `.ruff_cache`, `.mypy_cache`, `*.pyc`,
+  `*.tmp`, `*.swp`, `gx/uncommitted/*` and `data/bad/*`;
+* **does not touch** `data/raw`, `data/work`, `data/output`, `.env`, `.venv`,
+  `docs/evidence/runs` or `docs/evidence/kpis` — those are removed only by the
+  explicit `clean-data` / `clean-all` commands.
+
+`help`, `prune` and the cleanup commands (`down`, `stop`, `clean*`, `reset`,
+`fresh`) skip the automatic prune: they already clean up themselves and must
+not prune before their `y/N` confirmation.
 
 On Windows: `run.bat up`, `run.bat ports`, `run.bat test`, `run.bat trigger`, …
 (`run.bat help`). Commands use `podman compose` when available and fall back to
