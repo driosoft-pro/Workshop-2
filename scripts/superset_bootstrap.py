@@ -314,7 +314,7 @@ def _validation_query(form: dict) -> dict:
     query = {
         "groupby": list(dict.fromkeys(groupby)),
         "metrics": metrics,
-        "row_limit": min(int(form.get("row_limit", 1000)), 1000),
+        "row_limit": int(form.get("row_limit", 1000)),
         "extras": {"time_grain_sqla": None},
         "applied_time_extras": {},
         "is_timeseries": False,

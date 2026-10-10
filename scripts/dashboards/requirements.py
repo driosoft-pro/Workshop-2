@@ -224,10 +224,10 @@ REQUIREMENTS_CHARTS: list[dict] = [
     _spec(R, "kpi_4_top_awarded_all", "R4 · Ranking global de artistas premiados", "R4",
           "Ranking general de galardonados incluyendo artistas ausentes de Spotify (Tier C).",
           [_table(["rank", "artist_display_name", "recognition_tier", "awards",
-                   "spotify_track_count", "in_spotify"], 25, order=[["rank", True]])]),
+                   "spotify_track_count", "in_spotify"], 1500, order=[["rank", True]])]),
     _spec(R, "kpi_4_top_awarded_all", "R4 · Premiados ausentes de Spotify", "R4",
           "Galardonados en categorías técnicas o de producción no catalogados como intérpretes en R1.",
-          [_table(["artist_display_name", "recognition_tier", "awards", "first_award_year", "last_award_year"], 15,
+          [_table(["artist_display_name", "recognition_tier", "awards", "first_award_year", "last_award_year"], 250,
                   order=[["awards", False]],
                   filters=[_simple_filter("recognition_tier", "==", "C")])]),
 ]
