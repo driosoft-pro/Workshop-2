@@ -1,7 +1,6 @@
 # Apache Superset image with the PostgreSQL driver for the metadata database.
-# Base image pinned for reproducibility; psycopg2 is not shipped by apache/superset.
-FROM apache/superset:4.1.4
+FROM apache/superset:6.1.0
 
 USER root
-RUN pip install --no-cache-dir "psycopg2-binary==2.9.10"
+RUN uv pip install --python /app/.venv/bin/python "psycopg2-binary==2.9.10"
 USER superset

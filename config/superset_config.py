@@ -32,3 +32,18 @@ SESSION_COOKIE_SECURE = False
 
 # Allows chart/dashboard SQL to use Jinja parameters ({{ ... }}).
 FEATURE_FLAGS = {"ENABLE_TEMPLATE_PROCESSING": True}
+
+# Native themes (Superset >= 6.0)
+_BRAND = {
+    "brandLogoUrl": "/static/assets/images/superset-logo-horiz.png",
+    "brandLogoHref": "/",
+}
+
+THEME_DEFAULT = {
+    "token": {**_BRAND, "colorPrimary": "#C9A227", "colorLink": "#8A6D0B"},
+}
+
+THEME_DARK = {
+    "algorithm": "dark",
+    "token": {**_BRAND, "colorPrimary": "#E5C158", "colorLink": "#E5C158"},
+}

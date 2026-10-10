@@ -461,7 +461,7 @@ Artefactos generados por el pipeline (14 CSV + 4 PNG) en `docs/evidence/kpis/`.
 | Fuente Grammys | PostgreSQL 16 `music_source` | `sql/source_setup.sql`, `scripts/prepare_source_db.py` |
 | Almacén | PostgreSQL 16 `music_dw` (esquema estrella + puente, 7 tablas) | `sql/dw_schema.sql`, `src/load.py` |
 | Analítica | 14 consultas KPI + scipy/numpy/pandas/matplotlib | `sql/kpi_queries.sql`, `src/analytics.py` |
-| BI | **Apache Superset 4.1.4** (principal) · Power BI (alternativa) | `scripts/superset_bootstrap.py`, `docs/superset_dashboard.md`, `docs/powerbi_dashboard.md` |
+| BI | **Apache Superset 6.1.0** (principal) · Power BI (alternativa) | `scripts/superset_bootstrap.py`, `docs/superset_dashboard.md`, `docs/powerbi_dashboard.md` |
 | Evidencia | JSON GX, resúmenes de corrida, KPI CSV/PNG, logs de tareas, muestra de auditoría | `docs/evidence/` |
 | Verificación | pytest (95) + `scripts/validate_report.py` + `scripts/match_audit.py` | `tests/`, `scripts/` |
 

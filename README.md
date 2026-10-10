@@ -457,7 +457,7 @@ Pipeline-generated artifacts (14 CSVs + 4 PNGs) live in `docs/evidence/kpis/`.
 | Grammy source | PostgreSQL 16 `music_source` | `sql/source_setup.sql`, `scripts/prepare_source_db.py` |
 | Warehouse | PostgreSQL 16 `music_dw` (star schema + bridge) | `sql/dw_schema.sql`, `src/load.py` |
 | Analytics | 14 KPI queries + pandas/matplotlib | `sql/kpi_queries.sql`, `src/analytics.py` |
-| BI | **Apache Superset 4.1.4** (primary) · Power BI (alternative) | `scripts/superset_bootstrap.py`, `docs/superset_dashboard.md`, `docs/powerbi_dashboard.md` |
+| BI | **Apache Superset 6.1.0** (primary) · Power BI (alternative) | `scripts/superset_bootstrap.py`, `docs/superset_dashboard.md`, `docs/powerbi_dashboard.md` |
 | Evidence | GX JSON, run summaries, KPI CSV/PNG, task logs | `docs/evidence/` |
 | Verification | pytest (95) + `scripts/smoke_test.py` + `scripts/validate_report.py` | `tests/`, `pytest.ini`, `scripts/` |
 

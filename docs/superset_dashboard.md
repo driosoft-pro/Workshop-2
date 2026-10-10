@@ -15,7 +15,7 @@ alternative client ([`powerbi_dashboard.md`](powerbi_dashboard.md)).
 | Database connection | `music_dw` → `postgresql+psycopg2://music:music@music-postgres:5432/music_dw` |
 | Metadata database | PostgreSQL `superset` (same server, `music-postgres`) |
 | Configuration | `config/superset_config.py` mounted at `/app/pythonpath/superset_config.py` |
-| Image | `Dockerfile.superset` (`apache/superset:4.1.4` + `psycopg2-binary`) |
+| Image | `Dockerfile.superset` (`apache/superset:6.1.0` + `psycopg2-binary`) |
 
 Services in [`docker-compose.yaml`](../docker-compose.yaml):
 

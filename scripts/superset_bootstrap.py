@@ -12,12 +12,9 @@ Creates (idempotently) on top of the analytical Data Warehouse ``music_dw``:
   2. "Workshop-2 - KPIs (R1-R4)"                (/superset/dashboard/w2-requirements/)
 
 Light / dark:
-* Superset >= 6.0 has native themes -> see config/superset_themes_6x.py (THEME_DEFAULT /
-  THEME_DARK). This script then also registers two UI themes (best effort).
-* Superset 4.x (this repo: 4.1.4) has no native dark mode -> two CSS templates
-  ("W2 Light" / "W2 Dark (Superset 4.x)") are created and one is applied to the
-  dashboards (``--theme light|dark|none``). Switch later in the UI:
-  dashboard > Edit CSS > Load a CSS template.
+* Superset >= 6.0 (this repo: 6.1.0) has native themes -> see config/superset_config.py
+  (THEME_DEFAULT / THEME_DARK). This script registers the UI themes via API.
+* Fallback CSS templates ("W2 Light" / "W2 Dark") are also registered for manual CSS styling.
 
 Every chart query is executed through the Superset API as a smoke test, so a
 failing KPI query fails this script (exit code 1).

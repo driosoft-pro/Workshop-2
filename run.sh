@@ -48,6 +48,12 @@ get_port() {
 
 # --- motor de contenedores (podman primero, docker como respaldo) -----------
 detect_engine() {
+  if [ -S "/run/user/$(id -u)/podman/podman.sock" ]; then
+    export CONTAINER_HOST="unix:///run/user/$(id -u)/podman/podman.sock"
+    if command -v systemctl >/dev/null 2>&1; then
+      systemctl --user import-environment PATH >/dev/null 2>&1 || true
+    fi
+  fi
   if [ -n "${ENGINE_BIN:-}" ]; then return 0; fi
   if command -v podman >/dev/null 2>&1; then ENGINE_BIN="podman"
   elif command -v docker >/dev/null 2>&1; then ENGINE_BIN="docker"
@@ -66,6 +72,7 @@ required_ports() {
 
 # --- compose provider -------------------------------------------------------
 compose() {
+  detect_engine || exit 1
   if [ -z "${COMPOSE_CMD:-}" ]; then
     if command -v podman >/dev/null 2>&1 && podman compose version >/dev/null 2>&1; then
       COMPOSE_CMD="podman compose"
@@ -169,7 +176,11 @@ cmd_up() {
   cmd_status
 }
 
-cmd_down()     { compose down; echo "[run] servicios del proyecto detenidos (volumenes conservados)"; }
+cmd_down() {
+  compose stop 2>/dev/null || true
+  compose down
+  echo "[run] servicios del proyecto detenidos (volumenes conservados)"
+}
 
 cmd_clean_airflow() {
   echo "[run] limpiando logs de Airflow ..."
