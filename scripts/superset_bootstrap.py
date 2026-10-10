@@ -82,10 +82,159 @@ KPI_SQL_PATH = os.path.join(PROJECT_ROOT, "sql", "kpi_queries.sql")
 DASHBOARD_TITLE = "Workshop-2 - KPIs (R1-R4)"
 GRANULARITY_TITLE = "Workshop-2 - Granularity & Data Quality"
 WORKSHOP_TITLE = "Dashboard Spotify & Grammy (R1–R4)"
+
+WORKSHOP_CSS = """
+/* === Estilos Modernos y Vistosos: Dashboard Spotify & Grammy === */
+
+/* Banner intro compacto: una sola línea, sin scroll innecesario */
+#MARKDOWN-r0c0 {
+    margin-bottom: 0px !important;
+}
+#MARKDOWN-r0c0 .dashboard-markdown {
+    padding: 4px 10px !important;
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+    border-left: 4px solid #1DB954 !important;
+    border-radius: 6px !important;
+}
+#MARKDOWN-r0c0 p {
+    margin: 0 !important;
+    font-size: 13.5px !important;
+    line-height: 1.4 !important;
+    color: #334155 !important;
+}
+#MARKDOWN-r0c0 a {
+    color: #1DB954 !important;
+    font-weight: 600 !important;
+    text-decoration: none !important;
+}
+#MARKDOWN-r0c0 a:hover {
+    text-decoration: underline !important;
+}
+
+/* --- Tarjeta 1: Premios Evaluados (Dorado Grammy) --- */
+#CHART-r1c0, div[data-test-chart-name="Premios Evaluados"] {
+    border-top: 4px solid #D4AF37 !important;
+    border-radius: 8px !important;
+    background: linear-gradient(180deg, rgba(212, 175, 55, 0.08) 0%, rgba(255, 255, 255, 0.95) 100%) !important;
+    box-shadow: 0 2px 6px rgba(212, 175, 55, 0.15) !important;
+    transition: all 0.2s ease !important;
+}
+#CHART-r1c0:hover {
+    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.25) !important;
+}
+#CHART-r1c0 .header-line,
+#CHART-r1c0 .big-number-number,
+#CHART-r1c0 [class*="header-line"],
+#CHART-r1c0 text {
+    color: #B8860B !important;
+    fill: #B8860B !important;
+    font-weight: 700 !important;
+}
+#CHART-r1c0 .slice_title,
+#CHART-r1c0 [data-test="slice-header-text"] {
+    color: #997A15 !important;
+    font-weight: 600 !important;
+}
+
+/* --- Tarjeta 2: Cobertura Integración % (Verde Spotify) --- */
+#CHART-r1c1, div[data-test-chart-name="Cobertura Integración %"] {
+    border-top: 4px solid #1DB954 !important;
+    border-radius: 8px !important;
+    background: linear-gradient(180deg, rgba(30, 215, 96, 0.08) 0%, rgba(255, 255, 255, 0.95) 100%) !important;
+    box-shadow: 0 2px 6px rgba(30, 215, 96, 0.15) !important;
+    transition: all 0.2s ease !important;
+}
+#CHART-r1c1:hover {
+    box-shadow: 0 4px 12px rgba(30, 215, 96, 0.25) !important;
+}
+#CHART-r1c1 .header-line,
+#CHART-r1c1 .big-number-number,
+#CHART-r1c1 [class*="header-line"],
+#CHART-r1c1 text {
+    color: #1DB954 !important;
+    fill: #1DB954 !important;
+    font-weight: 700 !important;
+}
+#CHART-r1c1 .slice_title,
+#CHART-r1c1 [data-test="slice-header-text"] {
+    color: #15803D !important;
+    font-weight: 600 !important;
+}
+
+/* --- Tarjeta 3: Artistas Grammy en Spotify (Azul Océano) --- */
+#CHART-r1c2, div[data-test-chart-name="Artistas Grammy en Spotify"] {
+    border-top: 4px solid #0EA5E9 !important;
+    border-radius: 8px !important;
+    background: linear-gradient(180deg, rgba(14, 165, 233, 0.08) 0%, rgba(255, 255, 255, 0.95) 100%) !important;
+    box-shadow: 0 2px 6px rgba(14, 165, 233, 0.15) !important;
+    transition: all 0.2s ease !important;
+}
+#CHART-r1c2:hover {
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.25) !important;
+}
+#CHART-r1c2 .header-line,
+#CHART-r1c2 .big-number-number,
+#CHART-r1c2 [class*="header-line"],
+#CHART-r1c2 text {
+    color: #0284C7 !important;
+    fill: #0284C7 !important;
+    font-weight: 700 !important;
+}
+#CHART-r1c2 .slice_title,
+#CHART-r1c2 [data-test="slice-header-text"] {
+    color: #0369A1 !important;
+    font-weight: 600 !important;
+}
+
+/* --- Tarjeta 4: Cobertura Estricta % (Púrpura Amatista) --- */
+#CHART-r1c3, div[data-test-chart-name="Cobertura Estricta %"] {
+    border-top: 4px solid #8B5CF6 !important;
+    border-radius: 8px !important;
+    background: linear-gradient(180deg, rgba(139, 92, 246, 0.08) 0%, rgba(255, 255, 255, 0.95) 100%) !important;
+    box-shadow: 0 2px 6px rgba(139, 92, 246, 0.15) !important;
+    transition: all 0.2s ease !important;
+}
+#CHART-r1c3:hover {
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.25) !important;
+}
+#CHART-r1c3 .header-line,
+#CHART-r1c3 .big-number-number,
+#CHART-r1c3 [class*="header-line"],
+#CHART-r1c3 text {
+    color: #7C3AED !important;
+    fill: #7C3AED !important;
+    font-weight: 700 !important;
+}
+#CHART-r1c3 .slice_title,
+#CHART-r1c3 [data-test="slice-header-text"] {
+    color: #6D28D9 !important;
+    font-weight: 600 !important;
+}
+
+/* Subencabezados legibles en las 4 tarjetas */
+#CHART-r1c0 .subheader-line,
+#CHART-r1c1 .subheader-line,
+#CHART-r1c2 .subheader-line,
+#CHART-r1c3 .subheader-line {
+    font-weight: 500 !important;
+    color: #475569 !important;
+    margin-top: 2px !important;
+}
+
+/* Encabezados de sección intermedios */
+.dashboard-component-header h2 {
+    font-weight: 600 !important;
+    color: #1E293B !important;
+    border-bottom: 2px solid #E2E8F0 !important;
+    padding-bottom: 6px !important;
+}
+"""
+
 DASHBOARDS: dict[str, dict[str, str]] = {
-    "granularity": {"title": GRANULARITY_TITLE, "slug": "w2-granularity"},
-    "requirements": {"title": DASHBOARD_TITLE, "slug": "w2-requirements"},
-    "workshop": {"title": WORKSHOP_TITLE, "slug": "workshop-dashboard"},
+    "granularity": {"title": GRANULARITY_TITLE, "slug": "w2-granularity", "css": ""},
+    "requirements": {"title": DASHBOARD_TITLE, "slug": "w2-requirements", "css": ""},
+    "workshop": {"title": WORKSHOP_TITLE, "slug": "workshop-dashboard", "css": WORKSHOP_CSS},
 }
 
 # metric_name -> SQL aggregate used by the charts
@@ -444,21 +593,21 @@ CHART_SPECS: list[dict] = [
 
     # ===== Dashboard 3: Workshop Dashboard ==========================================
     _spec(W, "etl_batch_log", "Premios Evaluados", ALL_REQ,
-          "Total de premios Grammy evaluados en el Data Warehouse.",
+          "Total de 4.810 premios Grammy evaluados en el Data Warehouse.",
           _big("rows_fact_grammy_award", "Total Premios Grammy", ",d",
-               color={"r": 201, "g": 162, "b": 39, "a": 1})),
+               color={"r": 201, "g": 162, "b": 39, "a": 1}, subheader_font_size=0.34)),
     _spec(W, "kpi_0_integration_coverage", "Cobertura Integración %", ALL_REQ,
-          "Porcentaje de premios asociados a un artista del catálogo de Spotify.",
-          _big("matched_enriched_pct", "Premios Vinculados a Spotify (%)", ".1f",
-               color={"r": 30, "g": 215, "b": 96, "a": 1})),
+          "51.1% de premios enlazados a Spotify mediante cascada completa (exacto + créditos + fuzzy).",
+          _big("matched_enriched_pct", "Premios Vinculados (% Cascada)", ".1f",
+               color={"r": 30, "g": 215, "b": 96, "a": 1}, subheader_font_size=0.34)),
     _spec(W, "gran_grammy_artists", "Artistas Grammy en Spotify", ALL_REQ,
-          "Artistas reconocidos con el Grammy presentes en el catálogo Spotify.",
-          _big("grammy_artists", "Artistas Galardonados Únicos", ",d",
-               color={"r": 41, "g": 128, "b": 185, "a": 1})),
+          "638 artistas únicos reconocidos con Grammy presentes en Spotify.",
+          _big("grammy_artists", "Artistas Galardonados en Catálogo", ",d",
+               color={"r": 41, "g": 128, "b": 185, "a": 1}, subheader_font_size=0.34)),
     _spec(W, "kpi_0_integration_coverage", "Cobertura Estricta %", ALL_REQ,
-          "Línea base de cruce exacto directo antes de la cascada.",
-          _big("matched_strict_pct", "Cruce Estricto Inicial Directo (%)", ".1f",
-               color={"r": 142, "g": 68, "b": 173, "a": 1})),
+          "31.8% de cruce exacto directo inicial (línea base 1 a 1 sin cascada).",
+          _big("matched_strict_pct", "Cruce Estricto 1:1 (% Línea Base)", ".1f",
+               color={"r": 142, "g": 68, "b": 173, "a": 1}, subheader_font_size=0.34)),
 
     _spec(W, "kpi_1_within_genre_diff", "Diferencia de Popularidad por Género (R1/R2)", "R1,R2",
           "Diferencia de popularidad promedio (Grammy vs No-Grammy) por familia de género musical.",
@@ -521,25 +670,25 @@ LAYOUTS: dict[str, list] = {
         [("chart", "[R4] Top Artists Absent from Spotify", 6, 34), ("md", "r4_guide", 6, 34)],
     ],
     "workshop": [
-        [("md", "workshop_intro", 12, 10)],
-        [("chart", "Premios Evaluados", 3, 16),
-         ("chart", "Cobertura Integración %", 3, 16),
-         ("chart", "Artistas Grammy en Spotify", 3, 16),
-         ("chart", "Cobertura Estricta %", 3, 16)],
+        [("md", "workshop_intro", 12, 4)],
+        [("chart", "Premios Evaluados", 3, 14),
+         ("chart", "Cobertura Integración %", 3, 14),
+         ("chart", "Artistas Grammy en Spotify", 3, 14),
+         ("chart", "Cobertura Estricta %", 3, 14)],
         "R1 & R2: Desempeño Musical y Géneros | R3: Evolución Histórica",
-        [("chart", "Diferencia de Popularidad por Género (R1/R2)", 6, 48),
-         ("chart", "Evolución de Premios por Categoría y Década (R3)", 6, 48)],
+        [("chart", "Diferencia de Popularidad por Género (R1/R2)", 6, 46),
+         ("chart", "Evolución de Premios por Categoría y Década (R3)", 6, 46)],
         "R4: Ranking de Artistas Más Galardonados Presentes en Spotify",
-        [("chart", "Top Artistas Premiados en Spotify (R4)", 12, 38)],
+        [("chart", "Top Artistas Premiados en Spotify (R4)", 12, 36)],
     ],
 }
 
 # Markdown cards (Spanish; no hard-coded figures, numbers come from the charts).
 MARKDOWN: dict[str, str] = {
     "workshop_intro": (
-        "## Dashboard Spotify & Grammy (R1–R4)\n\n"
-        "Pipeline batch analítico Spotify × Premios Grammy (PostgreSQL `music_dw` → Superset).\n\n"
-        "👉 **[Ver Detalle Analítico Completo (KPIs R1–R4) →](/superset/dashboard/w2-requirements/)**"
+        "**Dashboard Spotify & Grammy (R1–R4)** &nbsp;|&nbsp; "
+        "Pipeline batch analítico Spotify × Premios Grammy (PostgreSQL `music_dw` → Superset) &nbsp;·&nbsp; "
+        "[Ver Detalle Analítico Completo (KPIs R1–R4) →](/superset/dashboard/w2-requirements/)"
     ),
     "gran_intro": (
         "## Workshop-2 · Granularidad y calidad de datos\n"
@@ -945,7 +1094,7 @@ def apply_dashboard(client: SupersetClient, dash_id: int, info: dict, layout: di
                     metadata: dict) -> None:
     base = {"dashboard_title": info["title"], "published": True,
             "position_json": json.dumps(layout), "json_metadata": json.dumps(metadata),
-            "css": ""}  # clear any CSS injected by older bootstrap runs
+            "css": info.get("css", "")}
     slim = json.dumps({k: v for k, v in metadata.items() if k not in OPTIONAL_META_KEYS})
     attempts = [
         dict(base, slug=info["slug"]),
