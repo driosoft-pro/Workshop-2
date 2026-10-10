@@ -79,29 +79,6 @@ REQUIREMENTS_CSS = """
     margin-top: 2px !important;
 }
 
-/* --- Cajas de Guía Metodológica (R1, R3, R4) --- */
-#MARKDOWN-r3c1, #MARKDOWN-r8c1, #MARKDOWN-r11c1 {
-    background: rgba(128, 128, 128, 0.08) !important;
-    border: 1px solid rgba(128, 128, 128, 0.30) !important;
-    border-left: 4px solid #0EA5E9 !important;
-    border-radius: 8px !important;
-    padding: 10px 14px !important;
-    box-shadow: 0 2px 6px rgba(128, 128, 128, 0.08) !important;
-}
-#MARKDOWN-r3c1 h3, #MARKDOWN-r8c1 h3, #MARKDOWN-r11c1 h3 {
-    color: inherit !important;
-    font-size: 15px !important;
-    margin-bottom: 8px !important;
-    font-weight: 700 !important;
-}
-#MARKDOWN-r3c1 ul, #MARKDOWN-r8c1 ul, #MARKDOWN-r11c1 ul {
-    padding-left: 18px !important;
-    margin-bottom: 0 !important;
-    font-size: 13px !important;
-    line-height: 1.5 !important;
-    color: inherit !important;
-}
-
 /* --- Títulos de secciones R1-R4 --- */
 .dashboard-component-header h2 {
     font-weight: 600 !important;
