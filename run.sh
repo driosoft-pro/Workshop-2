@@ -48,11 +48,13 @@ get_port() {
 
 # --- motor de contenedores (podman primero, docker como respaldo) -----------
 detect_engine() {
-  if [ -S "/run/user/$(id -u)/podman/podman.sock" ]; then
-    export CONTAINER_HOST="unix:///run/user/$(id -u)/podman/podman.sock"
-    if command -v systemctl >/dev/null 2>&1; then
-      systemctl --user import-environment PATH >/dev/null 2>&1 || true
-    fi
+  if [ ! -f "$HOME/.config/containers/registries.conf" ] && [ ! -f "/etc/containers/registries.conf" ]; then
+    mkdir -p "$HOME/.config/containers"
+    printf 'unqualified-search-registries = ["docker.io"]\n' > "$HOME/.config/containers/registries.conf" 2>/dev/null || true
+  fi
+  if [ ! -f "$HOME/.config/containers/policy.json" ] && [ ! -f "/etc/containers/policy.json" ]; then
+    mkdir -p "$HOME/.config/containers"
+    printf '{\n  "default": [\n    {\n      "type": "insecureAcceptAnything"\n    }\n  ]\n}\n' > "$HOME/.config/containers/policy.json" 2>/dev/null || true
   fi
   if [ -n "${ENGINE_BIN:-}" ]; then return 0; fi
   if command -v podman >/dev/null 2>&1; then ENGINE_BIN="podman"

@@ -1,4 +1,4 @@
-FROM apache/airflow:3.1.8
+FROM docker.io/apache/airflow:3.1.8
 
 COPY requirements.txt /requirements.txt
 
