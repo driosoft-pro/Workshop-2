@@ -81,7 +81,7 @@ KPI_SQL_PATH = os.path.join(PROJECT_ROOT, "sql", "kpi_queries.sql")
 # Kept for backwards compatibility (validate_report / tests): the R1-R4 dashboard.
 DASHBOARD_TITLE = "Workshop-2 - KPIs (R1-R4)"
 GRANULARITY_TITLE = "Workshop-2 - Granularity & Data Quality"
-WORKSHOP_TITLE = "Workshop Dashboard"
+WORKSHOP_TITLE = "Dashboard Spotify & Grammy (R1–R4)"
 DASHBOARDS: dict[str, dict[str, str]] = {
     "granularity": {"title": GRANULARITY_TITLE, "slug": "w2-granularity"},
     "requirements": {"title": DASHBOARD_TITLE, "slug": "w2-requirements"},
@@ -262,12 +262,15 @@ def _table(cols, limit=50, order=None, filters=None):
     return ("table", form)
 
 
-def _big(metric, subheader, fmt=".1f"):
+def _big(metric, subheader, fmt=".1f", color=None, header_font_size=0.55, subheader_font_size=0.28):
+    form = {
+        "metric": metric, "subheader": subheader, "y_axis_format": fmt,
+        "header_font_size": header_font_size, "subheader_font_size": subheader_font_size,
+    }
+    if color:
+        form["color_picker"] = color
     return [
-        ("big_number_total", {
-            "metric": metric, "subheader": subheader, "y_axis_format": fmt,
-            "header_font_size": 0.5, "subheader_font_size": 0.15,
-        }),
+        ("big_number_total", form),
         _table([metric], 10),
     ]
 
@@ -440,37 +443,41 @@ CHART_SPECS: list[dict] = [
                   filters=[_simple_filter("recognition_tier", "==", "C")])]),
 
     # ===== Dashboard 3: Workshop Dashboard ==========================================
-    _spec(W, "etl_batch_log", "[Workshop Header] Premios Evaluados", ALL_REQ,
+    _spec(W, "etl_batch_log", "Premios Evaluados", ALL_REQ,
           "Total de premios Grammy evaluados en el Data Warehouse.",
-          _big("rows_fact_grammy_award", "Total Premios Grammy", ",d")),
-    _spec(W, "kpi_0_integration_coverage", "[Workshop Header] Cobertura Integración %", ALL_REQ,
+          _big("rows_fact_grammy_award", "Total Premios Grammy", ",d",
+               color={"r": 201, "g": 162, "b": 39, "a": 1})),
+    _spec(W, "kpi_0_integration_coverage", "Cobertura Integración %", ALL_REQ,
           "Porcentaje de premios asociados a un artista del catálogo de Spotify.",
-          _big("matched_enriched_pct", "Premios Vinculados a Spotify (%)", ".1f")),
-    _spec(W, "gran_grammy_artists", "[Workshop Header] Artistas Grammy en Spotify", ALL_REQ,
+          _big("matched_enriched_pct", "Premios Vinculados a Spotify (%)", ".1f",
+               color={"r": 30, "g": 215, "b": 96, "a": 1})),
+    _spec(W, "gran_grammy_artists", "Artistas Grammy en Spotify", ALL_REQ,
           "Artistas reconocidos con el Grammy presentes en el catálogo Spotify.",
-          _big("grammy_artists", "Artistas Galardonados Únicos", ",d")),
-    _spec(W, "kpi_0_integration_coverage", "[Workshop Header] Cobertura Estricta %", ALL_REQ,
+          _big("grammy_artists", "Artistas Galardonados Únicos", ",d",
+               color={"r": 41, "g": 128, "b": 185, "a": 1})),
+    _spec(W, "kpi_0_integration_coverage", "Cobertura Estricta %", ALL_REQ,
           "Línea base de cruce exacto directo antes de la cascada.",
-          _big("matched_strict_pct", "Cruce Estricto Inicial (%)", ".1f")),
+          _big("matched_strict_pct", "Cruce Estricto Inicial Directo (%)", ".1f",
+               color={"r": 142, "g": 68, "b": 173, "a": 1})),
 
-    _spec(W, "kpi_1_within_genre_diff", "[Workshop] Diferencia de Popularidad por Género (R1/R2)", "R1,R2",
+    _spec(W, "kpi_1_within_genre_diff", "Diferencia de Popularidad por Género (R1/R2)", "R1,R2",
           "Diferencia de popularidad promedio (Grammy vs No-Grammy) por familia de género musical.",
           _hbar("genre_family", "diff", 15, ".1f", ascending=True)
-          + [_table(["genre_family", "diff", "mean_pop_grammy", "mean_pop_non"], 20)]),
+          + [_table(["genre_family", "diff", "mean_pop_grammy", "mean_pop_non"], 50)]),
 
-    _spec(W, "workshop_awards_breakdown", "[Workshop] Evolución de Premios por Categoría y Década (R3)", "R3",
+    _spec(W, "workshop_awards_breakdown", "Evolución de Premios por Categoría y Década (R3)", "R3",
           "Distribución histórica de premios Grammy por década y familia de categoría.",
           [("echarts_timeseries_bar", {"x_axis": "decade", "groupby": ["category_family"],
                                        "metrics": ["awards"], "stack": True, "show_legend": True,
-                                       "y_axis_format": ",d", "row_limit": 100}),
+                                       "y_axis_format": ",d", "row_limit": 500}),
            ("dist_bar", {"groupby": ["decade"], "columns": ["category_family"],
-                         "metrics": ["awards"], "bar_stacked": True, "row_limit": 100}),
-           _table(["decade", "category_family", "awards"], 100)]),
+                         "metrics": ["awards"], "bar_stacked": True, "row_limit": 500}),
+           _table(["decade", "category_family", "awards"], 500)]),
 
-    _spec(W, "kpi_4_top_awarded_artists_on_spotify", "[Workshop] Top Artistas Premiados en Spotify (R4)", "R4",
+    _spec(W, "kpi_4_top_awarded_artists_on_spotify", "Top Artistas Premiados en Spotify (R4)", "R4",
           "Artistas más galardonados con presencia en el catálogo de Spotify.",
           [_table(["rank", "artist_display_name", "awards", "spotify_track_count",
-                   "first_award_year", "last_award_year"], 15, order=[["awards", False]])]),
+                   "first_award_year", "last_award_year"], 50, order=[["awards", False]])]),
 ]
 
 # --- Layouts: str = section header, list = one row of (kind, ref, width, height) ----------
@@ -515,24 +522,24 @@ LAYOUTS: dict[str, list] = {
     ],
     "workshop": [
         [("md", "workshop_intro", 12, 10)],
-        [("chart", "[Workshop Header] Premios Evaluados", 3, 16),
-         ("chart", "[Workshop Header] Cobertura Integración %", 3, 16),
-         ("chart", "[Workshop Header] Artistas Grammy en Spotify", 3, 16),
-         ("chart", "[Workshop Header] Cobertura Estricta %", 3, 16)],
+        [("chart", "Premios Evaluados", 3, 16),
+         ("chart", "Cobertura Integración %", 3, 16),
+         ("chart", "Artistas Grammy en Spotify", 3, 16),
+         ("chart", "Cobertura Estricta %", 3, 16)],
         "R1 & R2: Desempeño Musical y Géneros | R3: Evolución Histórica",
-        [("chart", "[Workshop] Diferencia de Popularidad por Género (R1/R2)", 6, 48),
-         ("chart", "[Workshop] Evolución de Premios por Categoría y Década (R3)", 6, 48)],
+        [("chart", "Diferencia de Popularidad por Género (R1/R2)", 6, 48),
+         ("chart", "Evolución de Premios por Categoría y Década (R3)", 6, 48)],
         "R4: Ranking de Artistas Más Galardonados Presentes en Spotify",
-        [("chart", "[Workshop] Top Artistas Premiados en Spotify (R4)", 12, 38)],
+        [("chart", "Top Artistas Premiados en Spotify (R4)", 12, 38)],
     ],
 }
 
 # Markdown cards (Spanish; no hard-coded figures, numbers come from the charts).
 MARKDOWN: dict[str, str] = {
     "workshop_intro": (
-        "## Workshop Dashboard · Resumen Ejecutivo (R1–R4)\n"
-        "**Pipeline batch analítico Spotify × Premios Grammy** (PostgreSQL `music_dw` → Superset).\n"
-        "Tablero consolidado con indicadores clave (KPIs R1–R4), sin saturación y con filtros dinámicos."
+        "## Dashboard Spotify & Grammy (R1–R4)\n\n"
+        "Pipeline batch analítico Spotify × Premios Grammy (PostgreSQL `music_dw` → Superset).\n\n"
+        "👉 **[Ver Detalle Analítico Completo (KPIs R1–R4) →](/superset/dashboard/w2-requirements/)**"
     ),
     "gran_intro": (
         "## Workshop-2 · Granularidad y calidad de datos\n"
@@ -573,10 +580,10 @@ MARKDOWN: dict[str, str] = {
 # --- Native filters: column must exist in the datasets of the charts to be scoped --------
 FILTER_DEFS: dict[str, list[dict]] = {
     "workshop": [
-        {"name": "decade", "column": "decade"},
-        {"name": "category_family", "column": "category_family"},
-        {"name": "genre_family", "column": "genre_family"},
-        {"name": "match_method", "column": "match_method"},
+        {"name": "Década", "column": "decade", "description": "Filtrar por década del premio Grammy (1950s - 2010s)"},
+        {"name": "Categoría Grammy", "column": "category_family", "description": "Familia de categoría Grammy (Pop, Rock, Classical, General Field...)"},
+        {"name": "Género Musical", "column": "genre_family", "description": "Familia de género musical en Spotify (Pop, Rock, Hip-Hop, Electronic...)"},
+        {"name": "Método de Emparejamiento", "column": "match_method", "description": "Método de cruce entre Grammy y Spotify (exact, split, workers...)"},
     ],
     "granularity": [
         {"name": "decade", "column": "decade"},
@@ -911,7 +918,7 @@ def build_filters(key: str, dash_chart_ids: list[int], chart_dataset: dict[int, 
         targets = [{"datasetId": ds_id, "column": {"name": col}} for ds_id in target_datasets]
 
         filters.append({
-            "id": f"NATIVE_FILTER-w2-{key}-{spec['name']}",
+            "id": f"NATIVE_FILTER-w2-{key}-{spec['column']}",
             "type": "NATIVE_FILTER",
             "name": spec["name"],
             "description": spec.get("description", ""),
@@ -975,13 +982,29 @@ def main(argv: list[str] | None = None) -> int:
             dataset_cols[dataset_id] = columns
 
     dashboard_ids: dict[str, int] = {}
+    existing_dashboards_by_slug = client.list("/api/v1/dashboard/", "slug")
     for key, info in DASHBOARDS.items():
-        record = client.ensure(
-            "/api/v1/dashboard/", "dashboard_title", info["title"],
-            {"dashboard_title": info["title"], "published": True, "json_metadata": "{}"},
-            update_payload={"dashboard_title": info["title"], "published": True},
-        )
-        dashboard_ids[key] = record["id"]
+        existing = existing_dashboards_by_slug.get(info["slug"])
+        if existing:
+            status, out = client.call("PUT", f"/api/v1/dashboard/{existing['id']}", {
+                "dashboard_title": info["title"], "slug": info["slug"], "published": True
+            })
+            dashboard_ids[key] = existing["id"]
+            print(f"[superset-bootstrap] updated dashboard: {info['title']} (id={existing['id']})")
+        else:
+            record = client.ensure(
+                "/api/v1/dashboard/", "dashboard_title", info["title"],
+                {"dashboard_title": info["title"], "slug": info["slug"], "published": True, "json_metadata": "{}"},
+                update_payload={"dashboard_title": info["title"], "slug": info["slug"], "published": True},
+            )
+            dashboard_ids[key] = record["id"]
+
+    # Limpiar charts obsoletos con prefijos anteriores [Workshop Header] o [Workshop]
+    existing_charts = client.list("/api/v1/chart/", "slice_name")
+    for name, item in existing_charts.items():
+        if name.startswith("[Workshop Header]") or name.startswith("[Workshop]"):
+            client.call("DELETE", f"/api/v1/chart/{item['id']}")
+            print(f"[superset-bootstrap] deleted obsolete chart: {name} (id={item['id']})")
 
     chart_ids: dict[str, dict[str, int]] = {key: {} for key in DASHBOARDS}
     chart_dataset: dict[int, int] = {}
