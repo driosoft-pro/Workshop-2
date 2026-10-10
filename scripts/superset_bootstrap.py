@@ -1,27 +1,18 @@
-"""Bootstrap the Apache Superset BI layer for Workshop-2 (two dashboards).
+"""Bootstrap the Apache Superset BI layer for Workshop-2.
 
-Creates (idempotently) on top of the analytical Data Warehouse ``music_dw``:
+Orquestador central que reconcilia en Superset (de forma idempotente):
+  - Conexión a base de datos PostgreSQL `music_dw`
+  - Datasets virtuales y consultas analíticas (kpi_* y consultas inline)
+  - Gráficos métricos y analíticos asociados a R1–R4 y calidad de datos
+  - Dashboards interactivos organizados en submódulos:
+      * Dashboard Spotify & Grammy (R1–R4) (scripts/dashboards/workshop.py)
+      * Workshop-2 - Granularity & Data Quality (scripts/dashboards/granularity.py)
+      * Workshop-2 - KPIs (R1-R4) (scripts/dashboards/requirements.py)
 
-* database connection ``music_dw``
-* virtual datasets    ``kpi_*`` (sql/kpi_queries.sql) + inline ``gran_*`` datasets
-* charts              one or more per analytical requirement R1-R4 + granularity
-* TWO dashboards, each a single page (no inner tabs), responsive 12-column grid,
-  explicit layout (``position_json``), native filters scoped per chart, cross-filtering:
-
-  1. "Workshop-2 - Granularity & Data Quality"  (/superset/dashboard/w2-granularity/)
-  2. "Workshop-2 - KPIs (R1-R4)"                (/superset/dashboard/w2-requirements/)
-
-Light / dark: handled natively by Superset (>= 6.0; this repo: 6.1.0) from
-config/superset_config.py (THEME_DEFAULT / THEME_DARK). This script neither
-registers themes via API nor injects CSS into dashboards.
-
-Every chart query is executed through the Superset API as a smoke test, so a
-failing KPI query fails this script (exit code 1).
-
-Usage (inside the compose network):
+Uso en red Docker / Podman:
     python /app/scripts/superset_bootstrap.py
-On the host, with the UI published on :8088:
-    SUPERSET_URL=http://localhost:8088 python -m scripts.superset_bootstrap
+Uso en host:
+    python -m scripts.superset_bootstrap
 """
 
 from __future__ import annotations
@@ -33,6 +24,85 @@ import sys
 import urllib.error
 import urllib.request
 from http.cookiejar import CookieJar
+
+# Garantizar resolución de módulos tanto en ejecución directa desde el host como en contenedor
+_SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+_REPO_ROOT = os.path.abspath(os.path.join(_SCRIPT_DIR, ".."))
+for _p in (_SCRIPT_DIR, _REPO_ROOT):
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
+
+try:
+    from scripts.dashboards import (
+        ALL_REQ,
+        ALIAS_COLUMNS,
+        CHART_SPECS,
+        DASHBOARDS,
+        DASHBOARD_TITLE,
+        DATASET_SPECS,
+        ETL_BATCH_LOG_SQL,
+        FILTER_DEFS,
+        G,
+        GRANULARITY_CSS,
+        GRANULARITY_SLUG,
+        GRANULARITY_TITLE,
+        INLINE_QUERIES,
+        LABEL_COLORS,
+        LAYOUTS,
+        MARKDOWN,
+        OPTIONAL_META_KEYS,
+        R,
+        REQUIREMENTS_CSS,
+        REQUIREMENTS_SLUG,
+        REQUIREMENTS_TITLE,
+        W,
+        WORKSHOP_CSS,
+        WORKSHOP_SLUG,
+        WORKSHOP_TITLE,
+        _big,
+        _hbar,
+        _line,
+        _simple_filter,
+        _spec,
+        _table,
+        load_kpi_queries,
+    )
+except ImportError:
+    from dashboards import (
+        ALL_REQ,
+        ALIAS_COLUMNS,
+        CHART_SPECS,
+        DASHBOARDS,
+        DASHBOARD_TITLE,
+        DATASET_SPECS,
+        ETL_BATCH_LOG_SQL,
+        FILTER_DEFS,
+        G,
+        GRANULARITY_CSS,
+        GRANULARITY_SLUG,
+        GRANULARITY_TITLE,
+        INLINE_QUERIES,
+        LABEL_COLORS,
+        LAYOUTS,
+        MARKDOWN,
+        OPTIONAL_META_KEYS,
+        R,
+        REQUIREMENTS_CSS,
+        REQUIREMENTS_SLUG,
+        REQUIREMENTS_TITLE,
+        W,
+        WORKSHOP_CSS,
+        WORKSHOP_SLUG,
+        WORKSHOP_TITLE,
+        _big,
+        _hbar,
+        _line,
+        _simple_filter,
+        _spec,
+        _table,
+        load_kpi_queries,
+    )
+
 
 def _load_env() -> None:
     """Best-effort loader for .env when executing on the host without compose."""
@@ -78,1064 +148,37 @@ DW_URI = _resolve_dw_uri()
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 KPI_SQL_PATH = os.path.join(PROJECT_ROOT, "sql", "kpi_queries.sql")
 
-# Kept for backwards compatibility (validate_report / tests): the R1-R4 dashboard.
-DASHBOARD_TITLE = "Workshop-2 - KPIs (R1-R4)"
-GRANULARITY_TITLE = "Workshop-2 - Granularity & Data Quality"
-WORKSHOP_TITLE = "Dashboard Spotify & Grammy (R1–R4)"
-
-WORKSHOP_CSS = """
-/* ====================================================================
-   DASHBOARD SPOTIFY & GRAMMY (R1-R4) - ESTILOS PREMIUM
-   ==================================================================== */
-
-/* --- Banner intro compacto (una sola línea, sin scroll) --- */
-#MARKDOWN-r0c0 {
-    margin-bottom: 2px !important;
-}
-#MARKDOWN-r0c0 .dashboard-markdown {
-    padding: 6px 12px !important;
-    background: #f8fafc !important;
-    border: 1px solid #e2e8f0 !important;
-    border-left: 4px solid #1DB954 !important;
-    border-radius: 6px !important;
-}
-#MARKDOWN-r0c0 p {
-    margin: 0 !important;
-    font-size: 13.5px !important;
-    line-height: 1.4 !important;
-    color: #334155 !important;
-}
-#MARKDOWN-r0c0 a {
-    color: #1DB954 !important;
-    font-weight: 600 !important;
-    text-decoration: none !important;
-}
-#MARKDOWN-r0c0 a:hover {
-    text-decoration: underline !important;
-}
-
-/* ====================================================================
-   TARJETAS KPI / HEADERS (4 COLORES VIBRANTES)
-   ==================================================================== */
-
-/* Contenedores base de tarjeta */
-#CHART-r1c0, #CHART-r1c1, #CHART-r1c2, #CHART-r1c3,
-.dashboard-chart-id-34, .dashboard-chart-id-35, .dashboard-chart-id-36, .dashboard-chart-id-37 {
-    border-radius: 10px !important;
-    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
-}
-#CHART-r1c0:hover, #CHART-r1c1:hover, #CHART-r1c2:hover, #CHART-r1c3:hover,
-.dashboard-chart-id-34:hover, .dashboard-chart-id-35:hover, .dashboard-chart-id-36:hover, .dashboard-chart-id-37:hover {
-    transform: translateY(-2px) !important;
-}
-
-/* Asegurar que el fondo del slice sea transparente para ver el gradiente */
-#CHART-r1c0 .chart-slice, #CHART-r1c0 .dashboard-chart, #CHART-r1c0 .slice_container,
-#CHART-r1c1 .chart-slice, #CHART-r1c1 .dashboard-chart, #CHART-r1c1 .slice_container,
-#CHART-r1c2 .chart-slice, #CHART-r1c2 .dashboard-chart, #CHART-r1c2 .slice_container,
-#CHART-r1c3 .chart-slice, #CHART-r1c3 .dashboard-chart, #CHART-r1c3 .slice_container {
-    background: transparent !important;
-}
-
-/* --- TARJETA 1: Premios Evaluados (Dorado Grammy) --- */
-#CHART-r1c0, .dashboard-chart-id-34, div[data-test-chart-name="Premios Evaluados"] {
-    border-top: 4px solid #D4AF37 !important;
-    border-left: 1px solid rgba(212, 175, 55, 0.25) !important;
-    border-right: 1px solid rgba(212, 175, 55, 0.25) !important;
-    border-bottom: 1px solid rgba(212, 175, 55, 0.25) !important;
-    background: linear-gradient(180deg, rgba(212, 175, 55, 0.12) 0%, rgba(255, 255, 255, 0.98) 100%) !important;
-    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.15) !important;
-}
-#CHART-r1c0:hover, .dashboard-chart-id-34:hover {
-    box-shadow: 0 6px 18px rgba(212, 175, 55, 0.25) !important;
-}
-#CHART-r1c0 .header-title, #CHART-r1c0 [data-test="slice-header-text"],
-.dashboard-chart-id-34 [data-test="slice-header-text"] {
-    color: #997A15 !important;
-    font-weight: 700 !important;
-    font-size: 14px !important;
-}
-#CHART-r1c0 .header-line, #CHART-r1c0 .header-line *,
-.dashboard-chart-id-34 .header-line, .dashboard-chart-id-34 .header-line *,
-#CHART-r1c0 .superset-legacy-chart-big-number .header-line {
-    color: #C9A227 !important;
-    font-weight: 800 !important;
-}
-#CHART-r1c0 .subheader-line, .dashboard-chart-id-34 .subheader-line {
-    color: #64748B !important;
-    font-weight: 600 !important;
-    font-size: 12.5px !important;
-    margin-top: 2px !important;
-}
-
-/* --- TARJETA 2: Cobertura Integración % (Verde Spotify) --- */
-#CHART-r1c1, .dashboard-chart-id-35, div[data-test-chart-name="Cobertura Integración %"] {
-    border-top: 4px solid #1DB954 !important;
-    border-left: 1px solid rgba(30, 215, 96, 0.25) !important;
-    border-right: 1px solid rgba(30, 215, 96, 0.25) !important;
-    border-bottom: 1px solid rgba(30, 215, 96, 0.25) !important;
-    background: linear-gradient(180deg, rgba(30, 215, 96, 0.12) 0%, rgba(255, 255, 255, 0.98) 100%) !important;
-    box-shadow: 0 4px 12px rgba(30, 215, 96, 0.15) !important;
-}
-#CHART-r1c1:hover, .dashboard-chart-id-35:hover {
-    box-shadow: 0 6px 18px rgba(30, 215, 96, 0.25) !important;
-}
-#CHART-r1c1 .header-title, #CHART-r1c1 [data-test="slice-header-text"],
-.dashboard-chart-id-35 [data-test="slice-header-text"] {
-    color: #15803D !important;
-    font-weight: 700 !important;
-    font-size: 14px !important;
-}
-#CHART-r1c1 .header-line, #CHART-r1c1 .header-line *,
-.dashboard-chart-id-35 .header-line, .dashboard-chart-id-35 .header-line *,
-#CHART-r1c1 .superset-legacy-chart-big-number .header-line {
-    color: #1DB954 !important;
-    font-weight: 800 !important;
-}
-#CHART-r1c1 .header-line::after, .dashboard-chart-id-35 .header-line::after {
-    content: "%" !important;
-    font-size: 0.65em !important;
-    font-weight: 700 !important;
-    margin-left: 2px !important;
-    color: #1DB954 !important;
-}
-#CHART-r1c1 .subheader-line, .dashboard-chart-id-35 .subheader-line {
-    color: #64748B !important;
-    font-weight: 600 !important;
-    font-size: 12.5px !important;
-    margin-top: 2px !important;
-}
-
-/* --- TARJETA 3: Artistas Grammy en Spotify (Azul Océano) --- */
-#CHART-r1c2, .dashboard-chart-id-36, div[data-test-chart-name="Artistas Grammy en Spotify"] {
-    border-top: 4px solid #0EA5E9 !important;
-    border-left: 1px solid rgba(14, 165, 233, 0.25) !important;
-    border-right: 1px solid rgba(14, 165, 233, 0.25) !important;
-    border-bottom: 1px solid rgba(14, 165, 233, 0.25) !important;
-    background: linear-gradient(180deg, rgba(14, 165, 233, 0.12) 0%, rgba(255, 255, 255, 0.98) 100%) !important;
-    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.15) !important;
-}
-#CHART-r1c2:hover, .dashboard-chart-id-36:hover {
-    box-shadow: 0 6px 18px rgba(14, 165, 233, 0.25) !important;
-}
-#CHART-r1c2 .header-title, #CHART-r1c2 [data-test="slice-header-text"],
-.dashboard-chart-id-36 [data-test="slice-header-text"] {
-    color: #0369A1 !important;
-    font-weight: 700 !important;
-    font-size: 14px !important;
-}
-#CHART-r1c2 .header-line, #CHART-r1c2 .header-line *,
-.dashboard-chart-id-36 .header-line, .dashboard-chart-id-36 .header-line *,
-#CHART-r1c2 .superset-legacy-chart-big-number .header-line {
-    color: #0284C7 !important;
-    font-weight: 800 !important;
-}
-#CHART-r1c2 .subheader-line, .dashboard-chart-id-36 .subheader-line {
-    color: #64748B !important;
-    font-weight: 600 !important;
-    font-size: 12.5px !important;
-    margin-top: 2px !important;
-}
-
-/* --- TARJETA 4: Cobertura Estricta % (Púrpura Amatista) --- */
-#CHART-r1c3, .dashboard-chart-id-37, div[data-test-chart-name="Cobertura Estricta %"] {
-    border-top: 4px solid #8B5CF6 !important;
-    border-left: 1px solid rgba(139, 92, 246, 0.25) !important;
-    border-right: 1px solid rgba(139, 92, 246, 0.25) !important;
-    border-bottom: 1px solid rgba(139, 92, 246, 0.25) !important;
-    background: linear-gradient(180deg, rgba(139, 92, 246, 0.12) 0%, rgba(255, 255, 255, 0.98) 100%) !important;
-    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.15) !important;
-}
-#CHART-r1c3:hover, .dashboard-chart-id-37:hover {
-    box-shadow: 0 6px 18px rgba(139, 92, 246, 0.25) !important;
-}
-#CHART-r1c3 .header-title, #CHART-r1c3 [data-test="slice-header-text"],
-.dashboard-chart-id-37 [data-test="slice-header-text"] {
-    color: #6D28D9 !important;
-    font-weight: 700 !important;
-    font-size: 14px !important;
-}
-#CHART-r1c3 .header-line, #CHART-r1c3 .header-line *,
-.dashboard-chart-id-37 .header-line, .dashboard-chart-id-37 .header-line *,
-#CHART-r1c3 .superset-legacy-chart-big-number .header-line {
-    color: #7C3AED !important;
-    font-weight: 800 !important;
-}
-#CHART-r1c3 .header-line::after, .dashboard-chart-id-37 .header-line::after {
-    content: "%" !important;
-    font-size: 0.65em !important;
-    font-weight: 700 !important;
-    margin-left: 2px !important;
-    color: #7C3AED !important;
-}
-#CHART-r1c3 .subheader-line, .dashboard-chart-id-37 .subheader-line {
-    color: #64748B !important;
-    font-weight: 600 !important;
-    font-size: 12.5px !important;
-    margin-top: 2px !important;
-}
-
-/* --- Títulos de secciones intermedias --- */
-.dashboard-component-header h2 {
-    font-weight: 600 !important;
-    color: #1E293B !important;
-    border-bottom: 2px solid #E2E8F0 !important;
-    padding-bottom: 6px !important;
-}
-"""
-
-GRANULARITY_CSS = """
-/* ====================================================================
-   GRANULARIDAD & CALIDAD DE DATOS - ESTILOS PREMIUM
-   ==================================================================== */
-
-/* --- Banner intro compacto --- */
-#MARKDOWN-r0c0 {
-    margin-bottom: 2px !important;
-}
-#MARKDOWN-r0c0 .dashboard-markdown {
-    padding: 6px 12px !important;
-    background: #f8fafc !important;
-    border: 1px solid #e2e8f0 !important;
-    border-left: 4px solid #0EA5E9 !important;
-    border-radius: 6px !important;
-}
-#MARKDOWN-r0c0 p {
-    margin: 0 !important;
-    font-size: 13.5px !important;
-    line-height: 1.4 !important;
-    color: #334155 !important;
-}
-#MARKDOWN-r0c0 a {
-    color: #0284C7 !important;
-    font-weight: 600 !important;
-    text-decoration: none !important;
-}
-#MARKDOWN-r0c0 a:hover {
-    text-decoration: underline !important;
-}
-
-/* ====================================================================
-   TARJETAS KPI / HEADERS (4 COLORES VIBRANTES)
-   ==================================================================== */
-
-#CHART-r1c0, #CHART-r1c1, #CHART-r1c2, #CHART-r1c3,
-.dashboard-chart-id-41, .dashboard-chart-id-42, .dashboard-chart-id-43, .dashboard-chart-id-44 {
-    border-radius: 10px !important;
-    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
-}
-#CHART-r1c0:hover, #CHART-r1c1:hover, #CHART-r1c2:hover, #CHART-r1c3:hover,
-.dashboard-chart-id-41:hover, .dashboard-chart-id-42:hover, .dashboard-chart-id-43:hover, .dashboard-chart-id-44:hover {
-    transform: translateY(-2px) !important;
-}
-
-#CHART-r1c0 .chart-slice, #CHART-r1c0 .dashboard-chart, #CHART-r1c0 .slice_container,
-#CHART-r1c1 .chart-slice, #CHART-r1c1 .dashboard-chart, #CHART-r1c1 .slice_container,
-#CHART-r1c2 .chart-slice, #CHART-r1c2 .dashboard-chart, #CHART-r1c2 .slice_container,
-#CHART-r1c3 .chart-slice, #CHART-r1c3 .dashboard-chart, #CHART-r1c3 .slice_container {
-    background: transparent !important;
-}
-
-/* --- TARJETA 1: Premios Cargados (Dorado Grammy) --- */
-#CHART-r1c0, .dashboard-chart-id-41, div[data-test-chart-name="Premios Cargados"] {
-    border-top: 4px solid #D4AF37 !important;
-    border-left: 1px solid rgba(212, 175, 55, 0.25) !important;
-    border-right: 1px solid rgba(212, 175, 55, 0.25) !important;
-    border-bottom: 1px solid rgba(212, 175, 55, 0.25) !important;
-    background: linear-gradient(180deg, rgba(212, 175, 55, 0.12) 0%, rgba(255, 255, 255, 0.98) 100%) !important;
-    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.15) !important;
-}
-#CHART-r1c0:hover, .dashboard-chart-id-41:hover {
-    box-shadow: 0 6px 18px rgba(212, 175, 55, 0.25) !important;
-}
-#CHART-r1c0 .header-title, #CHART-r1c0 [data-test="slice-header-text"],
-.dashboard-chart-id-41 [data-test="slice-header-text"] {
-    color: #997A15 !important;
-    font-weight: 700 !important;
-    font-size: 14px !important;
-}
-#CHART-r1c0 .header-line, #CHART-r1c0 .header-line *,
-.dashboard-chart-id-41 .header-line, .dashboard-chart-id-41 .header-line *,
-#CHART-r1c0 .superset-legacy-chart-big-number .header-line {
-    color: #C9A227 !important;
-    font-weight: 800 !important;
-}
-#CHART-r1c0 .subheader-line, .dashboard-chart-id-41 .subheader-line {
-    color: #64748B !important;
-    font-weight: 600 !important;
-    font-size: 12.5px !important;
-    margin-top: 2px !important;
-}
-
-/* --- TARJETA 2: Cobertura Enriquecida % (Verde Spotify) --- */
-#CHART-r1c1, .dashboard-chart-id-42, div[data-test-chart-name="Cobertura Enriquecida %"] {
-    border-top: 4px solid #1DB954 !important;
-    border-left: 1px solid rgba(30, 215, 96, 0.25) !important;
-    border-right: 1px solid rgba(30, 215, 96, 0.25) !important;
-    border-bottom: 1px solid rgba(30, 215, 96, 0.25) !important;
-    background: linear-gradient(180deg, rgba(30, 215, 96, 0.12) 0%, rgba(255, 255, 255, 0.98) 100%) !important;
-    box-shadow: 0 4px 12px rgba(30, 215, 96, 0.15) !important;
-}
-#CHART-r1c1:hover, .dashboard-chart-id-42:hover {
-    box-shadow: 0 6px 18px rgba(30, 215, 96, 0.25) !important;
-}
-#CHART-r1c1 .header-title, #CHART-r1c1 [data-test="slice-header-text"],
-.dashboard-chart-id-42 [data-test="slice-header-text"] {
-    color: #15803D !important;
-    font-weight: 700 !important;
-    font-size: 14px !important;
-}
-#CHART-r1c1 .header-line, #CHART-r1c1 .header-line *,
-.dashboard-chart-id-42 .header-line, .dashboard-chart-id-42 .header-line *,
-#CHART-r1c1 .superset-legacy-chart-big-number .header-line {
-    color: #1DB954 !important;
-    font-weight: 800 !important;
-}
-#CHART-r1c1 .header-line::after, .dashboard-chart-id-42 .header-line::after {
-    content: "%" !important;
-    font-size: 0.65em !important;
-    font-weight: 700 !important;
-    margin-left: 2px !important;
-    color: #1DB954 !important;
-}
-#CHART-r1c1 .subheader-line, .dashboard-chart-id-42 .subheader-line {
-    color: #64748B !important;
-    font-weight: 600 !important;
-    font-size: 12.5px !important;
-    margin-top: 2px !important;
-}
-
-/* --- TARJETA 3: Cobertura Estricta (Línea Base) (Púrpura Amatista) --- */
-#CHART-r1c2, .dashboard-chart-id-43, div[data-test-chart-name="Cobertura Estricta (Línea Base)"] {
-    border-top: 4px solid #8B5CF6 !important;
-    border-left: 1px solid rgba(139, 92, 246, 0.25) !important;
-    border-right: 1px solid rgba(139, 92, 246, 0.25) !important;
-    border-bottom: 1px solid rgba(139, 92, 246, 0.25) !important;
-    background: linear-gradient(180deg, rgba(139, 92, 246, 0.12) 0%, rgba(255, 255, 255, 0.98) 100%) !important;
-    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.15) !important;
-}
-#CHART-r1c2:hover, .dashboard-chart-id-43:hover {
-    box-shadow: 0 6px 18px rgba(139, 92, 246, 0.25) !important;
-}
-#CHART-r1c2 .header-title, #CHART-r1c2 [data-test="slice-header-text"],
-.dashboard-chart-id-43 [data-test="slice-header-text"] {
-    color: #6D28D9 !important;
-    font-weight: 700 !important;
-    font-size: 14px !important;
-}
-#CHART-r1c2 .header-line, #CHART-r1c2 .header-line *,
-.dashboard-chart-id-43 .header-line, .dashboard-chart-id-43 .header-line *,
-#CHART-r1c2 .superset-legacy-chart-big-number .header-line {
-    color: #7C3AED !important;
-    font-weight: 800 !important;
-}
-#CHART-r1c2 .header-line::after, .dashboard-chart-id-43 .header-line::after {
-    content: "%" !important;
-    font-size: 0.65em !important;
-    font-weight: 700 !important;
-    margin-left: 2px !important;
-    color: #7C3AED !important;
-}
-#CHART-r1c2 .subheader-line, .dashboard-chart-id-43 .subheader-line {
-    color: #64748B !important;
-    font-weight: 600 !important;
-    font-size: 12.5px !important;
-    margin-top: 2px !important;
-}
-
-/* --- TARJETA 4: Artistas Grammy Vinculados (Azul Océano) --- */
-#CHART-r1c3, .dashboard-chart-id-44, div[data-test-chart-name="Artistas Grammy Vinculados"] {
-    border-top: 4px solid #0EA5E9 !important;
-    border-left: 1px solid rgba(14, 165, 233, 0.25) !important;
-    border-right: 1px solid rgba(14, 165, 233, 0.25) !important;
-    border-bottom: 1px solid rgba(14, 165, 233, 0.25) !important;
-    background: linear-gradient(180deg, rgba(14, 165, 233, 0.12) 0%, rgba(255, 255, 255, 0.98) 100%) !important;
-    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.15) !important;
-}
-#CHART-r1c3:hover, .dashboard-chart-id-44:hover {
-    box-shadow: 0 6px 18px rgba(14, 165, 233, 0.25) !important;
-}
-#CHART-r1c3 .header-title, #CHART-r1c3 [data-test="slice-header-text"],
-.dashboard-chart-id-44 [data-test="slice-header-text"] {
-    color: #0369A1 !important;
-    font-weight: 700 !important;
-    font-size: 14px !important;
-}
-#CHART-r1c3 .header-line, #CHART-r1c3 .header-line *,
-.dashboard-chart-id-44 .header-line, .dashboard-chart-id-44 .header-line *,
-#CHART-r1c3 .superset-legacy-chart-big-number .header-line {
-    color: #0284C7 !important;
-    font-weight: 800 !important;
-}
-#CHART-r1c3 .subheader-line, .dashboard-chart-id-44 .subheader-line {
-    color: #64748B !important;
-    font-weight: 600 !important;
-    font-size: 12.5px !important;
-    margin-top: 2px !important;
-}
-
-/* --- Títulos de secciones intermedias --- */
-.dashboard-component-header h2 {
-    font-weight: 600 !important;
-    color: #1E293B !important;
-    border-bottom: 2px solid #E2E8F0 !important;
-    padding-bottom: 6px !important;
-}
-"""
-
-REQUIREMENTS_CSS = """
-/* ====================================================================
-   DETALLE ANALÍTICO DE REQUERIMIENTOS (R1-R4) - ESTILOS PREMIUM
-   ==================================================================== */
-
-/* --- Banner intro compacto --- */
-#MARKDOWN-r0c0 {
-    margin-bottom: 2px !important;
-}
-#MARKDOWN-r0c0 .dashboard-markdown {
-    padding: 6px 12px !important;
-    background: #f8fafc !important;
-    border: 1px solid #e2e8f0 !important;
-    border-left: 4px solid #1DB954 !important;
-    border-radius: 6px !important;
-}
-#MARKDOWN-r0c0 p {
-    margin: 0 !important;
-    font-size: 13.5px !important;
-    line-height: 1.4 !important;
-    color: #334155 !important;
-}
-#MARKDOWN-r0c0 a {
-    color: #1DB954 !important;
-    font-weight: 600 !important;
-    text-decoration: none !important;
-}
-#MARKDOWN-r0c0 a:hover {
-    text-decoration: underline !important;
-}
-
-/* --- Tarjeta de Contexto (Cobertura Enriquecida) --- */
-#CHART-r0c1, .dashboard-chart-id-52, div[data-test-chart-name="Contexto · Cobertura Enriquecida %"] {
-    border-top: 4px solid #1DB954 !important;
-    border-left: 1px solid rgba(30, 215, 96, 0.25) !important;
-    border-right: 1px solid rgba(30, 215, 96, 0.25) !important;
-    border-bottom: 1px solid rgba(30, 215, 96, 0.25) !important;
-    background: linear-gradient(180deg, rgba(30, 215, 96, 0.12) 0%, rgba(255, 255, 255, 0.98) 100%) !important;
-    box-shadow: 0 4px 12px rgba(30, 215, 96, 0.15) !important;
-    border-radius: 10px !important;
-}
-#CHART-r0c1 .chart-slice, #CHART-r0c1 .dashboard-chart, #CHART-r0c1 .slice_container {
-    background: transparent !important;
-}
-#CHART-r0c1 .header-title, #CHART-r0c1 [data-test="slice-header-text"],
-.dashboard-chart-id-52 [data-test="slice-header-text"] {
-    color: #15803D !important;
-    font-weight: 700 !important;
-    font-size: 13.5px !important;
-}
-#CHART-r0c1 .header-line, #CHART-r0c1 .header-line *,
-.dashboard-chart-id-52 .header-line, .dashboard-chart-id-52 .header-line *,
-#CHART-r0c1 .superset-legacy-chart-big-number .header-line {
-    color: #1DB954 !important;
-    font-weight: 800 !important;
-}
-#CHART-r0c1 .header-line::after, .dashboard-chart-id-52 .header-line::after {
-    content: "%" !important;
-    font-size: 0.65em !important;
-    font-weight: 700 !important;
-    margin-left: 2px !important;
-    color: #1DB954 !important;
-}
-#CHART-r0c1 .subheader-line, .dashboard-chart-id-52 .subheader-line {
-    color: #64748B !important;
-    font-weight: 600 !important;
-    font-size: 12px !important;
-    margin-top: 2px !important;
-}
-
-/* --- Cajas de Guía Metodológica (R1, R3, R4) --- */
-#MARKDOWN-r3c1, #MARKDOWN-r8c1, #MARKDOWN-r11c1 {
-    background: #f8fafc !important;
-    border: 1px solid #e2e8f0 !important;
-    border-left: 4px solid #0EA5E9 !important;
-    border-radius: 8px !important;
-    padding: 10px 14px !important;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04) !important;
-}
-#MARKDOWN-r3c1 h3, #MARKDOWN-r8c1 h3, #MARKDOWN-r11c1 h3 {
-    color: #0369A1 !important;
-    font-size: 15px !important;
-    margin-bottom: 8px !important;
-    font-weight: 700 !important;
-}
-#MARKDOWN-r3c1 ul, #MARKDOWN-r8c1 ul, #MARKDOWN-r11c1 ul {
-    padding-left: 18px !important;
-    margin-bottom: 0 !important;
-    font-size: 13px !important;
-    line-height: 1.5 !important;
-    color: #334155 !important;
-}
-
-/* --- Títulos de secciones R1-R4 --- */
-.dashboard-component-header h2 {
-    font-weight: 600 !important;
-    color: #1E293B !important;
-    border-bottom: 2px solid #E2E8F0 !important;
-    padding-bottom: 6px !important;
-}
-"""
-
-DASHBOARDS: dict[str, dict[str, str]] = {
-    "granularity": {"title": GRANULARITY_TITLE, "slug": "w2-granularity", "css": GRANULARITY_CSS},
-    "requirements": {"title": DASHBOARD_TITLE, "slug": "w2-requirements", "css": REQUIREMENTS_CSS},
-    "workshop": {"title": WORKSHOP_TITLE, "slug": "workshop-dashboard", "css": WORKSHOP_CSS},
-}
-
-# metric_name -> SQL aggregate used by the charts
-DATASET_SPECS: dict[str, dict[str, str]] = {
-    "kpi_0_integration_coverage": {
-        "award_rows": "SUM(award_rows)",
-        "matched_strict_rows": "SUM(matched_strict_rows)",
-        "matched_strict_pct": "MAX(matched_strict_pct)",
-        "matched_enriched_rows": "SUM(matched_enriched_rows)",
-        "matched_enriched_pct": "MAX(matched_enriched_pct)",
-        "rows_without_artist_pct": "MAX(rows_without_artist_pct)",
-    },
-    "kpi_0_coverage_by_method": {
-        "award_rows": "SUM(award_rows)",
-        "share_pct": "MAX(share_pct)",
-    },
-    "kpi_0_coverage_by_tier": {
-        "award_rows": "SUM(award_rows)",
-        "share_pct": "MAX(share_pct)",
-    },
-    "kpi_0_coverage_by_decade": {
-        "award_rows": "SUM(award_rows)",
-        "matched_rows": "SUM(matched_rows)",
-        "match_rate_pct": "MAX(match_rate_pct)",
-        "matched_strict_rows": "SUM(matched_strict_rows)",
-        "match_rate_strict_pct": "MAX(match_rate_strict_pct)",
-    },
-    "kpi_1_popularity_by_grammy_recognition": {
-        "n_tracks": "SUM(n_tracks)",
-        "n_artists": "SUM(n_artists)",
-        "mean_popularity": "AVG(mean_popularity)",
-        "median_popularity": "AVG(median_popularity)",
-        "mean_danceability": "AVG(mean_danceability)",
-        "mean_energy": "AVG(mean_energy)",
-        "mean_valence": "AVG(mean_valence)",
-        "mean_acousticness": "AVG(mean_acousticness)",
-        "mean_speechiness": "AVG(mean_speechiness)",
-    },
-    "kpi_1_artist_level": {
-        "mean_popularity": "AVG(mean_popularity)",
-        "primary_tracks": "SUM(primary_tracks)",
-    },
-    "kpi_1_within_genre_diff": {
-        "n_grammy_artists": "SUM(n_grammy_artists)",
-        "n_non_grammy_artists": "SUM(n_non_grammy_artists)",
-        "mean_pop_grammy": "AVG(mean_pop_grammy)",
-        "mean_pop_non": "AVG(mean_pop_non)",
-        "diff": "AVG(diff)",
-        "mean_pop_grammy_strict": "AVG(mean_pop_grammy_strict)",
-        "diff_strict": "AVG(diff_strict)",
-        "stratified_weighted_diff": "MAX(stratified_weighted_diff)",
-    },
-    "kpi_2_awards_by_dominant_genre": {
-        "awards": "SUM(awards)",
-        "n_artists": "SUM(n_artists)",
-        "award_share_pct": "MAX(award_share_pct)",
-        "awards_per_100_artists": "MAX(awards_per_100_artists)",
-    },
-    "kpi_2_heatmap": {
-        "awards": "SUM(awards)",
-    },
-    "kpi_3_awards_and_profile_by_decade": {
-        "awards": "SUM(awards)",
-        "distinct_artists": "SUM(distinct_artists)",
-        "matched_awards": "SUM(matched_awards)",
-        "matched_share_pct": "MAX(matched_share_pct)",
-        "mean_energy": "AVG(mean_energy)",
-        "mean_valence": "AVG(mean_valence)",
-        "mean_danceability": "AVG(mean_danceability)",
-        "mean_acousticness": "AVG(mean_acousticness)",
-    },
-    "kpi_3_awards_per_year": {
-        "awards": "SUM(awards)",
-        "recognized_artists": "SUM(recognized_artists)",
-        "matched_awards": "SUM(matched_awards)",
-        "matched_share_pct": "MAX(matched_share_pct)",
-    },
-    "kpi_3_awards_by_family_decade": {
-        "awards": "SUM(awards)",
-    },
-    "kpi_4_top_awarded_artists_on_spotify": {
-        "awards": "SUM(awards)",
-        "spotify_track_count": "SUM(spotify_track_count)",
-        "in_spotify": "MAX(in_spotify)",
-    },
-    "kpi_4_top_awarded_all": {
-        "awards": "SUM(awards)",
-        "spotify_track_count": "SUM(spotify_track_count)",
-        "in_spotify": "MAX(in_spotify)",
-    },
-    "etl_batch_log": {
-        "rows_fact_track_artist": "MAX(rows_fact_track_artist)",
-        "rows_fact_grammy_award": "MAX(rows_fact_grammy_award)",
-        "rows_bridge_award_artist": "MAX(rows_bridge_award_artist)",
-    },
-}
-
-
-# --- Granularity datasets (inline SQL, no change needed in sql/kpi_queries.sql) -------
-DATASET_SPECS.update({
-    "gran_table_grain": {"row_count": "SUM(row_count)"},
-    "gran_award_funnel": {"row_count": "SUM(row_count)"},
-    "gran_track_funnel": {"row_count": "SUM(row_count)"},
-    "gran_grammy_artists": {"grammy_artists": "MAX(grammy_artists)"},
-    "workshop_awards_breakdown": {"awards": "SUM(awards)"},
-})
-
-INLINE_QUERIES: dict[str, str] = {
-    "gran_table_grain": (
-        "SELECT 1 AS sort_order, 'Dimension' AS layer, 'dim_year' AS table_name, "
-        "'one ceremony year' AS grain, count(*)::bigint AS row_count FROM dim_year "
-        "UNION ALL SELECT 2, 'Dimension', 'dim_genre', 'one Spotify genre (+ genre family)', count(*) FROM dim_genre "
-        "UNION ALL SELECT 3, 'Dimension', 'dim_award_category', 'one raw Grammy category (+ clean name, family)', count(*) FROM dim_award_category "
-        "UNION ALL SELECT 4, 'Dimension', 'dim_artist', 'one normalized artist key', count(*) FROM dim_artist "
-        "UNION ALL SELECT 5, 'Fact', 'fact_track_artist', 'track listing x genre x performing artist', count(*) FROM fact_track_artist "
-        "UNION ALL SELECT 6, 'Fact', 'fact_grammy_award', 'one award row (year x category x nominee x credit)', count(*) FROM fact_grammy_award "
-        "UNION ALL SELECT 7, 'Bridge', 'bridge_award_artist', 'award x resolved artist (N:M)', count(*) FROM bridge_award_artist "
-        "UNION ALL SELECT 8, 'Audit', 'etl_batch_log', 'one warehouse batch load', count(*) FROM etl_batch_log"
-    ),
-    "gran_award_funnel": (
-        "SELECT 1 AS step, 'Award rows' AS stage, count(*)::bigint AS row_count FROM fact_grammy_award "
-        "UNION ALL SELECT 2, 'Awards resolved to a Spotify artist', count(DISTINCT grammy_award_sk) FROM bridge_award_artist "
-        "UNION ALL SELECT 3, 'Bridge rows (award x artist)', count(*) FROM bridge_award_artist "
-        "UNION ALL SELECT 4, 'Distinct artists in bridge', count(DISTINCT artist_sk) FROM bridge_award_artist"
-    ),
-    "gran_grammy_artists": (
-        "SELECT count(DISTINCT artist_sk)::bigint AS grammy_artists "
-        "FROM fact_track_artist WHERE is_grammy_artist = 1"
-    ),
-    "gran_track_funnel": (
-        "SELECT 1 AS step, 'Track listings (track x genre x artist)' AS stage, count(*)::bigint AS row_count FROM fact_track_artist "
-        "UNION ALL SELECT 2, 'Primary songs (is_primary_song = 1)', COALESCE(SUM(is_primary_song), 0)::bigint FROM fact_track_artist "
-        "UNION ALL SELECT 3, 'Distinct artists', count(DISTINCT artist_sk) FROM fact_track_artist"
-    ),
-    "workshop_awards_breakdown": (
-        "SELECT y.decade, c.category_family, "
-        "COALESCE(a.dominant_genre_family, 'Other / Unclassified') AS genre_family, "
-        "COALESCE(w.match_method, 'none') AS match_method, "
-        "count(*)::bigint AS awards "
-        "FROM fact_grammy_award w "
-        "JOIN dim_year y ON y.year_sk = w.year_sk "
-        "JOIN dim_award_category c ON c.category_sk = w.category_sk "
-        "LEFT JOIN dim_artist a ON a.artist_sk = w.artist_sk "
-        "GROUP BY y.decade, c.category_family, COALESCE(a.dominant_genre_family, 'Other / Unclassified'), COALESCE(w.match_method, 'none')"
-    ),
-}
-
-# Virtual datasets whose column names differ across KPIs get an extra alias column so a
-# single native filter (e.g. genre_family) drives R1 and R2 charts alike.
-ALIAS_COLUMNS: dict[str, dict[str, str]] = {
-    "kpi_2_awards_by_dominant_genre": {"genre_family": "dominant_genre_family"},
-    "kpi_2_heatmap": {"genre_family": "dominant_genre_family"},
-}
-
-
-# --- chart spec helpers ---------------------------------------------------------------
-def _spec(dashboard, dataset, name, requirement, description, candidates):
-    return {
-        "dashboard": dashboard,
-        "dataset": dataset,
-        "slice_name": name,
-        "requirement": requirement,
-        "description": description,
-        "candidates": candidates,
-    }
-
-
-def _table(cols, limit=50, order=None, filters=None):
-    form = {"query_mode": "raw", "all_columns": cols, "row_limit": limit, "include_search": False}
-    if order:
-        form["order_by_cols"] = order
-    if filters:
-        form["adhoc_filters"] = filters
-    return ("table", form)
-
-
-def _big(metric, subheader, fmt=".1f", color=None, header_font_size=0.55, subheader_font_size=0.28):
-    form = {
-        "metric": metric, "subheader": subheader, "y_axis_format": fmt,
-        "header_font_size": header_font_size, "subheader_font_size": subheader_font_size,
-    }
-    if color:
-        form["color_picker"] = color
-    return [
-        ("big_number_total", form),
-        _table([metric], 10),
-    ]
-
-
-def _line(x, metrics, fmt=".2f", limit=100):
-    return ("echarts_timeseries_line", {
-        "x_axis": x, "metrics": metrics, "x_axis_force_categorical": True,
-        "markerEnabled": True, "markerSize": 8, "y_axis_format": fmt,
-        "show_legend": len(metrics) > 1, "row_limit": limit,
-    })
-
-
-def _hbar(x, metric, limit, fmt=".1f", ascending=False):
-    return [
-        ("echarts_timeseries_bar", {
-            "x_axis": x, "metrics": [metric], "orientation": "horizontal", "show_value": True,
-            "x_axis_sort": metric, "x_axis_sort_asc": ascending, "y_axis_format": fmt,
-            "row_limit": limit,
-        }),
-        ("dist_bar", {
-            "groupby": [x], "metrics": [metric], "show_bar_value": True,
-            "order_bars": True, "y_axis_format": fmt, "row_limit": limit,
-        }),
-    ]
-
-
-def _simple_filter(col, op, val):
-    return {"expressionType": "SIMPLE", "subject": col, "operator": op,
-            "comparator": val, "clause": "WHERE"}
-
-
-G, R, W = "granularity", "requirements", "workshop"
-ALL_REQ = "R1,R2,R3,R4"
-
-# Charts: preferred viz type first, "table" always last as the safe fallback.
-CHART_SPECS: list[dict] = [
-    # ===== Dashboard 1: Granularity & Data Quality =================================
-    _spec(G, "etl_batch_log", "Premios Cargados", "R4",
-          "Total de filas de premios Grammy cargadas en el último lote del Data Warehouse.",
-          _big("rows_fact_grammy_award", "Total Premios Grammy en DW", ",d",
-               color={"r": 201, "g": 162, "b": 39, "a": 1}, subheader_font_size=0.34)),
-    _spec(G, "kpi_0_integration_coverage", "Cobertura Enriquecida %", "R1,R2,R3",
-          "Tasa de emparejamiento enriquecido mediante cascada completa a Spotify.",
-          _big("matched_enriched_pct", "Premios Vinculados (% Cascada)", ".1f",
-               color={"r": 30, "g": 215, "b": 96, "a": 1}, subheader_font_size=0.34)),
-    _spec(G, "kpi_0_integration_coverage", "Cobertura Estricta (Línea Base)", "R1,R2,R3",
-          "Tasa de coincidencia directa exacta sin separación de créditos ni cascada.",
-          _big("matched_strict_pct", "Cruce Directo 1:1 (% Línea Base)", ".1f",
-               color={"r": 142, "g": 68, "b": 173, "a": 1}, subheader_font_size=0.34)),
-    _spec(G, "gran_grammy_artists", "Artistas Grammy Vinculados", "R3",
-          "Artistas reconocidos por el Grammy identificados en el catálogo de Spotify.",
-          _big("grammy_artists", "Artistas Galardonados Únicos", ",d",
-               color={"r": 41, "g": 128, "b": 185, "a": 1}, subheader_font_size=0.34)),
-
-    _spec(G, "gran_table_grain", "Granularidad · Filas y grano por tabla", ALL_REQ,
-          "Una fila por tabla del almacén de datos: capa, grano y volumen actual.",
-          [_table(["sort_order", "layer", "table_name", "grain", "row_count"], 10,
-                  order=[["sort_order", True]])]),
-    _spec(G, "gran_award_funnel", "Granularidad · De créditos a puente", ALL_REQ,
-          "Premios -> premios resueltos -> filas puente (premio x artista) -> artistas distintos.",
-          _hbar("stage", "row_count", 10, ",d") + [_table(["step", "stage", "row_count"], 10,
-                                                          order=[["step", True]])]),
-    _spec(G, "gran_track_funnel", "Granularidad · De listados a artistas", ALL_REQ,
-          "Listados de pistas que se repiten por género y colaboraciones vs pistas principales.",
-          _hbar("stage", "row_count", 10, ",d") + [_table(["step", "stage", "row_count"], 10,
-                                                          order=[["step", True]])]),
-
-    _spec(G, "kpi_0_coverage_by_method", "Calidad · Método de emparejamiento", "R1,R2,R3",
-          "Distribución de la cascada jerárquica: exact -> split -> workers -> nominee -> fuzzy -> none.",
-          [("pie", {"groupby": ["match_method"], "metric": "award_rows", "metrics": ["award_rows"],
-                    "donut": True, "show_legend": True, "label_type": "key_percent", "row_limit": 10}),
-           _table(["match_method", "award_rows", "share_pct"], 10)]),
-    _spec(G, "kpi_0_coverage_by_tier", "Calidad · Premios por nivel de reconocimiento", "R1,R2,R3",
-          "Premios Grammy por nivel de reconocimiento (Tier A, B, C, ninguno) y método de cruce.",
-          [("echarts_timeseries_bar", {"x_axis": "recognition_tier", "groupby": ["match_method"],
-                                       "metrics": ["award_rows"], "stack": True, "show_legend": True,
-                                       "y_axis_format": ",d", "row_limit": 50}),
-           ("dist_bar", {"groupby": ["recognition_tier"], "columns": ["match_method"],
-                         "metrics": ["award_rows"], "bar_stacked": True, "row_limit": 50}),
-           _table(["recognition_tier", "match_method", "award_rows", "share_pct"], 50)]),
-    _spec(G, "kpi_0_coverage_by_decade", "Calidad · Cobertura por década", "R1,R2,R3",
-          "Comparativa de coincidencia estricta vs enriquecida a lo largo de las décadas.",
-          [_line("decade", ["match_rate_pct", "match_rate_strict_pct"], ".1f"),
-           _table(["decade", "award_rows", "match_rate_pct", "match_rate_strict_pct"], 100)]),
-    _spec(G, "etl_batch_log", "Calidad · Últimas cargas ETL", "R4",
-          "Pista de auditoría de cargas por lote en el Data Warehouse desde etl_batch_log.",
-          [_table(["batch_id", "dag_id", "run_id", "status", "rows_fact_track_artist",
-                   "rows_fact_grammy_award", "rows_bridge_award_artist"], 5)]),
-
-    # ===== Dashboard 2: R1-R4 ========================================================
-    _spec(R, "kpi_0_integration_coverage", "Contexto · Cobertura Enriquecida %", "R1,R2,R3,R4",
-          "Porcentaje de premios vinculados exitosamente a Spotify (contexto analítico permanente).",
-          _big("matched_enriched_pct", "Cobertura Integración (% Cascada)", ".1f",
-               color={"r": 30, "g": 215, "b": 96, "a": 1}, subheader_font_size=0.34)),
-
-    # --- R1 ---
-    _spec(R, "kpi_1_artist_level", "R1 · Distribución de popularidad por artista", "R1",
-          "Distribución de popularidad promedio por artista (Grammy vs No-Grammy).",
-          [("box_plot", {"columns": ["artist_group"], "groupby": ["artist_display_name"],
-                         "metrics": ["mean_popularity"], "whiskerOptions": "Tukey",
-                         "row_limit": 500}),
-           _table(["artist_group", "artist_display_name", "mean_popularity", "primary_tracks"], 100)]),
-    _spec(R, "kpi_1_popularity_by_grammy_recognition", "R1 · Perfil de audio: Grammy vs No-Grammy", "R1",
-          "Características sonoras promedio normalizadas en rango [0, 1] en canciones principales.",
-          [("radar", {"groupby": ["artist_group"],
-                      "metrics": ["mean_danceability", "mean_energy", "mean_valence",
-                                  "mean_acousticness", "mean_speechiness"],
-                      "show_legend": True, "row_limit": 10}),
-           _table(["basis", "recognition", "artist_group", "mean_danceability", "mean_energy",
-                   "mean_valence", "mean_acousticness", "mean_speechiness"], 20)]),
-    _spec(R, "kpi_1_within_genre_diff", "R1 · Diferencia de popularidad por familia de género", "R1,R2",
-          "Diferencia de popularidad (Grammy menos No-Grammy) por familia de género.",
-          _hbar("genre_family", "diff", 20, ".1f", ascending=True)
-          + [_table(["genre_family", "mean_pop_grammy", "mean_pop_non", "diff",
-                     "n_grammy_artists", "stratified_weighted_diff"], 50)]),
-    _spec(R, "kpi_1_popularity_by_grammy_recognition", "R1 · Resumen de popularidad por grupo", "R1",
-          "Medianas, cuartiles y recuentos de popularidad por grupo y condición de catálogo.",
-          [_table(["basis", "recognition", "artist_group", "n_tracks", "n_artists",
-                   "mean_popularity", "median_popularity", "p25_popularity", "p75_popularity"], 20)]),
-
-    # --- R2 ---
-    _spec(R, "kpi_2_heatmap", "R2 · Mapa de calor: género vs categoría", "R2",
-          "Premios por familia de género dominante del artista vs familia de categoría Grammy.",
-          [("heatmap_v2", {"x_axis": "genre_family", "groupby": "category_family",
-                           "metric": "awards", "normalize_across": "heatmap",
-                           "legend_type": "continuous", "show_legend": True, "row_limit": 500}),
-           ("heatmap", {"all_columns_x": "genre_family", "all_columns_y": "category_family",
-                        "metric": "awards", "row_limit": 500}),
-           _table(["dominant_genre_family", "category_family", "awards"], 200)]),
-    _spec(R, "kpi_2_awards_by_dominant_genre", "R2 · Premios por 100 artistas según género dominante", "R2",
-          "Tasa de premios por cada 100 artistas clasificados en la familia de género dominante.",
-          _hbar("genre_family", "awards_per_100_artists", 15, ".1f")
-          + [_table(["dominant_genre_family", "awards", "n_artists", "awards_per_100_artists"], 50)]),
-
-    # --- R3 ---
-    _spec(R, "kpi_3_awards_and_profile_by_decade", "R3 · Tendencia de energía por década", "R3",
-          "Evolución histórica de la energía promedio de grabaciones premiadas por década.",
-          [_line("decade", ["mean_energy"]), _table(["decade", "mean_energy"], 100)]),
-    _spec(R, "kpi_3_awards_and_profile_by_decade", "R3 · Tendencia de valencia por década", "R3",
-          "Evolución histórica de la valencia / positividad musical promedio por década.",
-          [_line("decade", ["mean_valence"]), _table(["decade", "mean_valence"], 100)]),
-    _spec(R, "kpi_3_awards_and_profile_by_decade", "R3 · Tendencia de bailabilidad por década", "R3",
-          "Evolución histórica de bailabilidad en canciones principales por década.",
-          [_line("decade", ["mean_danceability"]), _table(["decade", "mean_danceability"], 100)]),
-    _spec(R, "kpi_3_awards_and_profile_by_decade", "R3 · Cobertura Spotify por década", "R3",
-          "Porcentaje de premios con presencia identificada en Spotify por década.",
-          [_line("decade", ["matched_share_pct"], ".1f"),
-           _table(["decade", "awards", "matched_awards", "matched_share_pct"], 100)]),
-    _spec(R, "kpi_3_awards_by_family_decade", "R3 · Premios por familia de categoría y década", "R3",
-          "Distribución histórica de premios agrupados en familias canónicas por década.",
-          [("echarts_timeseries_bar", {"x_axis": "decade", "groupby": ["category_family"],
-                                       "metrics": ["awards"], "stack": True, "show_legend": True,
-                                       "y_axis_format": ",d", "row_limit": 300}),
-           ("dist_bar", {"groupby": ["decade"], "columns": ["category_family"],
-                         "metrics": ["awards"], "bar_stacked": True, "row_limit": 300}),
-           _table(["decade", "category_family", "awards"], 150)]),
-
-    # --- R4 ---
-    _spec(R, "kpi_4_top_awarded_artists_on_spotify", "R4 · Top 10 artistas premiados en Spotify", "R4",
-          "Top 10 de artistas más premiados con presencia en el catálogo de Spotify.",
-          _hbar("artist_display_name", "awards", 10, ",d")
-          + [_table(["artist_display_name", "awards", "spotify_track_count",
-                     "first_award_year", "last_award_year"], 20, order=[["awards", False]])]),
-    _spec(R, "kpi_4_top_awarded_all", "R4 · Ranking global de artistas premiados", "R4",
-          "Ranking general de galardonados incluyendo artistas ausentes de Spotify (Tier C).",
-          [_table(["rank", "artist_display_name", "recognition_tier", "awards",
-                   "spotify_track_count", "in_spotify"], 25, order=[["rank", True]])]),
-    _spec(R, "kpi_4_top_awarded_all", "R4 · Premiados ausentes de Spotify", "R4",
-          "Galardonados en categorías técnicas o de producción no catalogados como intérpretes en R1.",
-          [_table(["artist_display_name", "recognition_tier", "awards", "first_award_year", "last_award_year"], 15,
-                  order=[["awards", False]],
-                  filters=[_simple_filter("recognition_tier", "==", "C")])]),
-
-    # ===== Dashboard 3: Workshop Dashboard ==========================================
-    _spec(W, "etl_batch_log", "Premios Evaluados", ALL_REQ,
-          "Total de 4.810 premios Grammy evaluados en el Data Warehouse.",
-          _big("rows_fact_grammy_award", "Total Premios Grammy", ",d",
-               color={"r": 201, "g": 162, "b": 39, "a": 1}, subheader_font_size=0.34)),
-    _spec(W, "kpi_0_integration_coverage", "Cobertura Integración %", ALL_REQ,
-          "51.1% de premios enlazados a Spotify mediante cascada completa (exacto + créditos + fuzzy).",
-          _big("matched_enriched_pct", "Premios Vinculados (% Cascada)", ".1f",
-               color={"r": 30, "g": 215, "b": 96, "a": 1}, subheader_font_size=0.34)),
-    _spec(W, "gran_grammy_artists", "Artistas Grammy en Spotify", ALL_REQ,
-          "638 artistas únicos reconocidos con Grammy presentes en Spotify.",
-          _big("grammy_artists", "Artistas Galardonados en Catálogo", ",d",
-               color={"r": 41, "g": 128, "b": 185, "a": 1}, subheader_font_size=0.34)),
-    _spec(W, "kpi_0_integration_coverage", "Cobertura Estricta %", ALL_REQ,
-          "31.8% de cruce exacto directo inicial (línea base 1 a 1 sin cascada).",
-          _big("matched_strict_pct", "Cruce Estricto 1:1 (% Línea Base)", ".1f",
-               color={"r": 142, "g": 68, "b": 173, "a": 1}, subheader_font_size=0.34)),
-
-    _spec(W, "kpi_1_within_genre_diff", "Diferencia de Popularidad por Género (R1/R2)", "R1,R2",
-          "Diferencia de popularidad promedio (Grammy vs No-Grammy) por familia de género musical.",
-          _hbar("genre_family", "diff", 15, ".1f", ascending=True)
-          + [_table(["genre_family", "diff", "mean_pop_grammy", "mean_pop_non"], 50)]),
-
-    _spec(W, "workshop_awards_breakdown", "Evolución de Premios por Categoría y Década (R3)", "R3",
-          "Distribución histórica de premios Grammy por década y familia de categoría.",
-          [("echarts_timeseries_bar", {"x_axis": "decade", "groupby": ["category_family"],
-                                       "metrics": ["awards"], "stack": True, "show_legend": True,
-                                       "y_axis_format": ",d", "row_limit": 500}),
-           ("dist_bar", {"groupby": ["decade"], "columns": ["category_family"],
-                         "metrics": ["awards"], "bar_stacked": True, "row_limit": 500}),
-           _table(["decade", "category_family", "awards"], 500)]),
-
-    _spec(W, "kpi_4_top_awarded_artists_on_spotify", "Top Artistas Premiados en Spotify (R4)", "R4",
-          "Artistas más galardonados con presencia en el catálogo de Spotify.",
-          [_table(["rank", "artist_display_name", "awards", "spotify_track_count",
-                   "first_award_year", "last_award_year"], 50, order=[["awards", False]])]),
-]
-
-# --- Layouts: str = section header, list = one row of (kind, ref, width, height) ----------
-# width is in the 12-column grid; height unit = 8 px. Chart refs are slice_name values.
-LAYOUTS: dict[str, list] = {
-    "granularity": [
-        [("md", "gran_intro", 12, 4)],
-        [("chart", "Premios Cargados", 3, 14),
-         ("chart", "Cobertura Enriquecida %", 3, 14),
-         ("chart", "Cobertura Estricta (Línea Base)", 3, 14),
-         ("chart", "Artistas Grammy Vinculados", 3, 14)],
-        "Granularidad del Data Warehouse: Modelado y Grano por Tabla",
-        [("chart", "Granularidad · Filas y grano por tabla", 12, 34)],
-        [("chart", "Granularidad · De créditos a puente", 4, 42),
-         ("chart", "Granularidad · De listados a artistas", 4, 42),
-         ("chart", "Calidad · Método de emparejamiento", 4, 42)],
-        "Calidad y Confiabilidad del Enlace: Auditoría de Cascada y Lotes ETL",
-        [("chart", "Calidad · Premios por nivel de reconocimiento", 6, 42),
-         ("chart", "Calidad · Cobertura por década", 6, 42)],
-        [("chart", "Calidad · Últimas cargas ETL", 12, 24)],
-    ],
-    "requirements": [
-        [("md", "req_intro", 9, 14), ("chart", "Contexto · Cobertura Enriquecida %", 3, 14)],
-        "R1 — ¿Los artistas reconocidos por el Grammy rinden distinto en Spotify?",
-        [("chart", "R1 · Distribución de popularidad por artista", 4, 46),
-         ("chart", "R1 · Perfil de audio: Grammy vs No-Grammy", 4, 46),
-         ("chart", "R1 · Diferencia de popularidad por familia de género", 4, 46)],
-        [("chart", "R1 · Resumen de popularidad por grupo", 8, 30), ("md", "r1_guide", 4, 30)],
-        "R2 — ¿Qué géneros dominan entre los artistas premiados?",
-        [("chart", "R2 · Mapa de calor: género vs categoría", 7, 56),
-         ("chart", "R2 · Premios por 100 artistas según género dominante", 5, 56)],
-        "R3 — ¿Cómo evoluciona el perfil de los artistas a lo largo de las décadas?",
-        [("chart", "R3 · Tendencia de energía por década", 3, 36),
-         ("chart", "R3 · Tendencia de valencia por década", 3, 36),
-         ("chart", "R3 · Tendencia de bailabilidad por década", 3, 36),
-         ("chart", "R3 · Cobertura Spotify por década", 3, 36)],
-        [("chart", "R3 · Premios por familia de categoría y década", 8, 42), ("md", "r3_guide", 4, 42)],
-        "R4 — ¿Quiénes acumulan más premios y cómo están representados en Spotify?",
-        [("chart", "R4 · Top 10 artistas premiados en Spotify", 5, 50),
-         ("chart", "R4 · Ranking global de artistas premiados", 7, 50)],
-        [("chart", "R4 · Premiados ausentes de Spotify", 6, 34), ("md", "r4_guide", 6, 34)],
-    ],
-    "workshop": [
-        [("md", "workshop_intro", 12, 4)],
-        [("chart", "Premios Evaluados", 3, 14),
-         ("chart", "Cobertura Integración %", 3, 14),
-         ("chart", "Artistas Grammy en Spotify", 3, 14),
-         ("chart", "Cobertura Estricta %", 3, 14)],
-        "R1 & R2: Desempeño Musical y Géneros | R3: Evolución Histórica",
-        [("chart", "Diferencia de Popularidad por Género (R1/R2)", 6, 46),
-         ("chart", "Evolución de Premios por Categoría y Década (R3)", 6, 46)],
-        "R4: Ranking de Artistas Más Galardonados Presentes en Spotify",
-        [("chart", "Top Artistas Premiados en Spotify (R4)", 12, 36)],
-    ],
-}
-
-# Markdown cards (Spanish; no hard-coded figures, numbers come from the charts).
-MARKDOWN: dict[str, str] = {
-    "workshop_intro": (
-        "**Dashboard Spotify & Grammy (R1–R4)** &nbsp;|&nbsp; "
-        "Pipeline batch analítico Spotify × Premios Grammy (PostgreSQL `music_dw` → Superset) &nbsp;·&nbsp; "
-        "[Ver Detalle Analítico Completo (KPIs R1–R4) →](/superset/dashboard/w2-requirements/)"
-    ),
-    "gran_intro": (
-        "**Workshop · Granularidad & Calidad de Datos** &nbsp;|&nbsp; "
-        "Auditoría del modelado dimensional y estrategia de integración Spotify × Grammy (Airflow → PostgreSQL `music_dw`) &nbsp;·&nbsp; "
-        "[Ver Dashboard Principal (R1–R4) →](/superset/dashboard/workshop-dashboard/) &nbsp;·&nbsp; "
-        "[Ver Detalle Analítico R1–R4 →](/superset/dashboard/w2-requirements/)"
-    ),
-    "req_intro": (
-        "**Workshop · Requerimientos Analíticos (R1–R4)** &nbsp;|&nbsp; "
-        "Exploración profunda de hipótesis musicales, popularidad e impacto histórico en Spotify &nbsp;·&nbsp; "
-        "[Ver Dashboard Ejecutivo →](/superset/dashboard/workshop-dashboard/) &nbsp;·&nbsp; "
-        "[Ver Granularidad & Calidad →](/superset/dashboard/w2-granularity/)\n\n"
-        "> **Controles Interactivos:** Filtre por **Base de Análisis** (*excl_zero* vs *all*) y **Criterio de Reconocimiento** (*core* vs *strict*) en la barra superior."
-    ),
-    "r1_guide": (
-        "### Claves para explicar R1\n\n"
-        "- **Base de Análisis (`basis`)**: *excl_zero* excluye pistas con popularidad 0 (~14.1% del catálogo). *all* evalúa todo el catálogo.\n"
-        "- **Reconocimiento (`recognition`)**: *core* = Tiers A+B (intérpretes directos y colaboradores). *strict* = solo Tier A (crédito directo).\n"
-        "- **Hallazgo estadístico**: La popularidad mediana de artistas Grammy es significativamente mayor (+10.22 puntos en *excl_zero*, p < 1e-30; delta de Cliff = 0.24)."
-    ),
-    "r3_guide": (
-        "### Claves para explicar R3\n\n"
-        "- **Evolución sónica**: Caída sostenida en *acousticness* junto al aumento de *energy* y *danceability* desde los 1960s.\n"
-        "- **Cobertura por década**: La disponibilidad en Spotify crece de ~15% en los 1960s a ~50% en los 2010s.\n"
-        "- **Uso del filtro `Década`**: Permite aislar una década para ver las familias de categorías predominantes."
-    ),
-    "r4_guide": (
-        "### Claves para explicar R4\n\n"
-        "- **Top en Spotify**: Intérpretes principales más premiados en catálogo (Chicago Symphony Orchestra, John Williams, Beyoncé, Jay-Z).\n"
-        "- **Ranking Global**: Muestra el nivel de reconocimiento (Tier A: crédito, Tier B: colaboradores, Tier C: producción).\n"
-        "- **Galardonados Tier C**: Leyendas con premios técnicos o de producción (Frank Sinatra, Quincy Jones, Miles Davis, Billie Holiday)."
-    ),
-}
-
-# --- Native filters: column must exist in the datasets of the charts to be scoped --------
-FILTER_DEFS: dict[str, list[dict]] = {
-    "workshop": [
-        {"name": "Década", "column": "decade", "description": "Filtrar por década del premio Grammy (1950s - 2010s)"},
-        {"name": "Categoría Grammy", "column": "category_family", "description": "Familia de categoría Grammy (Pop, Rock, Classical, General Field...)"},
-        {"name": "Género Musical", "column": "genre_family", "description": "Familia de género musical en Spotify (Pop, Rock, Hip-Hop, Electronic...)"},
-        {"name": "Método de Emparejamiento", "column": "match_method", "description": "Método de cruce entre Grammy y Spotify (exact, split, workers...)"},
-    ],
-    "granularity": [
-        {"name": "Década", "column": "decade", "description": "Filtrar por década de ceremonia Grammy (1950s - 2010s)"},
-        {"name": "Método de Emparejamiento", "column": "match_method", "description": "Método de resolución (exact, split, workers, nominee, fuzzy)"},
-        {"name": "Nivel de Reconocimiento", "column": "recognition_tier", "description": "Nivel de acreditación (Tier A: directo, Tier B: colaborador, Tier C: técnico)"},
-    ],
-    "requirements": [
-        {"name": "Década", "column": "decade", "description": "Filtrar por década histórica de entrega del premio Grammy"},
-        {"name": "Género Musical", "column": "genre_family", "description": "Familia de género musical del artista en catálogo Spotify"},
-        {"name": "Categoría Grammy", "column": "category_family", "description": "Familia canónica de categoría de premio Grammy"},
-        {"name": "Base de Análisis (Popularidad)", "column": "basis", "default": ["excl_zero"], "required": True,
-         "multi": False,
-         "description": "excl_zero oculta el ~14.1% de canciones con popularidad = 0. all evalúa catálogo completo (R1)."},
-        {"name": "Criterio de Reconocimiento", "column": "recognition", "default": ["core"], "required": True,
-         "multi": False,
-         "description": "core: evalúa Tiers A y B (intérpretes directos y colaboradores). strict: solo Tier A (R1)."},
-    ],
-}
-OPTIONAL_META_KEYS = ("cross_filters_enabled", "filter_bar_orientation")
-
-LABEL_COLORS = {
-    "Grammy-recognized": "#C9A227", "Not Grammy-recognized": "#5B6C8F",
-    "Grammy": "#C9A227", "Non-Grammy": "#5B6C8F",
-    "exact": "#C9A227", "split": "#E5C158", "workers": "#5B6C8F",
-    "nominee": "#8B9BB4", "fuzzy": "#A78BFA", "none": "#CBD5E1",
-    "A": "#C9A227", "B": "#5B6C8F", "C": "#8B9BB4",
-}
 
 class SupersetClient:
+    """Minimal Superset REST API client using cookie-jar session handling."""
+
     def __init__(self, base_url: str):
-        self.base_url = base_url
-        self.opener = urllib.request.build_opener(
-            urllib.request.HTTPCookieProcessor(CookieJar())
-        )
+        self.base_url = base_url.rstrip("/")
         self.token: str | None = None
         self.csrf: str | None = None
+        self.cookies = CookieJar()
+        self.opener = urllib.request.build_opener(
+            urllib.request.HTTPCookieProcessor(self.cookies)
+        )
 
-    def call(self, method: str, path: str, payload: dict | None = None):
-        request = urllib.request.Request(self.base_url + path, method=method)
-        request.add_header("Content-Type", "application/json")
+    def call(self, method: str, path: str, payload: dict | None = None) -> tuple[int, dict]:
+        url = f"{self.base_url}{path}"
+        data = json.dumps(payload).encode("utf-8") if payload is not None else None
+        headers = {"Accept": "application/json"}
+        if data is not None:
+            headers["Content-Type"] = "application/json"
         if self.token:
-            request.add_header("Authorization", f"Bearer {self.token}")
+            headers["Authorization"] = f"Bearer {self.token}"
         if self.csrf:
-            request.add_header("X-CSRFToken", self.csrf)
-        data = json.dumps(payload).encode() if payload is not None else None
+            headers["X-CSRFToken"] = self.csrf
+            headers["Referer"] = f"{self.base_url}/"
+
+        request = urllib.request.Request(url, data=data, headers=headers, method=method)
         try:
-            with self.opener.open(request, data, timeout=180) as response:
-                body = response.read().decode()
+            with self.opener.open(request) as response:
+                body = response.read().decode("utf-8")
                 try:
-                    parsed = json.loads(body or "{}")
+                    parsed = json.loads(body) if body else {}
                 except json.JSONDecodeError:
                     parsed = {"raw": body[:500]}
                 return response.status, parsed
@@ -1187,18 +230,6 @@ class SupersetClient:
         return record
 
 
-def load_kpi_queries() -> dict[str, str]:
-    raw = open(KPI_SQL_PATH, encoding="utf-8").read()
-    marks = [(m.group(1), m.start())
-             for m in re.finditer(r"^--\s*@name:\s*([A-Za-z0-9_]+)\s*$", raw, flags=re.M)]
-    queries: dict[str, str] = {}
-    for index, (name, start) in enumerate(marks):
-        body_start = raw.index("\n", start) + 1
-        body_end = marks[index + 1][1] if index + 1 < len(marks) else len(raw)
-        queries[name] = raw[body_start:body_end].strip()
-    return queries
-
-
 def ensure_database(client: SupersetClient) -> int:
     existing = client.list("/api/v1/database/", "database_name").get("music_dw")
     if existing:
@@ -1215,18 +246,6 @@ def ensure_database(client: SupersetClient) -> int:
         "allows_virtual_table_explore": True,
     })
     return record["id"]
-
-
-
-
-ETL_BATCH_LOG_SQL = (
-    "SELECT batch_id, COALESCE(dag_id, 'manual') AS dag_id, "
-    "COALESCE(run_id, batch_id) AS run_id, status, "
-    "COALESCE((target_rows_after->>'fact_track_artist')::bigint, 0) AS rows_fact_track_artist, "
-    "COALESCE((target_rows_after->>'fact_grammy_award')::bigint, 0) AS rows_fact_grammy_award, "
-    "COALESCE((target_rows_after->>'bridge_award_artist')::bigint, 0) AS rows_bridge_award_artist "
-    "FROM etl_batch_log ORDER BY started_at DESC LIMIT 5"
-)
 
 
 def _wrap_sql(sql: str, aliases: dict[str, str] | None) -> str:
