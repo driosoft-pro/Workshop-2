@@ -11,11 +11,11 @@
 SELECT
     COUNT(*)                                                               AS award_rows,
     COUNT(*) FILTER (WHERE is_matched_strict = 1)                          AS matched_strict_rows,
-    ROUND(100.0 * COUNT(*) FILTER (WHERE is_matched_strict = 1) / COUNT(*), 2) AS matched_strict_pct,
+    ROUND(100.0 * COUNT(*) FILTER (WHERE is_matched_strict = 1) / NULLIF(COUNT(*), 0), 2) AS matched_strict_pct,
     SUM(is_matched_spotify)                                                AS matched_enriched_rows,
-    ROUND(100.0 * SUM(is_matched_spotify) / COUNT(*), 2)                   AS matched_enriched_pct,
+    ROUND(100.0 * SUM(is_matched_spotify) / NULLIF(COUNT(*), 0), 2)                   AS matched_enriched_pct,
     COUNT(*) FILTER (WHERE artist_sk IS NULL)                              AS rows_without_artist,
-    ROUND(100.0 * COUNT(*) FILTER (WHERE artist_sk IS NULL) / COUNT(*), 2) AS rows_without_artist_pct
+    ROUND(100.0 * COUNT(*) FILTER (WHERE artist_sk IS NULL) / NULLIF(COUNT(*), 0), 2) AS rows_without_artist_pct
 FROM fact_grammy_award;
 
 -- @name: kpi_0_coverage_by_method
@@ -23,7 +23,7 @@ FROM fact_grammy_award;
 SELECT
     COALESCE(match_method, 'none')                                         AS match_method,
     COUNT(*)                                                               AS award_rows,
-    ROUND(100.0 * COUNT(*) / SUM(COUNT(*)) OVER (), 2)                     AS share_pct
+    ROUND(100.0 * COUNT(*) / NULLIF(SUM(COUNT(*)) OVER (), 0), 2)         AS share_pct
 FROM fact_grammy_award
 GROUP BY match_method
 ORDER BY award_rows DESC;
@@ -34,7 +34,7 @@ SELECT
     COALESCE(recognition_tier, 'none')                                     AS recognition_tier,
     COALESCE(match_method, 'none')                                         AS match_method,
     COUNT(*)                                                               AS award_rows,
-    ROUND(100.0 * COUNT(*) / SUM(COUNT(*)) OVER (), 2)                     AS share_pct
+    ROUND(100.0 * COUNT(*) / NULLIF(SUM(COUNT(*)) OVER (), 0), 2)         AS share_pct
 FROM fact_grammy_award
 GROUP BY recognition_tier, match_method
 ORDER BY recognition_tier, award_rows DESC;
@@ -45,9 +45,9 @@ SELECT
     y.decade,
     COUNT(*)                                                               AS award_rows,
     SUM(w.is_matched_spotify)                                              AS matched_rows,
-    ROUND(100.0 * SUM(w.is_matched_spotify) / COUNT(*), 2)                 AS match_rate_pct,
+    ROUND(100.0 * SUM(w.is_matched_spotify) / NULLIF(COUNT(*), 0), 2)                 AS match_rate_pct,
     COUNT(*) FILTER (WHERE w.is_matched_strict = 1)                        AS matched_strict_rows,
-    ROUND(100.0 * COUNT(*) FILTER (WHERE w.is_matched_strict = 1) / COUNT(*), 2) AS match_rate_strict_pct
+    ROUND(100.0 * COUNT(*) FILTER (WHERE w.is_matched_strict = 1) / NULLIF(COUNT(*), 0), 2) AS match_rate_strict_pct
 FROM fact_grammy_award w
 JOIN dim_year y ON y.year_sk = w.year_sk
 GROUP BY y.decade
@@ -283,7 +283,7 @@ SELECT
     f.diff,
     f.mean_pop_grammy_strict,
     f.diff_strict,
-    ROUND(SUM(f.diff * f.n_grammy_artists) OVER () / t.sum_w, 2) AS stratified_weighted_diff
+    ROUND(SUM(f.diff * f.n_grammy_artists) OVER () / NULLIF(t.sum_w, 0), 2) AS stratified_weighted_diff
 FROM family_diffs f
 CROSS JOIN total_weight t
 ORDER BY f.diff DESC;
@@ -318,8 +318,8 @@ SELECT
     g.dominant_genre_family,
     g.awards,
     af.n_artists,
-    ROUND(100.0 * g.awards / SUM(g.awards) OVER (), 2)                     AS award_share_pct,
-    ROUND(100.0 * g.awards / af.n_artists, 2)                              AS awards_per_100_artists
+    ROUND(100.0 * g.awards / NULLIF(SUM(g.awards) OVER (), 0), 2)         AS award_share_pct,
+    ROUND(100.0 * g.awards / NULLIF(af.n_artists, 0), 2)                  AS awards_per_100_artists
 FROM genre_awards g
 JOIN artists_in_family af ON af.dominant_genre_family = g.dominant_genre_family
 ORDER BY g.awards DESC;
@@ -377,7 +377,7 @@ SELECT
     COUNT(*)                                                               AS awards,
     COUNT(DISTINCT w.artist_sk)                                            AS distinct_artists,
     SUM(w.is_matched_spotify)                                              AS matched_awards,
-    ROUND(100.0 * SUM(w.is_matched_spotify) / COUNT(*), 2)                 AS matched_share_pct,
+    ROUND(100.0 * SUM(w.is_matched_spotify) / NULLIF(COUNT(*), 0), 2)     AS matched_share_pct,
     da.mean_energy,
     da.mean_valence,
     da.mean_danceability,
@@ -395,7 +395,7 @@ SELECT
     COUNT(*)                                                               AS awards,
     COUNT(DISTINCT w.artist_sk)                                            AS recognized_artists,
     SUM(w.is_matched_spotify)                                              AS matched_awards,
-    ROUND(100.0 * SUM(w.is_matched_spotify) / COUNT(*), 2)                 AS matched_share_pct
+    ROUND(100.0 * SUM(w.is_matched_spotify) / NULLIF(COUNT(*), 0), 2)     AS matched_share_pct
 FROM fact_grammy_award w
 JOIN dim_year y ON y.year_sk = w.year_sk
 GROUP BY y.year

@@ -258,11 +258,13 @@ cmd_ports() {
 # y en ese estado el bootstrap de Superset revienta con 500
 # (relation "fact_grammy_award" does not exist).
 dw_ready() {
-  local pg_user
+  local pg_user cnt
   pg_user=$(get_env "POSTGRES_USER" "music")
-  compose exec -T music-postgres \
-    psql -U "$pg_user" -d music_dw -Atc "select to_regclass('public.fact_grammy_award')" \
-    2>/dev/null | grep -q 'fact_grammy_award'
+  cnt=$(compose exec -T music-postgres \
+    psql -U "$pg_user" -d music_dw -Atc \
+    "SELECT CASE WHEN to_regclass('public.fact_grammy_award') IS NOT NULL THEN (SELECT count(*) FROM fact_grammy_award) ELSE 0 END" \
+    2>/dev/null || echo "0")
+  [ "${cnt:-0}" -gt 0 ] 2>/dev/null
 }
 
 cmd_up() {
@@ -281,7 +283,7 @@ cmd_up() {
     cmd_trigger
     echo "[run] esperando a que el pipeline pueble music_dw ..."
     local i=1
-    while [ "$i" -le 60 ]; do
+    while [ "$i" -le 90 ]; do
       if dw_ready; then
         echo "[run] OK  music_dw preparado"
         break
