@@ -40,38 +40,72 @@ REQUIREMENTS_CSS = """
 }
 
 /* --- Tarjeta de Contexto (Cobertura Enriquecida) --- */
-#CHART-r0c1, .dashboard-chart-id-52, div[data-test-chart-name="Contexto · Cobertura Enriquecida %"] {
+#CHART-r0c1,
+.anchor-link-container {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+.dashboard-component-chart-holder .chart-slice,
+.dashboard-component-chart-holder .dashboard-chart,
+.dashboard-component-chart-holder .slice_container,
+div[data-test-chart-name="Contexto · Cobertura Enriquecida %"] {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+}
+.dashboard-component-chart-holder:has(#CHART-r0c1),
+.dashboard-component-chart-holder:has([data-test-chart-name="Contexto · Cobertura Enriquecida %"]),
+.dashboard-chart-id-12 {
     border-top: 4px solid #1DB954 !important;
     border-left: 1px solid rgba(30, 215, 96, 0.25) !important;
     border-right: 1px solid rgba(30, 215, 96, 0.25) !important;
     border-bottom: 1px solid rgba(30, 215, 96, 0.25) !important;
-    background: linear-gradient(180deg, rgba(30, 215, 96, 0.12) 0%, transparent 100%) !important;
+    background: linear-gradient(180deg, rgba(30, 215, 96, 0.12) 0%, rgba(255, 255, 255, 0.98) 100%) !important;
     box-shadow: 0 4px 12px rgba(30, 215, 96, 0.15) !important;
     border-radius: 10px !important;
+    box-sizing: border-box !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
 }
-#CHART-r0c1 .chart-slice, #CHART-r0c1 .dashboard-chart, #CHART-r0c1 .slice_container {
-    background: transparent !important;
+.dashboard-component-chart-holder:has(#CHART-r0c1):hover,
+.dashboard-component-chart-holder:has([data-test-chart-name="Contexto · Cobertura Enriquecida %"]):hover,
+.dashboard-chart-id-12:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 18px rgba(30, 215, 96, 0.25) !important;
 }
-#CHART-r0c1 .header-title, #CHART-r0c1 [data-test="slice-header-text"],
-.dashboard-chart-id-52 [data-test="slice-header-text"] {
+.dashboard-component-chart-holder:has(#CHART-r0c1) .header-title,
+.dashboard-component-chart-holder:has(#CHART-r0c1) [data-test="slice-header-text"],
+[data-test-chart-name="Contexto · Cobertura Enriquecida %"] [data-test="slice-header-text"],
+.dashboard-chart-id-12 [data-test="slice-header-text"] {
     color: inherit !important;
     font-weight: 700 !important;
     font-size: 13.5px !important;
 }
-#CHART-r0c1 .header-line, #CHART-r0c1 .header-line *,
-.dashboard-chart-id-52 .header-line, .dashboard-chart-id-52 .header-line *,
-#CHART-r0c1 .superset-legacy-chart-big-number .header-line {
+.dashboard-component-chart-holder:has(#CHART-r0c1) .header-line,
+.dashboard-component-chart-holder:has(#CHART-r0c1) .header-line *,
+[data-test-chart-name="Contexto · Cobertura Enriquecida %"] .header-line,
+[data-test-chart-name="Contexto · Cobertura Enriquecida %"] .header-line *,
+.dashboard-chart-id-12 .header-line,
+.dashboard-chart-id-12 .header-line * {
     color: #1DB954 !important;
     font-weight: 800 !important;
+    line-height: 1.15 !important;
+    overflow: visible !important;
+    white-space: nowrap !important;
 }
-#CHART-r0c1 .header-line::after, .dashboard-chart-id-52 .header-line::after {
+.dashboard-component-chart-holder:has(#CHART-r0c1) .header-line::after,
+[data-test-chart-name="Contexto · Cobertura Enriquecida %"] .header-line::after,
+.dashboard-chart-id-12 .header-line::after {
     content: "%" !important;
     font-size: 0.65em !important;
     font-weight: 700 !important;
     margin-left: 2px !important;
     color: #1DB954 !important;
 }
-#CHART-r0c1 .subheader-line, .dashboard-chart-id-52 .subheader-line {
+.dashboard-component-chart-holder:has(#CHART-r0c1) .subheader-line,
+[data-test-chart-name="Contexto · Cobertura Enriquecida %"] .subheader-line,
+.dashboard-chart-id-12 .subheader-line {
     color: inherit !important;
     opacity: 0.72 !important;
     font-weight: 600 !important;
@@ -85,35 +119,6 @@ REQUIREMENTS_CSS = """
     color: inherit !important;
     border-bottom: 2px solid rgba(128, 128, 128, 0.30) !important;
     padding-bottom: 6px !important;
-}
-
-/* ====================================================================
-   FIX KPI: una sola tarjeta (se limpia toda caja anidada) y número
-   completo. Colores neutros/transparentes -> compatible dark y light.
-   ==================================================================== */
-#CHART-r0c1 .dashboard-chart-id-52,
-#CHART-r0c1:hover .dashboard-chart-id-52,
-#CHART-r0c1 div[data-test-chart-name="Contexto · Cobertura Enriquecida %"],
-#CHART-r0c1:hover div[data-test-chart-name="Contexto · Cobertura Enriquecida %"],
-.dashboard-chart-id-52 #CHART-r0c1,
-.dashboard-chart-id-52:hover #CHART-r0c1,
-.dashboard-chart-id-52 div[data-test-chart-name="Contexto · Cobertura Enriquecida %"],
-.dashboard-chart-id-52:hover div[data-test-chart-name="Contexto · Cobertura Enriquecida %"],
-div[data-test-chart-name="Contexto · Cobertura Enriquecida %"] #CHART-r0c1,
-div[data-test-chart-name="Contexto · Cobertura Enriquecida %"]:hover #CHART-r0c1,
-div[data-test-chart-name="Contexto · Cobertura Enriquecida %"] .dashboard-chart-id-52,
-div[data-test-chart-name="Contexto · Cobertura Enriquecida %"]:hover .dashboard-chart-id-52 {
-    border: none !important;
-    background: transparent !important;
-    box-shadow: none !important;
-    border-radius: 0 !important;
-    transform: none !important;
-}
-#CHART-r0c1 .header-line,
-.dashboard-chart-id-52 .header-line {
-    line-height: 1.1 !important;
-    overflow: visible !important;
-    white-space: nowrap !important;
 }
 """
 

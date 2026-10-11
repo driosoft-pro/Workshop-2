@@ -82,6 +82,7 @@ x-superset-common: &superset-common
     context: .
     dockerfile: Dockerfile.superset
   image: ${SUPERSET_IMAGE_NAME:-workshop2-superset:6.1.0}
+  user: "0:0"
   env_file:
     - .env
   environment: &superset-common-env

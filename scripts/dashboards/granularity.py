@@ -39,51 +39,94 @@ GRANULARITY_CSS = """
 }
 
 /* ====================================================================
-   TARJETAS KPI / HEADERS (4 COLORES VIBRANTES)
+   TARJETAS KPI - UNA SOLA TARJETA LIMPIA (SIN CAJAS ANIDADAS NI SOBRELAPADAS)
    ==================================================================== */
 
+/* Contenedores de anclaje y grilla: limpios y sin bordes para evitar líneas flotantes */
 #CHART-r1c0, #CHART-r1c1, #CHART-r1c2, #CHART-r1c3,
-.dashboard-chart-id-41, .dashboard-chart-id-42, .dashboard-chart-id-43, .dashboard-chart-id-44 {
+.anchor-link-container {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* El contenido interno debe ser completamente transparente para no duplicar cajas */
+.dashboard-component-chart-holder .chart-slice,
+.dashboard-component-chart-holder .dashboard-chart,
+.dashboard-component-chart-holder .slice_container,
+div[data-test-chart-name="Premios Cargados"],
+div[data-test-chart-name="Cobertura Enriquecida %"],
+div[data-test-chart-name="Cobertura Estricta (Línea Base)"],
+div[data-test-chart-name="Artistas Grammy Vinculados"] {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+}
+
+/* Base común para las 4 tarjetas KPI (holder real) */
+.dashboard-component-chart-holder:has(#CHART-r1c0),
+.dashboard-component-chart-holder:has(#CHART-r1c1),
+.dashboard-component-chart-holder:has(#CHART-r1c2),
+.dashboard-component-chart-holder:has(#CHART-r1c3),
+.dashboard-component-chart-holder:has([data-test-chart-name="Premios Cargados"]),
+.dashboard-component-chart-holder:has([data-test-chart-name="Cobertura Enriquecida %"]),
+.dashboard-component-chart-holder:has([data-test-chart-name="Cobertura Estricta (Línea Base)"]),
+.dashboard-component-chart-holder:has([data-test-chart-name="Artistas Grammy Vinculados"]),
+.dashboard-chart-id-1, .dashboard-chart-id-2, .dashboard-chart-id-3, .dashboard-chart-id-4 {
     border-radius: 10px !important;
+    box-sizing: border-box !important;
     transition: transform 0.2s ease, box-shadow 0.2s ease !important;
 }
-#CHART-r1c0:hover, #CHART-r1c1:hover, #CHART-r1c2:hover, #CHART-r1c3:hover,
-.dashboard-chart-id-41:hover, .dashboard-chart-id-42:hover, .dashboard-chart-id-43:hover, .dashboard-chart-id-44:hover {
+
+.dashboard-component-chart-holder:has(#CHART-r1c0):hover,
+.dashboard-component-chart-holder:has(#CHART-r1c1):hover,
+.dashboard-component-chart-holder:has(#CHART-r1c2):hover,
+.dashboard-component-chart-holder:has(#CHART-r1c3):hover,
+.dashboard-component-chart-holder:has([data-test-chart-name="Premios Cargados"]):hover,
+.dashboard-component-chart-holder:has([data-test-chart-name="Cobertura Enriquecida %"]):hover,
+.dashboard-component-chart-holder:has([data-test-chart-name="Cobertura Estricta (Línea Base)"]):hover,
+.dashboard-component-chart-holder:has([data-test-chart-name="Artistas Grammy Vinculados"]):hover,
+.dashboard-chart-id-1:hover, .dashboard-chart-id-2:hover, .dashboard-chart-id-3:hover, .dashboard-chart-id-4:hover {
     transform: translateY(-2px) !important;
 }
 
-#CHART-r1c0 .chart-slice, #CHART-r1c0 .dashboard-chart, #CHART-r1c0 .slice_container,
-#CHART-r1c1 .chart-slice, #CHART-r1c1 .dashboard-chart, #CHART-r1c1 .slice_container,
-#CHART-r1c2 .chart-slice, #CHART-r1c2 .dashboard-chart, #CHART-r1c2 .slice_container,
-#CHART-r1c3 .chart-slice, #CHART-r1c3 .dashboard-chart, #CHART-r1c3 .slice_container {
-    background: transparent !important;
-}
-
 /* --- TARJETA 1: Premios Cargados (Dorado Grammy) --- */
-#CHART-r1c0, .dashboard-chart-id-41, div[data-test-chart-name="Premios Cargados"] {
+.dashboard-component-chart-holder:has(#CHART-r1c0),
+.dashboard-component-chart-holder:has([data-test-chart-name="Premios Cargados"]),
+.dashboard-chart-id-1 {
     border-top: 4px solid #D4AF37 !important;
     border-left: 1px solid rgba(212, 175, 55, 0.25) !important;
     border-right: 1px solid rgba(212, 175, 55, 0.25) !important;
     border-bottom: 1px solid rgba(212, 175, 55, 0.25) !important;
-    background: linear-gradient(180deg, rgba(212, 175, 55, 0.12) 0%, transparent 100%) !important;
+    background: linear-gradient(180deg, rgba(212, 175, 55, 0.12) 0%, rgba(255, 255, 255, 0.98) 100%) !important;
     box-shadow: 0 4px 12px rgba(212, 175, 55, 0.15) !important;
 }
-#CHART-r1c0:hover, .dashboard-chart-id-41:hover {
+.dashboard-component-chart-holder:has(#CHART-r1c0):hover,
+.dashboard-component-chart-holder:has([data-test-chart-name="Premios Cargados"]):hover,
+.dashboard-chart-id-1:hover {
     box-shadow: 0 6px 18px rgba(212, 175, 55, 0.25) !important;
 }
-#CHART-r1c0 .header-title, #CHART-r1c0 [data-test="slice-header-text"],
-.dashboard-chart-id-41 [data-test="slice-header-text"] {
+.dashboard-component-chart-holder:has(#CHART-r1c0) .header-title,
+.dashboard-component-chart-holder:has(#CHART-r1c0) [data-test="slice-header-text"],
+[data-test-chart-name="Premios Cargados"] [data-test="slice-header-text"],
+.dashboard-chart-id-1 [data-test="slice-header-text"] {
     color: inherit !important;
     font-weight: 700 !important;
     font-size: 14px !important;
 }
-#CHART-r1c0 .header-line, #CHART-r1c0 .header-line *,
-.dashboard-chart-id-41 .header-line, .dashboard-chart-id-41 .header-line *,
-#CHART-r1c0 .superset-legacy-chart-big-number .header-line {
+.dashboard-component-chart-holder:has(#CHART-r1c0) .header-line,
+.dashboard-component-chart-holder:has(#CHART-r1c0) .header-line *,
+[data-test-chart-name="Premios Cargados"] .header-line,
+[data-test-chart-name="Premios Cargados"] .header-line *,
+.dashboard-chart-id-1 .header-line,
+.dashboard-chart-id-1 .header-line * {
     color: #C9A227 !important;
     font-weight: 800 !important;
 }
-#CHART-r1c0 .subheader-line, .dashboard-chart-id-41 .subheader-line {
+.dashboard-component-chart-holder:has(#CHART-r1c0) .subheader-line,
+[data-test-chart-name="Premios Cargados"] .subheader-line,
+.dashboard-chart-id-1 .subheader-line {
     color: inherit !important;
     opacity: 0.72 !important;
     font-weight: 600 !important;
@@ -92,37 +135,50 @@ GRANULARITY_CSS = """
 }
 
 /* --- TARJETA 2: Cobertura Enriquecida % (Verde Spotify) --- */
-#CHART-r1c1, .dashboard-chart-id-42, div[data-test-chart-name="Cobertura Enriquecida %"] {
+.dashboard-component-chart-holder:has(#CHART-r1c1),
+.dashboard-component-chart-holder:has([data-test-chart-name="Cobertura Enriquecida %"]),
+.dashboard-chart-id-2 {
     border-top: 4px solid #1DB954 !important;
     border-left: 1px solid rgba(30, 215, 96, 0.25) !important;
     border-right: 1px solid rgba(30, 215, 96, 0.25) !important;
     border-bottom: 1px solid rgba(30, 215, 96, 0.25) !important;
-    background: linear-gradient(180deg, rgba(30, 215, 96, 0.12) 0%, transparent 100%) !important;
+    background: linear-gradient(180deg, rgba(30, 215, 96, 0.12) 0%, rgba(255, 255, 255, 0.98) 100%) !important;
     box-shadow: 0 4px 12px rgba(30, 215, 96, 0.15) !important;
 }
-#CHART-r1c1:hover, .dashboard-chart-id-42:hover {
+.dashboard-component-chart-holder:has(#CHART-r1c1):hover,
+.dashboard-component-chart-holder:has([data-test-chart-name="Cobertura Enriquecida %"]):hover,
+.dashboard-chart-id-2:hover {
     box-shadow: 0 6px 18px rgba(30, 215, 96, 0.25) !important;
 }
-#CHART-r1c1 .header-title, #CHART-r1c1 [data-test="slice-header-text"],
-.dashboard-chart-id-42 [data-test="slice-header-text"] {
+.dashboard-component-chart-holder:has(#CHART-r1c1) .header-title,
+.dashboard-component-chart-holder:has(#CHART-r1c1) [data-test="slice-header-text"],
+[data-test-chart-name="Cobertura Enriquecida %"] [data-test="slice-header-text"],
+.dashboard-chart-id-2 [data-test="slice-header-text"] {
     color: inherit !important;
     font-weight: 700 !important;
     font-size: 14px !important;
 }
-#CHART-r1c1 .header-line, #CHART-r1c1 .header-line *,
-.dashboard-chart-id-42 .header-line, .dashboard-chart-id-42 .header-line *,
-#CHART-r1c1 .superset-legacy-chart-big-number .header-line {
+.dashboard-component-chart-holder:has(#CHART-r1c1) .header-line,
+.dashboard-component-chart-holder:has(#CHART-r1c1) .header-line *,
+[data-test-chart-name="Cobertura Enriquecida %"] .header-line,
+[data-test-chart-name="Cobertura Enriquecida %"] .header-line *,
+.dashboard-chart-id-2 .header-line,
+.dashboard-chart-id-2 .header-line * {
     color: #1DB954 !important;
     font-weight: 800 !important;
 }
-#CHART-r1c1 .header-line::after, .dashboard-chart-id-42 .header-line::after {
+.dashboard-component-chart-holder:has(#CHART-r1c1) .header-line::after,
+[data-test-chart-name="Cobertura Enriquecida %"] .header-line::after,
+.dashboard-chart-id-2 .header-line::after {
     content: "%" !important;
     font-size: 0.65em !important;
     font-weight: 700 !important;
     margin-left: 2px !important;
     color: #1DB954 !important;
 }
-#CHART-r1c1 .subheader-line, .dashboard-chart-id-42 .subheader-line {
+.dashboard-component-chart-holder:has(#CHART-r1c1) .subheader-line,
+[data-test-chart-name="Cobertura Enriquecida %"] .subheader-line,
+.dashboard-chart-id-2 .subheader-line {
     color: inherit !important;
     opacity: 0.72 !important;
     font-weight: 600 !important;
@@ -131,37 +187,50 @@ GRANULARITY_CSS = """
 }
 
 /* --- TARJETA 3: Cobertura Estricta (Línea Base) (Púrpura Amatista) --- */
-#CHART-r1c2, .dashboard-chart-id-43, div[data-test-chart-name="Cobertura Estricta (Línea Base)"] {
+.dashboard-component-chart-holder:has(#CHART-r1c2),
+.dashboard-component-chart-holder:has([data-test-chart-name="Cobertura Estricta (Línea Base)"]),
+.dashboard-chart-id-3 {
     border-top: 4px solid #8B5CF6 !important;
     border-left: 1px solid rgba(139, 92, 246, 0.25) !important;
     border-right: 1px solid rgba(139, 92, 246, 0.25) !important;
     border-bottom: 1px solid rgba(139, 92, 246, 0.25) !important;
-    background: linear-gradient(180deg, rgba(139, 92, 246, 0.12) 0%, transparent 100%) !important;
+    background: linear-gradient(180deg, rgba(139, 92, 246, 0.12) 0%, rgba(255, 255, 255, 0.98) 100%) !important;
     box-shadow: 0 4px 12px rgba(139, 92, 246, 0.15) !important;
 }
-#CHART-r1c2:hover, .dashboard-chart-id-43:hover {
+.dashboard-component-chart-holder:has(#CHART-r1c2):hover,
+.dashboard-component-chart-holder:has([data-test-chart-name="Cobertura Estricta (Línea Base)"]):hover,
+.dashboard-chart-id-3:hover {
     box-shadow: 0 6px 18px rgba(139, 92, 246, 0.25) !important;
 }
-#CHART-r1c2 .header-title, #CHART-r1c2 [data-test="slice-header-text"],
-.dashboard-chart-id-43 [data-test="slice-header-text"] {
+.dashboard-component-chart-holder:has(#CHART-r1c2) .header-title,
+.dashboard-component-chart-holder:has(#CHART-r1c2) [data-test="slice-header-text"],
+[data-test-chart-name="Cobertura Estricta (Línea Base)"] [data-test="slice-header-text"],
+.dashboard-chart-id-3 [data-test="slice-header-text"] {
     color: inherit !important;
     font-weight: 700 !important;
     font-size: 14px !important;
 }
-#CHART-r1c2 .header-line, #CHART-r1c2 .header-line *,
-.dashboard-chart-id-43 .header-line, .dashboard-chart-id-43 .header-line *,
-#CHART-r1c2 .superset-legacy-chart-big-number .header-line {
+.dashboard-component-chart-holder:has(#CHART-r1c2) .header-line,
+.dashboard-component-chart-holder:has(#CHART-r1c2) .header-line *,
+[data-test-chart-name="Cobertura Estricta (Línea Base)"] .header-line,
+[data-test-chart-name="Cobertura Estricta (Línea Base)"] .header-line *,
+.dashboard-chart-id-3 .header-line,
+.dashboard-chart-id-3 .header-line * {
     color: #7C3AED !important;
     font-weight: 800 !important;
 }
-#CHART-r1c2 .header-line::after, .dashboard-chart-id-43 .header-line::after {
+.dashboard-component-chart-holder:has(#CHART-r1c2) .header-line::after,
+[data-test-chart-name="Cobertura Estricta (Línea Base)"] .header-line::after,
+.dashboard-chart-id-3 .header-line::after {
     content: "%" !important;
     font-size: 0.65em !important;
     font-weight: 700 !important;
     margin-left: 2px !important;
     color: #7C3AED !important;
 }
-#CHART-r1c2 .subheader-line, .dashboard-chart-id-43 .subheader-line {
+.dashboard-component-chart-holder:has(#CHART-r1c2) .subheader-line,
+[data-test-chart-name="Cobertura Estricta (Línea Base)"] .subheader-line,
+.dashboard-chart-id-3 .subheader-line {
     color: inherit !important;
     opacity: 0.72 !important;
     font-weight: 600 !important;
@@ -170,30 +239,41 @@ GRANULARITY_CSS = """
 }
 
 /* --- TARJETA 4: Artistas Grammy Vinculados (Azul Océano) --- */
-#CHART-r1c3, .dashboard-chart-id-44, div[data-test-chart-name="Artistas Grammy Vinculados"] {
+.dashboard-component-chart-holder:has(#CHART-r1c3),
+.dashboard-component-chart-holder:has([data-test-chart-name="Artistas Grammy Vinculados"]),
+.dashboard-chart-id-4 {
     border-top: 4px solid #0EA5E9 !important;
     border-left: 1px solid rgba(14, 165, 233, 0.25) !important;
     border-right: 1px solid rgba(14, 165, 233, 0.25) !important;
     border-bottom: 1px solid rgba(14, 165, 233, 0.25) !important;
-    background: linear-gradient(180deg, rgba(14, 165, 233, 0.12) 0%, transparent 100%) !important;
+    background: linear-gradient(180deg, rgba(14, 165, 233, 0.12) 0%, rgba(255, 255, 255, 0.98) 100%) !important;
     box-shadow: 0 4px 12px rgba(14, 165, 233, 0.15) !important;
 }
-#CHART-r1c3:hover, .dashboard-chart-id-44:hover {
+.dashboard-component-chart-holder:has(#CHART-r1c3):hover,
+.dashboard-component-chart-holder:has([data-test-chart-name="Artistas Grammy Vinculados"]):hover,
+.dashboard-chart-id-4:hover {
     box-shadow: 0 6px 18px rgba(14, 165, 233, 0.25) !important;
 }
-#CHART-r1c3 .header-title, #CHART-r1c3 [data-test="slice-header-text"],
-.dashboard-chart-id-44 [data-test="slice-header-text"] {
+.dashboard-component-chart-holder:has(#CHART-r1c3) .header-title,
+.dashboard-component-chart-holder:has(#CHART-r1c3) [data-test="slice-header-text"],
+[data-test-chart-name="Artistas Grammy Vinculados"] [data-test="slice-header-text"],
+.dashboard-chart-id-4 [data-test="slice-header-text"] {
     color: inherit !important;
     font-weight: 700 !important;
     font-size: 14px !important;
 }
-#CHART-r1c3 .header-line, #CHART-r1c3 .header-line *,
-.dashboard-chart-id-44 .header-line, .dashboard-chart-id-44 .header-line *,
-#CHART-r1c3 .superset-legacy-chart-big-number .header-line {
+.dashboard-component-chart-holder:has(#CHART-r1c3) .header-line,
+.dashboard-component-chart-holder:has(#CHART-r1c3) .header-line *,
+[data-test-chart-name="Artistas Grammy Vinculados"] .header-line,
+[data-test-chart-name="Artistas Grammy Vinculados"] .header-line *,
+.dashboard-chart-id-4 .header-line,
+.dashboard-chart-id-4 .header-line * {
     color: #0284C7 !important;
     font-weight: 800 !important;
 }
-#CHART-r1c3 .subheader-line, .dashboard-chart-id-44 .subheader-line {
+.dashboard-component-chart-holder:has(#CHART-r1c3) .subheader-line,
+[data-test-chart-name="Artistas Grammy Vinculados"] .subheader-line,
+.dashboard-chart-id-4 .subheader-line {
     color: inherit !important;
     opacity: 0.72 !important;
     font-weight: 600 !important;
@@ -209,73 +289,9 @@ GRANULARITY_CSS = """
     padding-bottom: 6px !important;
 }
 
-/* ====================================================================
-   FIX KPI: una sola tarjeta (se limpia toda caja anidada) y número
-   completo. Colores neutros/transparentes -> compatible dark y light.
-   ==================================================================== */
-#CHART-r1c0 .dashboard-chart-id-41,
-#CHART-r1c0:hover .dashboard-chart-id-41,
-#CHART-r1c0 div[data-test-chart-name="Premios Cargados"],
-#CHART-r1c0:hover div[data-test-chart-name="Premios Cargados"],
-.dashboard-chart-id-41 #CHART-r1c0,
-.dashboard-chart-id-41:hover #CHART-r1c0,
-.dashboard-chart-id-41 div[data-test-chart-name="Premios Cargados"],
-.dashboard-chart-id-41:hover div[data-test-chart-name="Premios Cargados"],
-div[data-test-chart-name="Premios Cargados"] #CHART-r1c0,
-div[data-test-chart-name="Premios Cargados"]:hover #CHART-r1c0,
-div[data-test-chart-name="Premios Cargados"] .dashboard-chart-id-41,
-div[data-test-chart-name="Premios Cargados"]:hover .dashboard-chart-id-41,
-#CHART-r1c1 .dashboard-chart-id-42,
-#CHART-r1c1:hover .dashboard-chart-id-42,
-#CHART-r1c1 div[data-test-chart-name="Cobertura Enriquecida %"],
-#CHART-r1c1:hover div[data-test-chart-name="Cobertura Enriquecida %"],
-.dashboard-chart-id-42 #CHART-r1c1,
-.dashboard-chart-id-42:hover #CHART-r1c1,
-.dashboard-chart-id-42 div[data-test-chart-name="Cobertura Enriquecida %"],
-.dashboard-chart-id-42:hover div[data-test-chart-name="Cobertura Enriquecida %"],
-div[data-test-chart-name="Cobertura Enriquecida %"] #CHART-r1c1,
-div[data-test-chart-name="Cobertura Enriquecida %"]:hover #CHART-r1c1,
-div[data-test-chart-name="Cobertura Enriquecida %"] .dashboard-chart-id-42,
-div[data-test-chart-name="Cobertura Enriquecida %"]:hover .dashboard-chart-id-42,
-#CHART-r1c2 .dashboard-chart-id-43,
-#CHART-r1c2:hover .dashboard-chart-id-43,
-#CHART-r1c2 div[data-test-chart-name="Cobertura Estricta (Línea Base)"],
-#CHART-r1c2:hover div[data-test-chart-name="Cobertura Estricta (Línea Base)"],
-.dashboard-chart-id-43 #CHART-r1c2,
-.dashboard-chart-id-43:hover #CHART-r1c2,
-.dashboard-chart-id-43 div[data-test-chart-name="Cobertura Estricta (Línea Base)"],
-.dashboard-chart-id-43:hover div[data-test-chart-name="Cobertura Estricta (Línea Base)"],
-div[data-test-chart-name="Cobertura Estricta (Línea Base)"] #CHART-r1c2,
-div[data-test-chart-name="Cobertura Estricta (Línea Base)"]:hover #CHART-r1c2,
-div[data-test-chart-name="Cobertura Estricta (Línea Base)"] .dashboard-chart-id-43,
-div[data-test-chart-name="Cobertura Estricta (Línea Base)"]:hover .dashboard-chart-id-43,
-#CHART-r1c3 .dashboard-chart-id-44,
-#CHART-r1c3:hover .dashboard-chart-id-44,
-#CHART-r1c3 div[data-test-chart-name="Artistas Grammy Vinculados"],
-#CHART-r1c3:hover div[data-test-chart-name="Artistas Grammy Vinculados"],
-.dashboard-chart-id-44 #CHART-r1c3,
-.dashboard-chart-id-44:hover #CHART-r1c3,
-.dashboard-chart-id-44 div[data-test-chart-name="Artistas Grammy Vinculados"],
-.dashboard-chart-id-44:hover div[data-test-chart-name="Artistas Grammy Vinculados"],
-div[data-test-chart-name="Artistas Grammy Vinculados"] #CHART-r1c3,
-div[data-test-chart-name="Artistas Grammy Vinculados"]:hover #CHART-r1c3,
-div[data-test-chart-name="Artistas Grammy Vinculados"] .dashboard-chart-id-44,
-div[data-test-chart-name="Artistas Grammy Vinculados"]:hover .dashboard-chart-id-44 {
-    border: none !important;
-    background: transparent !important;
-    box-shadow: none !important;
-    border-radius: 0 !important;
-    transform: none !important;
-}
-#CHART-r1c0 .header-line,
-.dashboard-chart-id-41 .header-line,
-#CHART-r1c1 .header-line,
-.dashboard-chart-id-42 .header-line,
-#CHART-r1c2 .header-line,
-.dashboard-chart-id-43 .header-line,
-#CHART-r1c3 .header-line,
-.dashboard-chart-id-44 .header-line {
-    line-height: 1.1 !important;
+/* Asegurar que los números de las tarjetas KPI se vean completos */
+.header-line {
+    line-height: 1.15 !important;
     overflow: visible !important;
     white-space: nowrap !important;
 }

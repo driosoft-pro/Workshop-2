@@ -1,10 +1,10 @@
 {
   "stage": "prepared_bridge",
-  "generated_at": "2026-10-11T00:06:23.465501+00:00",
+  "generated_at": "2026-10-11T16:33:01.487340+00:00",
   "run_context": {
     "dag_id": "reliable_music_pipeline",
     "task_id": "validate_prepared",
-    "run_id": "manual__2026-10-11T00:05:44.593414+00:00",
+    "run_id": "manual__2026-10-11T16:32:25.995437+00:00",
     "try_number": 1,
     "logical_date": "",
     "stage": "prepared_bridge"

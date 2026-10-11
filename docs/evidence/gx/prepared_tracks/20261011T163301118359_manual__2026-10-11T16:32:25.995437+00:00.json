@@ -1,21 +1,21 @@
 {
-  "stage": "raw_spotify",
-  "generated_at": "2026-10-11T00:06:03.855028+00:00",
+  "stage": "prepared_tracks",
+  "generated_at": "2026-10-11T16:33:01.118239+00:00",
   "run_context": {
     "dag_id": "reliable_music_pipeline",
-    "task_id": "validate_spotify_raw",
-    "run_id": "manual__2026-10-11T00:05:44.593414+00:00",
+    "task_id": "validate_prepared",
+    "run_id": "manual__2026-10-11T16:32:25.995437+00:00",
     "try_number": 1,
     "logical_date": "",
-    "stage": "raw_spotify"
+    "stage": "prepared_tracks"
   },
-  "checkpoint": "raw_spotify_checkpoint",
-  "suite": "spotify_raw_suite",
+  "checkpoint": "prepared_tracks_checkpoint",
+  "suite": "prepared_tracks_suite",
   "success": true,
   "max_failure_severity": null,
   "statistics": {
-    "evaluated_expectations": 9,
-    "successful_expectations": 9,
+    "evaluated_expectations": 10,
+    "successful_expectations": 10,
     "unsuccessful_expectations": 0,
     "success_percent": 100.0
   },
@@ -23,43 +23,39 @@
   "failed_warning_rules": [],
   "expectations": [
     {
-      "rule_id": "DQ-S1",
-      "quality_dimension": "Completeness",
-      "requirement": "R1,R2,R3",
+      "rule_id": "DQ-P1",
+      "quality_dimension": "Uniqueness",
+      "requirement": "R1",
       "expectation": "expect_column_values_to_not_be_null",
       "column": "track_id",
       "thresholds": {},
       "severity": "critical",
       "success": true,
       "result": {
-        "element_count": 114000,
+        "element_count": 157530,
         "unexpected_count": 0,
         "unexpected_percent": 0.0,
         "partial_unexpected_list": []
       }
     },
     {
-      "rule_id": "DQ-S2",
+      "rule_id": "DQ-P2",
       "quality_dimension": "Completeness",
-      "requirement": "R1,R2,R3",
+      "requirement": "R1,R2",
       "expectation": "expect_column_values_to_not_be_null",
-      "column": "artists",
-      "thresholds": {
-        "mostly": 0.999
-      },
+      "column": "artist_key",
+      "thresholds": {},
       "severity": "critical",
       "success": true,
       "result": {
-        "element_count": 114000,
-        "unexpected_count": 1,
-        "unexpected_percent": 0.0008771929824561403,
-        "partial_unexpected_list": [
-          null
-        ]
+        "element_count": 157530,
+        "unexpected_count": 0,
+        "unexpected_percent": 0.0,
+        "partial_unexpected_list": []
       }
     },
     {
-      "rule_id": "DQ-S3",
+      "rule_id": "DQ-P3",
       "quality_dimension": "Validity",
       "requirement": "R1",
       "expectation": "expect_column_values_to_be_between",
@@ -71,7 +67,7 @@
       "severity": "critical",
       "success": true,
       "result": {
-        "element_count": 114000,
+        "element_count": 157530,
         "unexpected_count": 0,
         "unexpected_percent": 0.0,
         "partial_unexpected_list": [],
@@ -80,50 +76,7 @@
       }
     },
     {
-      "rule_id": "DQ-S4",
-      "quality_dimension": "Validity",
-      "requirement": "R1",
-      "expectation": "expect_column_values_to_be_between",
-      "column": "duration_ms",
-      "thresholds": {
-        "mostly": 0.99,
-        "min_value": 1.0,
-        "max_value": 600000.0
-      },
-      "severity": "warning",
-      "success": true,
-      "result": {
-        "element_count": 114000,
-        "unexpected_count": 604,
-        "unexpected_percent": 0.5298245614035088,
-        "partial_unexpected_list": [
-          655440,
-          745653,
-          625066,
-          828586,
-          683893,
-          773800,
-          793200,
-          745386,
-          601240,
-          722200,
-          645210,
-          635790,
-          864000,
-          630228,
-          633462,
-          660000,
-          663021,
-          676986,
-          1041520,
-          760053
-        ],
-        "missing_count": 0,
-        "missing_percent": 0.0
-      }
-    },
-    {
-      "rule_id": "DQ-S5",
+      "rule_id": "DQ-P4",
       "quality_dimension": "Validity",
       "requirement": "R3",
       "expectation": "expect_column_values_to_be_between",
@@ -135,7 +88,7 @@
       "severity": "critical",
       "success": true,
       "result": {
-        "element_count": 114000,
+        "element_count": 157530,
         "unexpected_count": 0,
         "unexpected_percent": 0.0,
         "partial_unexpected_list": [],
@@ -144,7 +97,7 @@
       }
     },
     {
-      "rule_id": "DQ-S5",
+      "rule_id": "DQ-P4",
       "quality_dimension": "Validity",
       "requirement": "R3",
       "expectation": "expect_column_values_to_be_between",
@@ -156,7 +109,7 @@
       "severity": "critical",
       "success": true,
       "result": {
-        "element_count": 114000,
+        "element_count": 157530,
         "unexpected_count": 0,
         "unexpected_percent": 0.0,
         "partial_unexpected_list": [],
@@ -165,7 +118,7 @@
       }
     },
     {
-      "rule_id": "DQ-S5",
+      "rule_id": "DQ-P4",
       "quality_dimension": "Validity",
       "requirement": "R3",
       "expectation": "expect_column_values_to_be_between",
@@ -177,7 +130,7 @@
       "severity": "critical",
       "success": true,
       "result": {
-        "element_count": 114000,
+        "element_count": 157530,
         "unexpected_count": 0,
         "unexpected_percent": 0.0,
         "partial_unexpected_list": [],
@@ -186,33 +139,92 @@
       }
     },
     {
-      "rule_id": "DQ-S6",
-      "quality_dimension": "Completeness",
-      "requirement": "R2",
-      "expectation": "expect_column_values_to_not_be_null",
-      "column": "track_genre",
+      "rule_id": "DQ-P5",
+      "quality_dimension": "Validity",
+      "requirement": "R1,R2",
+      "expectation": "expect_column_values_to_be_in_set",
+      "column": "is_grammy_artist",
       "thresholds": {
-        "mostly": 0.999
+        "value_set": [
+          0,
+          1
+        ]
       },
       "severity": "critical",
       "success": true,
       "result": {
-        "element_count": 114000,
+        "element_count": 157530,
         "unexpected_count": 0,
         "unexpected_percent": 0.0,
-        "partial_unexpected_list": []
+        "partial_unexpected_list": [],
+        "missing_count": 0,
+        "missing_percent": 0.0
       }
     },
     {
-      "rule_id": "DQ-S7",
+      "rule_id": "DQ-G8",
       "quality_dimension": "Completeness",
-      "requirement": "R1,R2,R3",
-      "expectation": "expect_table_columns_to_match_set",
+      "requirement": "R2",
+      "expectation": "expect_column_values_to_be_in_set",
+      "column": "genre_family",
+      "thresholds": {
+        "value_set": [
+          "Classical & Instrumental",
+          "Country & Folk",
+          "Electronic",
+          "Hip-Hop & R&B",
+          "Jazz Blues Soul",
+          "Latin",
+          "Metal",
+          "Mood & Media",
+          "Pop",
+          "Reggae & Caribbean",
+          "Rock",
+          "World"
+        ]
+      },
+      "severity": "critical",
+      "success": true,
+      "result": {
+        "element_count": 157530,
+        "unexpected_count": 0,
+        "unexpected_percent": 0.0,
+        "partial_unexpected_list": [],
+        "missing_count": 0,
+        "missing_percent": 0.0
+      }
+    },
+    {
+      "rule_id": "DQ-P13",
+      "quality_dimension": "Validity",
+      "requirement": "R1",
+      "expectation": "expect_column_mean_to_be_between",
+      "column": "is_zero_popularity",
+      "thresholds": {
+        "min_value": 0.0,
+        "max_value": 0.2
+      },
+      "severity": "warning",
+      "success": true,
+      "result": {}
+    },
+    {
+      "rule_id": "DQ-G10",
+      "quality_dimension": "Uniqueness",
+      "requirement": "R1",
+      "expectation": "expect_compound_columns_to_be_unique",
       "column": null,
       "thresholds": {},
       "severity": "critical",
       "success": true,
-      "result": {}
+      "result": {
+        "element_count": 111206,
+        "unexpected_count": 0,
+        "unexpected_percent": 0.0,
+        "partial_unexpected_list": [],
+        "missing_count": 0,
+        "missing_percent": 0.0
+      }
     }
   ]
 }
