@@ -189,7 +189,7 @@ winners-only dataset; tier C craft awards excluded from performing recognition).
 
 | Object | Declared grain | Business key |
 | --- | --- | --- |
-| `fact_track_artist` | track listing × genre × performing artist | `(track_id, track_genre, artist_sk)` (UNIQUE) |
+| `fact_track_artist` | track listing × genre × performing artist | `(track_id, genre_sk, artist_sk)` (UNIQUE) |
 | `fact_grammy_award` | year × category × nominee × artist | `award_bk` (UNIQUE, normalized) |
 | `bridge_award_artist` | award listing × credited performing artist | `(grammy_award_sk, artist_sk)` (PRIMARY KEY) |
 | `dim_artist` | artist | `artist_bk` |
@@ -222,19 +222,17 @@ erDiagram
         text artist_bk UK "normalized name key"
         text artist_display_name
         bool from_spotify
-        bool from_grammy
         int grammy_award_count
-        int grammy_award_count_core
         int spotify_track_count
-        text dominant_genre "NEW T16"
-        text dominant_genre_family "NEW T16"
-        int n_genres "NEW T16"
-        bool genre_tie "NEW T16"
+        text dominant_genre "most frequent genre"
+        text dominant_genre_family "macro-family of dominant genre"
+        int n_genres "total associated genres"
+        bool genre_tie "true if tie in dominant genre"
     }
     dim_genre {
         bigint genre_sk PK
         text genre UK
-        text genre_family "NEW T14"
+        text genre_family "genre macro-family (12 groups)"
     }
     dim_year {
         int year_sk PK
@@ -244,38 +242,25 @@ erDiagram
     dim_award_category {
         bigint category_sk PK
         text category UK
-        text category_clean "NEW T13"
-        text category_family "NEW T13"
+        text category_clean "standardized category name"
+        text category_family "award field or family"
     }
     fact_track_artist {
         bigint track_artist_sk PK
         text track_id
-        text track_genre
         bigint artist_sk FK
         bigint genre_sk FK
-        text track_name
-        text album_name
-        int popularity
-        bigint duration_ms
-        float energy
-        float valence
-        int artist_position
-        int artist_total
-        int is_grammy_artist "0/1"
-        int is_grammy_artist_strict "0/1"
-        int artist_grammy_awards
-        text song_key "NEW T15"
-        int is_primary_song "NEW T15"
-        int is_zero_popularity "NEW T15"
-        int is_outlier_duration "NEW T15"
-        int is_outlier_loudness "NEW T15"
-        int is_outlier_tempo "NEW T15"
-        float danceability "audio feature (raw contract 22)"
-        float acousticness "audio feature (raw contract 22)"
-        float speechiness "audio feature (raw contract 22)"
-        float loudness "audio feature (raw contract 22)"
-        float tempo "audio feature (raw contract 22)"
-        bool explicit "raw contract 22"
+        int popularity "popularity 0..100"
+        float energy "energy 0.0..1.0"
+        float valence "valence 0.0..1.0"
+        int is_grammy_artist "1 if artist won Grammy (0/1)"
+        int is_grammy_artist_strict "1 if strict match (0/1)"
+        text song_key "canonical key (artist + track name)"
+        int is_primary_song "1 canonical row for dedup (0/1)"
+        int is_zero_popularity "1 if zero popularity (0/1)"
+        float danceability "danceability 0.0..1.0"
+        float acousticness "acousticness 0.0..1.0"
+        float speechiness "speechiness 0.0..1.0"
         text batch_id
         timestamptz loaded_at
     }
@@ -289,27 +274,21 @@ erDiagram
         text nominee
         text artist_credit
         text workers
-        bool winner
-        int winner_flag "0/1"
-        int is_matched_spotify "0/1"
-        int is_matched_strict "NEW T12"
-        int is_song_confirmed "NEW T12"
-        text artist_source "NEW T12"
-        text match_method "NEW T12"
-        int credit_artist_count "NEW T12"
-        text recognition_tier "NEW T18"
-        int is_aggregate_credit "NEW T17"
-        int spotify_track_count
-        int award_count
+        int winner_flag "1 if winner (0/1)"
+        int is_matched_spotify "1 if matched to Spotify (0/1)"
+        int is_matched_strict "1 if strict match (0/1)"
+        int is_song_confirmed "1 if song verified (0/1)"
+        text match_method "matching method (exact, fuzzy)"
+        text recognition_tier "recognition tier (solo, collab)"
         text batch_id
         timestamptz loaded_at
     }
     bridge_award_artist {
         bigint grammy_award_sk PK,FK
         bigint artist_sk PK,FK
-        int artist_position
-        text match_method
-        text recognition_tier "NEW T18"
+        int artist_position "credit order position"
+        text match_method "artist-level match method"
+        text recognition_tier "artist-level recognition tier"
         text batch_id
         timestamptz loaded_at
     }
@@ -332,6 +311,8 @@ Row counts: `fact_track_artist` 157,530 · `fact_grammy_award` 4,810 ·
 `dim_year` 62 · `dim_award_category` 638. Surrogate keys are generated inside the load
 transaction; business keys are UNIQUE-constrained; unmatched awards keep
 `artist_sk NULL` by design.
+
+**Model audit (applied).** Every column was traced through the ETL, KPI SQL, Superset dashboards, DAGs and tests. Both facts are kept because their grains differ (track × genre × artist vs. one award record) and merging them would repeat awards per catalogue row and lose the 465 awards without an artist; the bridge is kept because 246 awards have several matched artists. What was optimised is the **width**: the warehouse went from 98 to 75 columns (`fact_track_artist` 32 → 17, `fact_grammy_award` 23 → 17, `dim_artist` 13 → 11) by removing columns that no KPI, dashboard, script or DAG reads (names, unused audio features, outlier flags, duplicated `track_genre`/`winner`/`award_count`, etc.). They remain in the staging CSVs (`data/work/prepared_*.csv`) for traceability and validation. No tables, views or relationships were added or changed, and no dashboard column was removed. Details, removed-column table and regression queries: [`docs/dimensional_model.md` §9](docs/dimensional_model.md).
 
 ## 13. ETL pipeline, gates and orchestration
 

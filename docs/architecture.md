@@ -4,27 +4,43 @@ Workshop-2, sections 4.2, 5 and 6.11.
 
 ## 1. Reliable pipeline pattern
 
-```
-                        Spotify branch            Convergence / target             Grammy branch
+```mermaid 
+flowchart TD
+    subgraph SpotifyBranch["Spotify branch"]
+        raw_spotify["data/raw/spotify_dataset.csv"]
+        extract_spotify["extract_spotify"]
+        val_spotify["validate_spotify_raw"]
 
-  data/raw/spotify_dataset.csv                  PostgreSQL music_source
-            |                                               |
-      extract_spotify                                extract_grammys
-            |                                               |
-   validate_spotify_raw  ---- both raw gates ----  validate_grammys_raw
-                              converge (AND)
-                                   |
-                        transform_and_integrate            T1-T11: cleaning, harmonisation,
-                                   |                        integration, derivation
-                              validate_prepared      3 prepared checkpoints
-                                   |                        AND gate
-                                 load_dw             transactional replace into the star schema
-                                   |
-                              DATA WAREHOUSE  (music_dw: 4 dims + 2 facts + etl_batch_log)
-                                   |
-                               build_kpis      7 SQL KPIs + 4 PNG charts (R1-R4)
-                                   |
-                          KPIs / DASHBOARD (Superset primary, Power BI alt.)
+        raw_spotify --> extract_spotify --> val_spotify
+    end
+
+    subgraph GrammyBranch["Grammy branch"]
+        raw_grammy["PostgreSQL music_source"]
+        extract_grammy["extract_grammys"]
+        val_grammy["validate_grammys_raw"]
+
+        raw_grammy --> extract_grammy --> val_grammy
+    end
+
+    subgraph Convergence["Convergence / target"]
+        converge{"both raw gates<br/>converge (AND)"}
+        transform["transform_and_integrate"]
+        val_prep["validate_prepared"]
+        load_dw["load_dw"]
+        dw[("DATA WAREHOUSE<br/>(music_dw: 4 dims + 2 facts + 1 bridge + etl_batch_log)")]
+        build_kpis["build_kpis"]
+        dashboards["KPIs / DASHBOARD<br/>(Superset primary, Power BI alt.)"]
+    end
+
+    val_spotify --> converge
+    val_grammy --> converge
+
+    converge --> transform
+    transform -->|"T1-T11: cleaning, harmonisation,<br/>integration, derivation"| val_prep
+    val_prep -->|"3 prepared checkpoints<br/>AND gate"| load_dw
+    load_dw -->|"transactional replace<br/>into the star schema"| dw
+    dw --> build_kpis
+    build_kpis -->|"7 SQL KPIs + 4 PNG charts (R1-R4)"| dashboards
 ```
 
 Quality design around the flow: *profiling → quality risks → quality rules →

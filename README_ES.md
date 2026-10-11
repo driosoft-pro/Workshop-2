@@ -195,7 +195,7 @@ dataset solo de ganadores; premios de Nivel C excluidos de banderas de interpret
 
 | Objeto | Grano declarado | Clave de negocio |
 | --- | --- | --- |
-| `fact_track_artist` | anuncio de pista × género × artista intérprete | `(track_id, track_genre, artist_sk)` (UNIQUE) |
+| `fact_track_artist` | anuncio de pista × género × artista intérprete | `(track_id, genre_sk, artist_sk)` (UNIQUE) |
 | `fact_grammy_award` | año × categoría × nominado × artista | `award_bk` (UNIQUE, normalizado) |
 | `bridge_award_artist` | premio × artista intérprete acreditado | `(grammy_award_sk, artist_sk)` (PRIMARY KEY) |
 | `dim_artist` | artista | `artist_bk` |
@@ -228,19 +228,17 @@ erDiagram
         text artist_bk UK "clave normalizada del nombre"
         text artist_display_name
         bool from_spotify
-        bool from_grammy
         int grammy_award_count
-        int grammy_award_count_core
         int spotify_track_count
-        text dominant_genre "NUEVO T16"
-        text dominant_genre_family "NUEVO T16"
-        int n_genres "NUEVO T16"
-        bool genre_tie "NUEVO T16"
+        text dominant_genre "genero mas frecuente"
+        text dominant_genre_family "macro-familia del genero dominante"
+        int n_genres "total generos asociados"
+        bool genre_tie "empate en genero frecuente"
     }
     dim_genre {
         bigint genre_sk PK
         text genre UK
-        text genre_family "NUEVO T14"
+        text genre_family "macro-familia de genero (12 grupos)"
     }
     dim_year {
         int year_sk PK
@@ -250,38 +248,25 @@ erDiagram
     dim_award_category {
         bigint category_sk PK
         text category UK
-        text category_clean "NUEVO T13"
-        text category_family "NUEVO T13"
+        text category_clean "categoria estandarizada"
+        text category_family "macro-familia de la categoria"
     }
     fact_track_artist {
         bigint track_artist_sk PK
         text track_id
-        text track_genre
         bigint artist_sk FK
         bigint genre_sk FK
-        text track_name
-        text album_name
-        int popularity
-        bigint duration_ms
-        float energy
-        float valence
-        int artist_position
-        int artist_total
-        int is_grammy_artist "0/1"
-        int is_grammy_artist_strict "0/1"
-        int artist_grammy_awards
-        text song_key "NUEVO T15"
-        int is_primary_song "NUEVO T15"
-        int is_zero_popularity "NUEVO T15"
-        int is_outlier_duration "NUEVO T15"
-        int is_outlier_loudness "NUEVO T15"
-        int is_outlier_tempo "NUEVO T15"
-        float danceability "contrato raw 22 columnas"
-        float acousticness "contrato raw 22 columnas"
-        float speechiness "contrato raw 22 columnas"
-        float loudness "contrato raw 22 columnas"
-        float tempo "contrato raw 22 columnas"
-        bool explicit "contrato raw 22 columnas"
+        int popularity "popularidad 0..100"
+        float energy "energia sonora 0.0..1.0"
+        float valence "positividad musical 0.0..1.0"
+        int is_grammy_artist "1 si el artista gano Grammy (0/1)"
+        int is_grammy_artist_strict "1 si coincidencia estricta (0/1)"
+        text song_key "clave canonica (artista + cancion)"
+        int is_primary_song "1 fila canonica para evitar duplicados (0/1)"
+        int is_zero_popularity "1 si popularidad = 0 (0/1)"
+        float danceability "bailabilidad 0.0..1.0"
+        float acousticness "acustica 0.0..1.0"
+        float speechiness "presencia de voz 0.0..1.0"
         text batch_id
         timestamptz loaded_at
     }
@@ -295,27 +280,21 @@ erDiagram
         text nominee
         text artist_credit
         text workers
-        bool winner
-        int winner_flag "0/1"
-        int is_matched_spotify "0/1"
-        int is_matched_strict "NUEVO T12"
-        int is_song_confirmed "NUEVO T12"
-        text artist_source "NUEVO T12"
-        text match_method "NUEVO T12"
-        int credit_artist_count "NUEVO T12"
-        text recognition_tier "NUEVO T18"
-        int is_aggregate_credit "NUEVO T17"
-        int spotify_track_count
-        int award_count
+        int winner_flag "1 si es ganador (0/1)"
+        int is_matched_spotify "1 si coincide con Spotify (0/1)"
+        int is_matched_strict "1 si coincidencia es estricta (0/1)"
+        int is_song_confirmed "1 si cancion fue confirmada (0/1)"
+        text match_method "metodo de cruce (exact, fuzzy)"
+        text recognition_tier "nivel reconocimiento (solo, collab)"
         text batch_id
         timestamptz loaded_at
     }
     bridge_award_artist {
         bigint grammy_award_sk PK,FK
         bigint artist_sk PK,FK
-        int artist_position
-        text match_method
-        text recognition_tier "NUEVO T18"
+        int artist_position "posicion en creditos"
+        text match_method "metodo de cruce individual"
+        text recognition_tier "nivel reconocimiento individual"
         text batch_id
         timestamptz loaded_at
     }
@@ -338,6 +317,8 @@ Filas actuales: `fact_track_artist` 157.530 · `fact_grammy_award` 4.810 ·
 `dim_year` 62 · `dim_award_category` 638. Las claves sustitutas se generan dentro de la
 transacción de carga; las claves de negocio tienen restricción UNIQUE; los
 premios sin coincidencia conservan `artist_sk NULL` por diseño.
+
+**Auditoría del modelo (aplicada).** Se rastreó cada columna en el ETL, el SQL de KPI, los dashboards de Superset, los DAG y las pruebas. Se mantienen ambas tablas de hechos porque sus granos son distintos (canción × género × artista frente a un registro de premio) y unirlas repetiría premios por fila de catálogo y perdería los 465 premios sin artista. El puente se mantiene porque 246 premios tienen varios artistas emparejados. Lo que se optimizó es el **ancho**: el almacén pasó de 98 a 75 columnas (`fact_track_artist` 32 → 17, `fact_grammy_award` 23 → 17, `dim_artist` 13 → 11) al quitar columnas que ningún KPI, dashboard, script o DAG lee (nombres, características de audio sin uso, banderas de outliers, `track_genre`/`winner`/`award_count` duplicados, etc.). Siguen en los CSV de preparación (`data/work/prepared_*.csv`) para trazabilidad y validación. No se agregaron ni cambiaron tablas, vistas o relaciones, y no se quitó ninguna columna usada por los dashboards. Detalle, tabla de columnas retiradas y consultas de regresión: [`docs/dimensional_model.md` §9](docs/dimensional_model.md) (en inglés).
 
 ## 13. Pipeline ETL, puertas y orquestación
 
