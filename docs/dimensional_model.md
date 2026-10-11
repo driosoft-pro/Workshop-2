@@ -2,6 +2,7 @@
 
 Workshop-2, section 6.4 and 6.10. Executable DDL: [`sql/dw_schema.sql`](../sql/dw_schema.sql)
 (target database `music_dw`, PostgreSQL 16). Load implementation: `src/load.py`.
+Detailed table and field rationale: [`docs/data_dictionary_and_rationale.md`](data_dictionary_and_rationale.md).
 
 ## 1. Business process
 
