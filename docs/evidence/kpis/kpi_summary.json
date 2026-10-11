@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-11T00:06:56.382838+00:00",
+  "generated_at": "2026-10-11T01:02:46.572729+00:00",
   "source": "music_dw",
   "kpi_csvs": {
     "kpi_0_integration_coverage": "/opt/airflow/docs/evidence/kpis/kpi_0_integration_coverage.csv",
