@@ -46,14 +46,14 @@ def test_business_keys_are_unique_constrained():
         "year       INTEGER      NOT NULL UNIQUE",
         "category     TEXT         NOT NULL UNIQUE",
         "award_bk           TEXT         NOT NULL UNIQUE",
-        "UNIQUE (track_id, track_genre, artist_sk)",
+        "uq_track_artist ON fact_track_artist (track_id, genre_sk, artist_sk)",
     ):
         assert constraint in ddl, constraint
 
 
 def test_fact_grain_matches_documented_grain():
     ddl = DW_SCHEMA.read_text()
-    assert "UNIQUE (track_id, track_genre, artist_sk)" in ddl
+    assert "uq_track_artist ON fact_track_artist (track_id, genre_sk, artist_sk)" in ddl
     assert "artist_sk" in ddl.split("CREATE TABLE IF NOT EXISTS fact_grammy_award", 1)[1]
 
 
@@ -62,3 +62,37 @@ def test_batch_log_has_before_after_counts():
     block = ddl.split("CREATE TABLE IF NOT EXISTS etl_batch_log", 1)[1]
     for column in ("batch_id", "started_at", "target_rows_after", "status"):
         assert column in block, column
+
+
+def _table_block(ddl: str, table: str) -> str:
+    return ddl.split(f"CREATE TABLE IF NOT EXISTS {table}", 1)[1].split(");", 1)[0]
+
+
+REMOVED_COLUMNS = {
+    "dim_artist": ["from_grammy", "grammy_award_count_core"],
+    "fact_track_artist": [
+        "track_name", "album_name", "duration_ms", "explicit", "liveness", "loudness",
+        "tempo", "artist_position", "artist_total", "artist_grammy_awards", "track_genre",
+        "is_outlier_duration", "is_outlier_loudness", "is_outlier_tempo",
+    ],
+    "fact_grammy_award": [
+        "winner ", "artist_source", "is_aggregate_credit", "credit_artist_count",
+        "spotify_track_count", "award_count",
+    ],
+}
+
+
+def test_slim_model_has_no_unused_columns_and_no_views():
+    ddl = DW_SCHEMA.read_text()
+    for table, columns in REMOVED_COLUMNS.items():
+        block = _table_block(ddl, table)
+        for column in columns:
+            assert column not in block, (table, column)
+    assert "CREATE VIEW" not in ddl
+
+
+def test_every_column_dropped_from_old_databases_is_declared():
+    ddl = DW_SCHEMA.read_text()
+    for table, columns in REMOVED_COLUMNS.items():
+        for column in columns:
+            assert f"{table}" in ddl and f"DROP COLUMN IF EXISTS {column.strip()}" in ddl, column

@@ -163,9 +163,7 @@ def build_dimensional_frames(
             "artist_bk",
             "artist_display_name",
             "from_spotify",
-            "from_grammy",
             "grammy_award_count",
-            "grammy_award_count_core",
             "spotify_track_count",
             "dominant_genre",
             "dominant_genre_family",
@@ -205,26 +203,22 @@ def build_dimensional_frames(
 
     fact_track_artist = fact_track_artist[
         [
-            "track_id", "track_genre", "artist_sk", "genre_sk", "track_name", "album_name",
-            "popularity", "duration_ms", "duration_min", "explicit", "danceability", "energy",
-            "valence", "acousticness", "speechiness", "liveness", "loudness", "tempo",
-            "artist_position", "artist_total", "is_grammy_artist", "is_grammy_artist_strict",
-            "artist_grammy_awards",
-            "song_key", "is_zero_popularity", "is_outlier_duration", "is_outlier_loudness",
-            "is_outlier_tempo", "is_primary_song",
+            # Slim fact (model audit, docs/dimensional_model.md section 9). The columns
+            # dropped here (names, raw audio extras, outlier flags, artist_position/total,
+            # track_genre, artist_grammy_awards) remain available in prepared_tracks.csv.
+            "track_id", "artist_sk", "genre_sk",
+            "popularity", "danceability", "energy", "valence", "acousticness", "speechiness",
+            "is_grammy_artist", "is_grammy_artist_strict",
+            "song_key", "is_zero_popularity", "is_primary_song",
         ]
     ].copy()
     fact_track_artist["artist_sk"] = fact_track_artist["artist_sk"].astype("int64")
     fact_track_artist["genre_sk"] = fact_track_artist["genre_sk"].astype("int64")
-    fact_track_artist["explicit"] = fact_track_artist["explicit"].astype(bool)
     for column in (
-        "is_grammy_artist", "is_grammy_artist_strict", "is_zero_popularity",
-        "is_outlier_duration", "is_outlier_loudness", "is_outlier_tempo", "is_primary_song",
+        "is_grammy_artist", "is_grammy_artist_strict", "is_zero_popularity", "is_primary_song",
     ):
         fact_track_artist[column] = fact_track_artist[column].fillna(0).astype("int16")
     fact_track_artist["batch_id"] = batch_id
-    fact_track_artist["track_name"] = _sql_object(fact_track_artist["track_name"])
-    fact_track_artist["album_name"] = _sql_object(fact_track_artist["album_name"])
 
     fact_grammy_award = awards.merge(
         artist_sk, left_on="artist_key", right_on="artist_bk", how="left"
@@ -239,25 +233,20 @@ def build_dimensional_frames(
     fact_grammy_award = fact_grammy_award[
         [
             "award_bk", "artist_sk", "year_sk", "category_sk", "title", "nominee", "artist",
-            "workers", "winner", "winner_flag", "is_matched_spotify", "is_matched_strict",
-            "is_song_confirmed", "artist_source", "match_method", "recognition_tier",
-            "is_aggregate_credit", "credit_artist_count", "spotify_track_count",
+            "workers", "winner_flag", "is_matched_spotify", "is_matched_strict",
+            "is_song_confirmed", "match_method", "recognition_tier",
+            # winner, artist_source, is_aggregate_credit, credit_artist_count,
+            # spotify_track_count and award_count stay in prepared_grammys.csv only
         ]
     ].copy()
     fact_grammy_award = fact_grammy_award.rename(columns={"artist": "artist_credit"})
     fact_grammy_award["artist_sk"] = _sql_int(fact_grammy_award["artist_sk"])
     fact_grammy_award["year_sk"] = fact_grammy_award["year_sk"].astype("int32")
     fact_grammy_award["category_sk"] = fact_grammy_award["category_sk"].astype("int64")
-    fact_grammy_award["credit_artist_count"] = _sql_int(
-        fact_grammy_award["credit_artist_count"]
-    ).map(lambda value: 0 if value is None else int(value))
-    for column in ("is_matched_strict", "is_song_confirmed", "is_aggregate_credit"):
+    for column in ("is_matched_strict", "is_song_confirmed"):
         fact_grammy_award[column] = fact_grammy_award[column].fillna(0).astype("int16")
-    for column in ("artist_source", "match_method", "recognition_tier"):
+    for column in ("match_method", "recognition_tier"):
         fact_grammy_award[column] = _sql_object(fact_grammy_award[column])
-    fact_grammy_award["award_count"] = pd.Series(
-        1, index=fact_grammy_award.index, dtype="int16"
-    )
     fact_grammy_award["batch_id"] = batch_id
     for column in ("title", "nominee", "artist_credit", "workers"):
         fact_grammy_award[column] = _sql_object(fact_grammy_award[column])

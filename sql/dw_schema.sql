@@ -21,9 +21,7 @@ CREATE TABLE IF NOT EXISTS dim_artist (
     artist_bk            TEXT         NOT NULL UNIQUE,
     artist_display_name  TEXT         NOT NULL,
     from_spotify         BOOLEAN      NOT NULL DEFAULT FALSE,
-    from_grammy          BOOLEAN      NOT NULL DEFAULT FALSE,
     grammy_award_count   INTEGER      NOT NULL DEFAULT 0,
-    grammy_award_count_core INTEGER   NOT NULL DEFAULT 0,
     spotify_track_count  INTEGER      NOT NULL DEFAULT 0,
     dominant_genre       TEXT,
     dominant_genre_family TEXT,
@@ -57,38 +55,25 @@ CREATE TABLE IF NOT EXISTS dim_award_category (
 CREATE TABLE IF NOT EXISTS fact_track_artist (
     track_artist_sk      BIGSERIAL    PRIMARY KEY,
     track_id             TEXT         NOT NULL,
-    track_genre          TEXT         NOT NULL,
     artist_sk            BIGINT       NOT NULL REFERENCES dim_artist (artist_sk),
     genre_sk             BIGINT       NOT NULL REFERENCES dim_genre (genre_sk),
-    track_name           TEXT,
-    album_name           TEXT,
     popularity           INTEGER      NOT NULL,
-    duration_ms          BIGINT       NOT NULL,
-    duration_min         DOUBLE PRECISION,
-    explicit             BOOLEAN      NOT NULL,
     danceability         DOUBLE PRECISION,
     energy               DOUBLE PRECISION,
     valence              DOUBLE PRECISION,
     acousticness         DOUBLE PRECISION,
     speechiness          DOUBLE PRECISION,
-    liveness             DOUBLE PRECISION,
-    loudness             DOUBLE PRECISION,
-    tempo                DOUBLE PRECISION,
-    artist_position      INTEGER      NOT NULL,
-    artist_total         INTEGER      NOT NULL,
     is_grammy_artist     SMALLINT     NOT NULL CHECK (is_grammy_artist IN (0, 1)),
     is_grammy_artist_strict SMALLINT  NOT NULL DEFAULT 0 CHECK (is_grammy_artist_strict IN (0, 1)),
-    artist_grammy_awards INTEGER      NOT NULL DEFAULT 0,
     song_key             TEXT,
     is_zero_popularity   SMALLINT     NOT NULL DEFAULT 0 CHECK (is_zero_popularity IN (0, 1)),
-    is_outlier_duration  SMALLINT     NOT NULL DEFAULT 0 CHECK (is_outlier_duration IN (0, 1)),
-    is_outlier_loudness  SMALLINT     NOT NULL DEFAULT 0 CHECK (is_outlier_loudness IN (0, 1)),
-    is_outlier_tempo     SMALLINT     NOT NULL DEFAULT 0 CHECK (is_outlier_tempo IN (0, 1)),
     is_primary_song      SMALLINT     NOT NULL DEFAULT 0 CHECK (is_primary_song IN (0, 1)),
     batch_id             TEXT         NOT NULL,
-    loaded_at            TIMESTAMPTZ  NOT NULL DEFAULT now(),
-    UNIQUE (track_id, track_genre, artist_sk)
+    loaded_at            TIMESTAMPTZ  NOT NULL DEFAULT now()
 );
+
+-- Grain key: one row per track x genre x performing artist
+CREATE UNIQUE INDEX IF NOT EXISTS uq_track_artist ON fact_track_artist (track_id, genre_sk, artist_sk);
 
 CREATE INDEX IF NOT EXISTS idx_track_artist_artist  ON fact_track_artist (artist_sk);
 CREATE INDEX IF NOT EXISTS idx_track_artist_genre   ON fact_track_artist (genre_sk);
@@ -105,18 +90,12 @@ CREATE TABLE IF NOT EXISTS fact_grammy_award (
     nominee            TEXT,
     artist_credit       TEXT,
     workers            TEXT,
-    winner             BOOLEAN      NOT NULL,
     winner_flag        SMALLINT     NOT NULL CHECK (winner_flag IN (0, 1)),
     is_matched_spotify SMALLINT     NOT NULL CHECK (is_matched_spotify IN (0, 1)),
     is_matched_strict  SMALLINT     NOT NULL DEFAULT 0 CHECK (is_matched_strict IN (0, 1)),
     is_song_confirmed  SMALLINT     NOT NULL DEFAULT 0 CHECK (is_song_confirmed IN (0, 1)),
-    artist_source      TEXT,
     match_method       TEXT,
     recognition_tier   TEXT         NOT NULL DEFAULT 'none',
-    is_aggregate_credit SMALLINT    NOT NULL DEFAULT 0 CHECK (is_aggregate_credit IN (0, 1)),
-    credit_artist_count INTEGER     NOT NULL DEFAULT 0,
-    spotify_track_count INTEGER      NOT NULL DEFAULT 0,
-    award_count        SMALLINT     NOT NULL DEFAULT 1,
     batch_id           TEXT         NOT NULL,
     loaded_at          TIMESTAMPTZ  NOT NULL DEFAULT now()
 );
@@ -158,31 +137,33 @@ CREATE TABLE IF NOT EXISTS etl_batch_log (
 );
 
 -- ---------------------------------------------------------------------------
--- Idempotent upgrade for databases created before the T12-T16 extension.
--- CREATE TABLE IF NOT EXISTS cannot add columns to an existing table, so the
--- new attributes are declared here as well (no-op when they already exist).
+-- In-place upgrade of databases created with the previous (wider) schema.
+-- CREATE TABLE IF NOT EXISTS never alters an existing table, so the columns that
+-- the model audit removed (docs/dimensional_model.md section 9) are dropped here.
+-- No-op on a fresh database. Dropping track_genre also drops the old unique key.
 -- ---------------------------------------------------------------------------
-ALTER TABLE dim_artist          ADD COLUMN IF NOT EXISTS dominant_genre        TEXT;
-ALTER TABLE dim_artist          ADD COLUMN IF NOT EXISTS dominant_genre_family TEXT;
-ALTER TABLE dim_artist          ADD COLUMN IF NOT EXISTS n_genres              INTEGER;
-ALTER TABLE dim_artist          ADD COLUMN IF NOT EXISTS genre_tie             BOOLEAN;
-ALTER TABLE dim_genre           ADD COLUMN IF NOT EXISTS genre_family          TEXT;
-ALTER TABLE dim_award_category  ADD COLUMN IF NOT EXISTS category_clean        TEXT;
-ALTER TABLE dim_award_category  ADD COLUMN IF NOT EXISTS category_family       TEXT;
-ALTER TABLE fact_track_artist   ADD COLUMN IF NOT EXISTS song_key              TEXT;
-ALTER TABLE fact_track_artist   ADD COLUMN IF NOT EXISTS is_zero_popularity    SMALLINT DEFAULT 0;
-ALTER TABLE fact_track_artist   ADD COLUMN IF NOT EXISTS is_outlier_duration   SMALLINT DEFAULT 0;
-ALTER TABLE fact_track_artist   ADD COLUMN IF NOT EXISTS is_outlier_loudness   SMALLINT DEFAULT 0;
-ALTER TABLE fact_track_artist   ADD COLUMN IF NOT EXISTS is_outlier_tempo      SMALLINT DEFAULT 0;
-ALTER TABLE fact_track_artist   ADD COLUMN IF NOT EXISTS is_primary_song       SMALLINT DEFAULT 0;
-ALTER TABLE fact_grammy_award   ADD COLUMN IF NOT EXISTS artist_source         TEXT;
-ALTER TABLE fact_grammy_award   ADD COLUMN IF NOT EXISTS match_method          TEXT;
-ALTER TABLE fact_grammy_award   ADD COLUMN IF NOT EXISTS credit_artist_count   INTEGER DEFAULT 0;
-ALTER TABLE fact_grammy_award   ADD COLUMN IF NOT EXISTS is_matched_strict     SMALLINT DEFAULT 0;
-ALTER TABLE fact_grammy_award   ADD COLUMN IF NOT EXISTS is_song_confirmed     SMALLINT DEFAULT 0;
-ALTER TABLE dim_artist          ADD COLUMN IF NOT EXISTS grammy_award_count_core INTEGER DEFAULT 0;
-ALTER TABLE fact_track_artist   ADD COLUMN IF NOT EXISTS is_grammy_artist_strict SMALLINT DEFAULT 0;
-ALTER TABLE fact_grammy_award   ADD COLUMN IF NOT EXISTS recognition_tier     TEXT DEFAULT 'none';
-ALTER TABLE fact_grammy_award   ADD COLUMN IF NOT EXISTS is_aggregate_credit   SMALLINT DEFAULT 0;
-ALTER TABLE bridge_award_artist ADD COLUMN IF NOT EXISTS recognition_tier     TEXT DEFAULT 'none';
-
+DROP VIEW IF EXISTS vw_fact_track_artist;
+DROP VIEW IF EXISTS vw_fact_grammy_award;
+ALTER TABLE dim_artist         DROP COLUMN IF EXISTS from_grammy;
+ALTER TABLE dim_artist         DROP COLUMN IF EXISTS grammy_award_count_core;
+ALTER TABLE fact_track_artist  DROP COLUMN IF EXISTS track_name;
+ALTER TABLE fact_track_artist  DROP COLUMN IF EXISTS album_name;
+ALTER TABLE fact_track_artist  DROP COLUMN IF EXISTS duration_ms;
+ALTER TABLE fact_track_artist  DROP COLUMN IF EXISTS duration_min;
+ALTER TABLE fact_track_artist  DROP COLUMN IF EXISTS explicit;
+ALTER TABLE fact_track_artist  DROP COLUMN IF EXISTS liveness;
+ALTER TABLE fact_track_artist  DROP COLUMN IF EXISTS loudness;
+ALTER TABLE fact_track_artist  DROP COLUMN IF EXISTS tempo;
+ALTER TABLE fact_track_artist  DROP COLUMN IF EXISTS artist_position;
+ALTER TABLE fact_track_artist  DROP COLUMN IF EXISTS artist_total;
+ALTER TABLE fact_track_artist  DROP COLUMN IF EXISTS artist_grammy_awards;
+ALTER TABLE fact_track_artist  DROP COLUMN IF EXISTS is_outlier_duration;
+ALTER TABLE fact_track_artist  DROP COLUMN IF EXISTS is_outlier_loudness;
+ALTER TABLE fact_track_artist  DROP COLUMN IF EXISTS is_outlier_tempo;
+ALTER TABLE fact_track_artist  DROP COLUMN IF EXISTS track_genre;
+ALTER TABLE fact_grammy_award  DROP COLUMN IF EXISTS winner;
+ALTER TABLE fact_grammy_award  DROP COLUMN IF EXISTS artist_source;
+ALTER TABLE fact_grammy_award  DROP COLUMN IF EXISTS is_aggregate_credit;
+ALTER TABLE fact_grammy_award  DROP COLUMN IF EXISTS credit_artist_count;
+ALTER TABLE fact_grammy_award  DROP COLUMN IF EXISTS spotify_track_count;
+ALTER TABLE fact_grammy_award  DROP COLUMN IF EXISTS award_count;
