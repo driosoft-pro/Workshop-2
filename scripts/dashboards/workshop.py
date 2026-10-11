@@ -99,7 +99,7 @@ div[data-test-chart-name="Cobertura Estricta %"] {
     border-left: 1px solid rgba(212, 175, 55, 0.25) !important;
     border-right: 1px solid rgba(212, 175, 55, 0.25) !important;
     border-bottom: 1px solid rgba(212, 175, 55, 0.25) !important;
-    background: linear-gradient(180deg, rgba(212, 175, 55, 0.12) 0%, rgba(255, 255, 255, 0.98) 100%) !important;
+    background-image: linear-gradient(180deg, rgba(212, 175, 55, 0.14) 0%, transparent 100%) !important;
     box-shadow: 0 4px 12px rgba(212, 175, 55, 0.15) !important;
 }
 .dashboard-component-chart-holder:has(#CHART-r1c0):hover,
@@ -121,7 +121,7 @@ div[data-test-chart-name="Cobertura Estricta %"] {
 [data-test-chart-name="Premios Evaluados"] .header-line *,
 .dashboard-chart-id-27 .header-line,
 .dashboard-chart-id-27 .header-line * {
-    color: #C9A227 !important;
+    color: #D4AF37 !important;
     font-weight: 800 !important;
 }
 .dashboard-component-chart-holder:has(#CHART-r1c0) .subheader-line,
@@ -142,7 +142,7 @@ div[data-test-chart-name="Cobertura Estricta %"] {
     border-left: 1px solid rgba(30, 215, 96, 0.25) !important;
     border-right: 1px solid rgba(30, 215, 96, 0.25) !important;
     border-bottom: 1px solid rgba(30, 215, 96, 0.25) !important;
-    background: linear-gradient(180deg, rgba(30, 215, 96, 0.12) 0%, rgba(255, 255, 255, 0.98) 100%) !important;
+    background-image: linear-gradient(180deg, rgba(30, 215, 96, 0.14) 0%, transparent 100%) !important;
     box-shadow: 0 4px 12px rgba(30, 215, 96, 0.15) !important;
 }
 .dashboard-component-chart-holder:has(#CHART-r1c1):hover,
@@ -194,7 +194,7 @@ div[data-test-chart-name="Cobertura Estricta %"] {
     border-left: 1px solid rgba(14, 165, 233, 0.25) !important;
     border-right: 1px solid rgba(14, 165, 233, 0.25) !important;
     border-bottom: 1px solid rgba(14, 165, 233, 0.25) !important;
-    background: linear-gradient(180deg, rgba(14, 165, 233, 0.12) 0%, rgba(255, 255, 255, 0.98) 100%) !important;
+    background-image: linear-gradient(180deg, rgba(14, 165, 233, 0.14) 0%, transparent 100%) !important;
     box-shadow: 0 4px 12px rgba(14, 165, 233, 0.15) !important;
 }
 .dashboard-component-chart-holder:has(#CHART-r1c2):hover,
@@ -216,7 +216,7 @@ div[data-test-chart-name="Cobertura Estricta %"] {
 [data-test-chart-name="Artistas Grammy en Spotify"] .header-line *,
 .dashboard-chart-id-29 .header-line,
 .dashboard-chart-id-29 .header-line * {
-    color: #0284C7 !important;
+    color: #0EA5E9 !important;
     font-weight: 800 !important;
 }
 .dashboard-component-chart-holder:has(#CHART-r1c2) .subheader-line,
@@ -237,7 +237,7 @@ div[data-test-chart-name="Cobertura Estricta %"] {
     border-left: 1px solid rgba(139, 92, 246, 0.25) !important;
     border-right: 1px solid rgba(139, 92, 246, 0.25) !important;
     border-bottom: 1px solid rgba(139, 92, 246, 0.25) !important;
-    background: linear-gradient(180deg, rgba(139, 92, 246, 0.12) 0%, rgba(255, 255, 255, 0.98) 100%) !important;
+    background-image: linear-gradient(180deg, rgba(139, 92, 246, 0.14) 0%, transparent 100%) !important;
     box-shadow: 0 4px 12px rgba(139, 92, 246, 0.15) !important;
 }
 .dashboard-component-chart-holder:has(#CHART-r1c3):hover,
@@ -259,7 +259,7 @@ div[data-test-chart-name="Cobertura Estricta %"] {
 [data-test-chart-name="Cobertura Estricta %"] .header-line *,
 .dashboard-chart-id-30 .header-line,
 .dashboard-chart-id-30 .header-line * {
-    color: #7C3AED !important;
+    color: #8B5CF6 !important;
     font-weight: 800 !important;
 }
 .dashboard-component-chart-holder:has(#CHART-r1c3) .header-line::after,
@@ -269,7 +269,7 @@ div[data-test-chart-name="Cobertura Estricta %"] {
     font-size: 0.65em !important;
     font-weight: 700 !important;
     margin-left: 2px !important;
-    color: #7C3AED !important;
+    color: #8B5CF6 !important;
 }
 .dashboard-component-chart-holder:has(#CHART-r1c3) .subheader-line,
 [data-test-chart-name="Cobertura Estricta %"] .subheader-line,
@@ -279,6 +279,39 @@ div[data-test-chart-name="Cobertura Estricta %"] {
     font-weight: 600 !important;
     font-size: 12.5px !important;
     margin-top: 2px !important;
+}
+
+/* --- Soporte optimizado para modo oscuro --- */
+@media (prefers-color-scheme: dark) {
+    .dashboard-component-chart-holder:has(#CHART-r1c0) .header-line,
+    .dashboard-component-chart-holder:has(#CHART-r1c0) .header-line *,
+    [data-test-chart-name="Premios Evaluados"] .header-line,
+    [data-test-chart-name="Premios Evaluados"] .header-line *,
+    .dashboard-chart-id-27 .header-line,
+    .dashboard-chart-id-27 .header-line * {
+        color: #E5C158 !important;
+    }
+    .dashboard-component-chart-holder:has(#CHART-r1c2) .header-line,
+    .dashboard-component-chart-holder:has(#CHART-r1c2) .header-line *,
+    [data-test-chart-name="Artistas Grammy en Spotify"] .header-line,
+    [data-test-chart-name="Artistas Grammy en Spotify"] .header-line *,
+    .dashboard-chart-id-29 .header-line,
+    .dashboard-chart-id-29 .header-line * {
+        color: #38BDF8 !important;
+    }
+    .dashboard-component-chart-holder:has(#CHART-r1c3) .header-line,
+    .dashboard-component-chart-holder:has(#CHART-r1c3) .header-line *,
+    [data-test-chart-name="Cobertura Estricta %"] .header-line,
+    [data-test-chart-name="Cobertura Estricta %"] .header-line *,
+    .dashboard-chart-id-30 .header-line,
+    .dashboard-chart-id-30 .header-line * {
+        color: #A78BFA !important;
+    }
+    .dashboard-component-chart-holder:has(#CHART-r1c3) .header-line::after,
+    [data-test-chart-name="Cobertura Estricta %"] .header-line::after,
+    .dashboard-chart-id-30 .header-line::after {
+        color: #A78BFA !important;
+    }
 }
 
 /* --- Títulos de secciones intermedias --- */

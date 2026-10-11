@@ -62,7 +62,7 @@ div[data-test-chart-name="Contexto · Cobertura Enriquecida %"] {
     border-left: 1px solid rgba(30, 215, 96, 0.25) !important;
     border-right: 1px solid rgba(30, 215, 96, 0.25) !important;
     border-bottom: 1px solid rgba(30, 215, 96, 0.25) !important;
-    background: linear-gradient(180deg, rgba(30, 215, 96, 0.12) 0%, rgba(255, 255, 255, 0.98) 100%) !important;
+    background-image: linear-gradient(180deg, rgba(30, 215, 96, 0.14) 0%, transparent 100%) !important;
     box-shadow: 0 4px 12px rgba(30, 215, 96, 0.15) !important;
     border-radius: 10px !important;
     box-sizing: border-box !important;
